@@ -274,17 +274,7 @@ if df is not None:
             cmap="viridis"
         )
         
-        # 🎯 SỬA ĐỔI CHÍNH Ở ĐÂY: Thêm hide_index=True để bỏ cột số thứ tự
         st.dataframe(formatted_annual_table, use_container_width=True, hide_index=True)
-        
-        # Nút tải dữ liệu nhanh
-        csv_annual_data = df_annual_grouped.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 Xuất bảng tóm tắt năm (.CSV)",
-            data=csv_annual_data,
-            file_name=f"{data_column.lower()}_annual_averages.csv",
-            mime="text/csv"
-        )
 
     # --- CỘT PHẢI: KHUNG CHAT AI KÍNH MỜ ---
     with col2:
