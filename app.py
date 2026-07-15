@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from openai import OpenAI
+import requests
 
 # ==========================================
 # 1. CẤU HÌNH GIAO DIỆN WEB
@@ -63,11 +63,7 @@ if df is not None:
             st.info("Vui lòng vào Settings -> Secrets trên Streamlit Cloud để cấu hình khóa API của bạn.")
             st.stop()
 
-        # Khởi tạo kết nối trực tiếp với Google Gemini (sử dụng giao diện tương thích OpenAI)
-        client = OpenAI(
-            api_key=st.secrets["GEMINI_API_KEY"],
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-        )
+        api_key = st.secrets["GEMINI_API_KEY"]
 
         # Khởi tạo lịch sử chat
         if "messages" not in st.session_state:
@@ -83,11 +79,11 @@ if df is not None:
             st.chat_message("user").markdown(prompt)
             st.session_state.messages.append({"role": "user", "content": prompt})
 
-            # RAG Engine: Trích xuất 15 dòng dữ liệu mới nhất
+            # RAG Engine: Trích xuất 15 dòng dữ liệu mới nhất để AI tham chiếu
             latest_data_summary = df.tail(15).to_string(index=False)
 
             system_instruction = f"""
-            Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo.
+            Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo, tốt nghiệp Học viện Tài chính.
             Dưới đây là 15 dòng số liệu mới nhất trong cơ sở dữ liệu của chúng ta:
             ---
             {latest_data_summary}
@@ -98,22 +94,50 @@ if df is not None:
             3. Tuyệt đối không tự bịa ra các con số không có trong bảng dữ liệu trên.
             """
 
+            # Chuyển đổi lịch sử chat sang định dạng chuẩn của Google Gemini
+            contents = []
+            for msg in st.session_state.messages:
+                # Gemini yêu cầu vai trò của trợ lý phải là "model" thay vì "assistant"
+                role = "user" if msg["role"] == "user" else "model"
+                contents.append({
+                    "role": role,
+                    "parts": [{"text": msg["content"]}]
+                })
+
+            # Cấu hình dữ liệu gửi đi (Payload)
+            payload = {
+                "contents": contents,
+                "systemInstruction": {
+                    "parts": [{"text": system_instruction}]
+                },
+                "generationConfig": {
+                    "temperature": 0.2
+                }
+            }
+
+            headers = {
+                "Content-Type": "application/json"
+            }
+
+            # Gọi trực tiếp REST API v1beta chính thức của Google Gemini
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+
             try:
-                with st.spinner("AI đang xử lý thông tin trên Cloud..."):
-                    response = client.chat.completions.create(
-                        model="gemini-1.5-flash", # Dòng model miễn phí, siêu nhanh và thông minh của Google
-                        messages=[
-                            {"role": "system", "content": system_instruction},
-                            *st.session_state.messages
-                        ],
-                        temperature=0.2
-                    )
-                    
-                    ai_response = response.choices[0].message.content
-                
-                with st.chat_message("assistant"):
-                    st.markdown(ai_response)
-                st.session_state.messages.append({"role": "assistant", "content": ai_response})
-                
+                with st.spinner("AI đang phân tích số liệu trên Cloud..."):
+                    response = requests.post(url, json=payload, headers=headers)
+                    response_json = response.json()
+
+                    # Kiểm tra xem Google có trả về lỗi cụ thể nào không
+                    if "error" in response_json:
+                        error_msg = response_json["error"].get("message", "Lỗi không xác định")
+                        st.error(f"⚠️ Lỗi từ Google API: {error_msg}")
+                    else:
+                        # Trích xuất văn bản phản hồi từ cấu trúc JSON của Gemini
+                        ai_response = response_json["candidates"][0]["content"]["parts"][0]["text"]
+                        
+                        with st.chat_message("assistant"):
+                            st.markdown(ai_response)
+                        st.session_state.messages.append({"role": "assistant", "content": ai_response})
+                        
             except Exception as e:
-                st.error(f"⚠️ Đã xảy ra lỗi khi gọi AI Cloud: {e}")
+                st.error(f"⚠️ Đã xảy ra lỗi khi kết nối với AI Cloud: {e}")
