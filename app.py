@@ -13,19 +13,19 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Inject CSS "ma thuật" để thay đổi toàn diện giao diện mặc định của Streamlit
+# Inject CSS để biến đổi giao diện mặc định thành phong cách Fintech Glassmorphism sang trọng
 st.markdown("""
     <style>
         /* Nhập font chữ Inter tinh tế */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
-        /* Cấu hình màu nền gradient chuyển động chìm tối sang trọng */
+        /* Cấu hình màu nền gradient tối sâu thẳm */
         .main {
             background: radial-gradient(circle at 50% 50%, #141923 0%, #0b0d13 100%) !important;
             font-family: 'Inter', sans-serif !important;
         }
         
-        /* Biến đổi các thẻ Metric mặc định thành các hộp Kính mờ (Glassmorphic Cards) phát sáng */
+        /* Hộp Kính mờ (Glassmorphic Cards) phát sáng cho các thẻ Metric KPI */
         [data-testid="stMetric"] {
             background: rgba(255, 255, 255, 0.02) !important;
             border: 1px solid rgba(255, 255, 255, 0.06) !important;
@@ -37,14 +37,14 @@ st.markdown("""
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
         }
         
-        /* Hiệu ứng di chuột cực bay bổng cho các thẻ KPI */
+        /* Hiệu ứng di chuột nổi bật cho KPI Cards */
         [data-testid="stMetric"]:hover {
             border-color: rgba(0, 255, 204, 0.3) !important;
             box-shadow: 0 10px 40px 0 rgba(0, 255, 204, 0.1) !important;
             transform: translateY(-4px) !important;
         }
         
-        /* Tùy chỉnh màu sắc và kích thước chữ trong thẻ Metric */
+        /* Tùy chỉnh màu sắc chữ số trong thẻ Metric */
         div[data-testid="stMetricValue"] {
             font-size: 32px !important;
             font-weight: 700 !important;
@@ -56,6 +56,29 @@ st.markdown("""
             color: #8F9CAE !important;
             text-transform: uppercase;
             letter-spacing: 1.5px;
+            font-weight: 600 !important;
+        }
+        
+        /* Tùy biến bộ lọc Pills của Streamlit thành phong cách SaaS Neon */
+        div[data-testid="stPills"] button {
+            background-color: rgba(255, 255, 255, 0.02) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            color: #8F9CAE !important;
+            border-radius: 20px !important;
+            padding: 6px 18px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+        }
+        div[data-testid="stPills"] button:hover {
+            border-color: rgba(0, 255, 204, 0.4) !important;
+            color: #fff !important;
+        }
+        div[data-testid="stPills"] button[aria-selected="true"] {
+            background-color: rgba(0, 255, 204, 0.12) !important;
+            border-color: #00FFCC !important;
+            color: #00FFCC !important;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.25) !important;
             font-weight: 600 !important;
         }
         
@@ -75,7 +98,6 @@ st.markdown("""
             background: rgba(0, 255, 204, 0.5);
         }
         
-        /* Bo tròn góc cho thanh nhập chat nhập liệu */
         .stChatInput {
             border-radius: 24px !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -85,11 +107,19 @@ st.markdown("""
 
 # Khung tiêu đề chính thiết kế tối giản hiện đại
 st.markdown("""
-    <div style="margin-bottom: 25px;">
+    <div style="margin-bottom: 15px;">
         <h1 style="font-weight: 700; color: #ffffff; margin-bottom: 5px; letter-spacing: -1px;">📈 Hệ Thống Dữ Liệu Vĩ Mô & Trợ Lý AI</h1>
         <p style="color: #8F9CAE; font-size: 15px; margin: 0;">Nền tảng phân tích chu kỳ kinh tế và chỉ số lạm phát chuyên sâu.</p>
     </div>
 """, unsafe_allow_html=True)
+
+# 🎯 BỘ LỌC THỜI GIAN TOÀN HỆ THỐNG (SaaS Pills) - Đồng bộ hoàn hảo cho cả KPI và biểu đồ
+timeframe = st.pills(
+    "Phạm vi phân tích toàn hệ thống:",
+    options=["1 năm qua", "5 năm qua", "Tất cả 10 năm"],
+    default="Tất cả 10 năm",
+    key="global_timeframe"
+)
 st.markdown("---")
 
 # ==========================================
@@ -128,32 +158,42 @@ def load_data():
 df = load_data()
 
 if df is not None:
-    # Lọc dữ liệu gốc trong vòng 10 năm qua (phục vụ vẽ biểu đồ chi tiết)
+    # 1. Lọc giới hạn tối đa 10 năm qua từ mốc hiện tại
     ten_years_ago = pd.Timestamp.now() - pd.DateOffset(years=10)
     df_filtered = df[df['Ngay'] >= ten_years_ago].copy()
     data_column = df_filtered.columns[1]
 
-    # 🎯 TIẾN HÀNH GOM NHÓM TÍNH TRUNG BÌNH TỪNG NĂM (DÀNH CHO BẢNG SỐ LIỆU)
-    df_annual = df_filtered.copy()
+    # 2. Áp dụng bộ lọc thời gian động "global_timeframe"
+    if timeframe == "1 năm qua":
+        df_active = df_filtered[df_filtered['Ngay'] >= pd.Timestamp.now() - pd.DateOffset(years=1)].copy()
+        label_suffix = "1 Năm Qua"
+    elif timeframe == "5 năm qua":
+        df_active = df_filtered[df_filtered['Ngay'] >= pd.Timestamp.now() - pd.DateOffset(years=5)].copy()
+        label_suffix = "5 Năm Qua"
+    else:
+        df_active = df_filtered.copy()
+        label_suffix = "10 Năm Qua"
+
+    # 3. Gom nhóm tính trung bình từng năm dựa trên khoảng thời gian đang kích hoạt
+    df_annual = df_active.copy()
     df_annual['Năm'] = df_annual['Ngay'].dt.year
-    # Tính trung bình và làm tròn 2 chữ số thập phân
     df_annual_grouped = df_annual.groupby('Năm')[data_column].mean().reset_index()
     df_annual_grouped.columns = ['Năm', f'Chỉ số {data_column} Trung Bình']
 
-    # Tính toán chỉ số cho các thẻ KPI đầu trang
-    latest_row = df_filtered.iloc[-1]
-    prev_row = df_filtered.iloc[-2] if len(df_filtered) > 1 else latest_row
+    # 4. Tính toán các chỉ số KPI động theo khoảng thời gian đã chọn
+    latest_row = df_active.iloc[-1]
+    prev_row = df_active.iloc[-2] if len(df_active) > 1 else latest_row
     current_val = latest_row[data_column]
     prev_val = prev_row[data_column]
     
     mo_m_change = ((current_val - prev_val) / prev_val) * 100 if prev_val != 0 else 0
-    max_val = df_filtered[data_column].max()
-    max_date = df_filtered[df_filtered[data_column] == max_val]['Ngay'].dt.strftime('%m/%Y').values[0]
-    min_val = df_filtered[data_column].min()
-    min_date = df_filtered[df_filtered[data_column] == min_val]['Ngay'].dt.strftime('%m/%Y').values[0]
+    max_val = df_active[data_column].max()
+    max_date = df_active[df_active[data_column] == max_val]['Ngay'].dt.strftime('%m/%Y').values[0]
+    min_val = df_active[data_column].min()
+    min_date = df_active[df_active[data_column] == min_val]['Ngay'].dt.strftime('%m/%Y').values[0]
 
     # ==========================================
-    # 4. KHU VỰC THẺ CHỈ SỐ KPI CARDS (SIÊU ĐẸP)
+    # 4. KHU VỰC THẺ CHỈ SỐ KPI CARDS (ĐỘNG)
     # ==========================================
     kpi1, kpi2, kpi3 = st.columns(3, gap="medium")
     
@@ -166,14 +206,14 @@ if df is not None:
         )
     with kpi2:
         st.metric(
-            label="Đỉnh 10 Năm Qua", 
+            label=f"Đỉnh {label_suffix}", 
             value=f"{max_val:,.2f}", 
             delta=f"Cực đại vào tháng {max_date}",
             delta_color="off"
         )
     with kpi3:
         st.metric(
-            label="Đáy 10 Năm Qua", 
+            label=f"Đáy {label_suffix}", 
             value=f"{min_val:,.2f}", 
             delta=f"Cực tiểu vào tháng {min_date}",
             delta_color="off"
@@ -186,13 +226,13 @@ if df is not None:
     # ==========================================
     col1, col2 = st.columns([1.55, 1], gap="large")
 
-    # --- CỘT TRÁI: BIỂU ĐỒ CHI TIẾT & BẢNG TỔNG HỢP NĂM ---
+    # --- CỘT TRÁI: BIỂU ĐỒ & BẢNG SỐ LIỆU ---
     with col1:
         st.markdown(f"### 📊 Phân tích xu hướng {data_column}")
         
-        # Biểu đồ đường vẽ mượt spline neon cyan phát sáng
+        # Vẽ biểu đồ đường trơn (Spline) mượt mà với dữ liệu đã được Streamlit lọc sẵn
         fig = px.line(
-            df_filtered, 
+            df_active, 
             x='Ngay', 
             y=data_column, 
             template="plotly_dark"
@@ -204,20 +244,10 @@ if df is not None:
             hovertemplate="<b>Thời gian:</b> %{x|%m/%Y}<br><b>Giá trị:</b> %{y:.2f}<extra></extra>"
         )
         
+        # Bỏ rangeselector tích hợp sẵn của Plotly để triệt tiêu lỗi đồng bộ hóa trục
         fig.update_xaxes(
             title="",
-            gridcolor="rgba(255, 255, 255, 0.03)",
-            rangeslider_visible=False,
-            rangeselector=dict(
-                buttons=list([
-                    dict(count=1, label="1 năm qua", step="year", stepmode="backward"),
-                    dict(count=5, label="5 năm qua", step="year", stepmode="backward"),
-                    dict(step="all", label="Tất cả 10 năm")
-                ]),
-                bgcolor="rgba(30, 34, 42, 0.9)",
-                activecolor="#00FFCC",
-                font=dict(color="#fff", size=11)
-            )
+            gridcolor="rgba(255, 255, 255, 0.03)"
         )
         
         fig.update_yaxes(
@@ -228,28 +258,26 @@ if df is not None:
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=0, r=10, t=20, b=0),
+            margin=dict(l=0, r=10, t=10, b=0),
             height=380
         )
         
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # Bảng dữ liệu đại diện năm (Rút gọn tối đa, loại bỏ con lăn)
+        # Bảng dữ liệu đại diện năm (gọn gàng, vừa vặn khung hình)
         st.markdown(f"#### 🔍 Giá trị đại diện {data_column} trung bình theo từng năm")
         
-        # Áp dụng heatmap coolwarm thời thượng cho bảng gom nhóm
         formatted_annual_table = df_annual_grouped.style.format({
             'Năm': '{:.0f}',
             f'Chỉ số {data_column} Trung Bình': '{:.2f}'
         }).background_gradient(
             subset=[f'Chỉ số {data_column} Trung Bình'], 
-            cmap="viridis" # Dải chuyển sắc lục-lam-vàng cực sáng trên nền dark mode
+            cmap="viridis" # Dải chuyển sắc lục-lam-vàng siêu hiện đại trên nền tối
         )
         
-        # Hiển thị bảng vừa khít (chỉ 10 dòng nên không bao giờ hiện thanh cuộn ngang dọc)
         st.dataframe(formatted_annual_table, use_container_width=True)
         
-        # Nút tải xuống dữ liệu năm tinh gọn
+        # Nút tải dữ liệu nhanh
         csv_annual_data = df_annual_grouped.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="📥 Xuất bảng tóm tắt năm (.CSV)",
@@ -258,14 +286,13 @@ if df is not None:
             mime="text/csv"
         )
 
-    # --- CỘT PHẢI: KHUNG CHAT KÍNH MỜ ---
+    # --- CỘT PHẢI: KHUNG CHAT AI KÍNH MỜ ---
     with col2:
         st.markdown("### 🤖 Trợ lý AI Phân tích")
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        # Khung chứa hội thoại kính mờ tinh tế
         chat_container = st.container(height=450)
 
         with chat_container:
@@ -281,26 +308,26 @@ if df is not None:
             
             st.session_state.messages.append({"role": "user", "content": prompt})
 
-            # RAG Engine: Gửi cả số liệu chi tiết và bảng trung bình năm để AI có góc nhìn sắc bén nhất
-            recent_monthly_summary = df_filtered.tail(12).to_string(index=False)
+            # Gửi cả số liệu chi tiết tháng và bảng trung bình năm để AI phản hồi chuẩn xác nhất
+            recent_monthly_summary = df_active.tail(12).to_string(index=False)
             annual_summary = df_annual_grouped.to_string(index=False)
 
             system_instruction = f"""
             Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo, tốt nghiệp Học viện Tài chính.
             Dưới đây là dữ liệu vĩ mô thực tế để hỗ trợ phân tích:
             
-            1. CHỈ SỐ TRUNG BÌNH THEO NĂM (10 năm qua):
+            1. CHỈ SỐ TRUNG BÌNH THEO NĂM:
             ---
             {annual_summary}
             ---
             
-            2. CHỈ SỐ CHI TIẾT THEO THÁNG (12 tháng gần nhất):
+            2. CHỈ SỐ CHI TIẾT THEO THÁNG:
             ---
             {recent_monthly_summary}
             ---
             
             Yêu cầu:
-            1. Phân tích xu hướng dài hạn dựa trên dữ liệu năm và biến động ngắn hạn dựa trên dữ liệu tháng.
+            1. Phân tích xu hướng dựa trên dữ liệu thực tế được cung cấp.
             2. Trả lời ngắn gọn, trực diện, lập luận logic bằng Tiếng Việt.
             3. Tuyệt đối không tự bịa ra các con số không tồn tại trong hai bảng dữ liệu trên.
             """
@@ -313,7 +340,6 @@ if df is not None:
                     api_key="lm-studio"
                 )
 
-                # Hiệu ứng đổi trạng thái load động cực chất
                 with chat_container:
                     status_placeholder = st.empty()
                     
