@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import time  # Thêm thư viện time để làm hiệu ứng chuyển chữ mượt mà
 from openai import OpenAI
 
 # ==========================================
@@ -15,12 +16,12 @@ st.title("📈 Dashboard Kinh Tế Vĩ Mô & Trợ Lý AI")
 st.markdown("---")
 
 # ==========================================
-# 2. ĐƯỜNG DẪN NGROK CỐ ĐỊNH (THAY THẾ TẠI ĐÂY)
+# 2. ĐƯỜNG DẪN NGROK CỐ ĐỊNH 
 # ==========================================
-# Hãy dán đường dẫn cố định bạn vừa lấy ở Bước 1 vào đây:
-NGROK_STATIC_URL = "https://decode-thigh-dinginess.ngrok-free.dev"
+# Hãy dán đường dẫn cố định của bạn vào đây:
+NGROK_STATIC_URL = "https://TÊN_MIỀN_CỦA_BẠN.ngrok-free.app"
 
-# Hiển thị trạng thái kết nối ở Sidebar cho chuyên nghiệp
+# Hiển thị trạng thái kết nối ở Sidebar
 st.sidebar.header("⚙️ Trạng thái Hệ thống")
 st.sidebar.success("🟢 Đã cấu hình máy chủ AI cố định")
 st.sidebar.caption(f"Endpoint: {NGROK_STATIC_URL}")
@@ -106,7 +107,6 @@ if df is not None:
             3. Tuyệt đối không tự bịa ra các con số không có trong bảng dữ liệu trên.
             """
 
-            # Chuẩn hóa url cố định
             clean_url = NGROK_STATIC_URL.strip().rstrip('/')
             
             try:
@@ -116,19 +116,36 @@ if df is not None:
                     api_key="lm-studio"
                 )
 
-                with st.spinner("Đang gửi truy vấn đến LM Studio..."):
-                    response = client.chat.completions.create(
-                        model="local-model",
-                        messages=[
-                            {"role": "system", "content": system_instruction},
-                            *st.session_state.messages
-                        ],
-                        temperature=0.2
-                    )
+                # 🛠️ HIỆU ỨNG LOAD CHỮ CHUYỂN ĐỘNG LINH HOẠT
+                with chat_container:
+                    # Tạo một placeholder tạm thời để hiển thị trạng thái loading
+                    status_placeholder = st.empty()
                     
-                    ai_response = response.choices[0].message.content
-                
-                # Hiển thị câu trả lời mới vào khung cuộn
+                    with status_placeholder.status("🤖 Đang đọc dữ liệu CPI...", expanded=False) as status:
+                        time.sleep(0.6)  # Tạo độ trễ ngắn để người dùng kịp nhìn chữ thay đổi
+                        
+                        status.update(label="🧮 Đang thực hiện tính toán...", state="running")
+                        time.sleep(0.6)
+                        
+                        status.update(label="✍️ Đang đưa ra kết luận...", state="running")
+                        
+                        # Gọi API thực tế từ LM Studio
+                        response = client.chat.completions.create(
+                            model="local-model",
+                            messages=[
+                                {"role": "system", "content": system_instruction},
+                                *st.session_state.messages
+                            ],
+                            temperature=0.2
+                        )
+                        
+                        ai_response = response.choices[0].message.content
+                        status.update(label="Đã hoàn thành phân tích!", state="complete")
+                    
+                    # Xoá bỏ hoàn toàn khung trạng thái load sau khi đã có câu trả lời
+                    status_placeholder.empty()
+
+                # Hiển thị câu trả lời chính thức của AI vào khung cuộn
                 with chat_container:
                     with st.chat_message("assistant"):
                         st.markdown(ai_response)
@@ -136,7 +153,6 @@ if df is not None:
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
                 
             except Exception as e:
-                # Hiển thị thông báo lỗi thân thiện nếu bạn chưa bật LM Studio hoặc chưa chạy lệnh Ngrok
                 st.error(f"""
                 **⚠️ KHÔNG THỂ KẾT NỐI ĐẾN MÁY CHỦ AI** 
                 
