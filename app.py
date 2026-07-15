@@ -82,7 +82,7 @@ if df is not None:
             # RAG Engine: Trích xuất 15 dòng dữ liệu mới nhất để AI tham chiếu
             latest_data_summary = df.tail(15).to_string(index=False)
 
-            # Đóng gói chỉ thị hệ thống và dữ liệu bảng vào một chuỗi ngữ cảnh
+            # Đóng gói chỉ thị hệ thống và dữ liệu bảng vào một chuỗi ngữ cảnh gọn gàng
             context_instruction = f"""Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo, tốt nghiệp Học viện Tài chính.
 Hãy sử dụng bảng số liệu CPI mới nhất sau đây để phân tích và trả lời câu hỏi của người dùng:
 ---
@@ -112,7 +112,7 @@ Yêu cầu:
                 "parts": [{"text": final_user_content}]
             })
 
-            # Cấu hình dữ liệu gửi đi (Payload) - Bỏ hoàn toàn trường systemInstruction gây lỗi tương thích!
+            # Cấu hình dữ liệu gửi đi (Payload)
             payload = {
                 "contents": contents,
                 "generationConfig": {
@@ -124,29 +124,51 @@ Yêu cầu:
                 "Content-Type": "application/json"
             }
 
+            # 🛠️ CƠ CHẾ DÒ TÌM MODEL THÔNG MINH (FALLBACK ENGINE)
+            def call_gemini_with_fallback(api_key, payload, headers):
+                # Danh sách các model từ mới tới cũ để hệ thống tự động quét qua
+                models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+                versions_to_try = ["v1", "v1beta"]
+                
+                last_error = None
+                for version in versions_to_try:
+                    for model in models_to_try:
+                        url = f"https://generativelanguage.googleapis.com/{version}/models/{model}:generateContent?key={api_key}"
+                        try:
+                            response = requests.post(url, json=payload, headers=headers, timeout=10)
+                            response_json = response.json()
+                            
+                            # Nếu thành công (Không có lỗi và có dữ liệu trả về)
+                            if "error" not in response_json:
+                                if "candidates" in response_json and len(response_json["candidates"]) > 0:
+                                    ai_response = response_json["candidates"][0]["content"]["parts"][0]["text"]
+                                    return ai_response, None
+                            else:
+                                err_detail = response_json["error"]
+                                last_error = err_detail.get("message", "Lỗi không xác định")
+                                
+                                # Nếu là lỗi "Không tìm thấy model" (404 hoặc Not Found), tiếp tục thử model khác
+                                if "not found" in last_error.lower() or err_detail.get("code") == 404:
+                                    continue
+                                else:
+                                    # Nếu là lỗi nghiêm trọng khác (như sai API Key), báo lỗi ngay lập tức
+                                    return None, last_error
+                        except Exception as e:
+                            last_error = str(e)
+                            continue
+                
+                return None, last_error if last_error else "Không thể kết nối đến bất kỳ mô hình AI nào."
+
             try:
                 with st.spinner("AI đang phân tích số liệu trên Cloud..."):
-                    # Thử gọi API phiên bản ổn định v1 trước
-                    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
-                    response = requests.post(url, json=payload, headers=headers)
-                    response_json = response.json()
-
-                    # Nếu lỗi 404, tự động chuyển hướng sang v1beta làm dự phòng
-                    if "error" in response_json and response_json["error"].get("code") == 404:
-                        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-                        response = requests.post(url, json=payload, headers=headers)
-                        response_json = response.json()
-
-                    # Kiểm tra kết quả phản hồi cuối cùng
-                    if "error" in response_json:
-                        error_msg = response_json["error"].get("message", "Lỗi không xác định")
-                        st.error(f"⚠️ Lỗi từ Google API: {error_msg}")
+                    ai_response, error = call_gemini_with_fallback(api_key, payload, headers)
+                    
+                    if error:
+                        st.error(f"⚠️ Lỗi kết nối: {error}")
                     else:
-                        ai_response = response_json["candidates"][0]["content"]["parts"][0]["text"]
-                        
                         with st.chat_message("assistant"):
                             st.markdown(ai_response)
                         st.session_state.messages.append({"role": "assistant", "content": ai_response})
                         
             except Exception as e:
-                st.error(f"⚠️ Đã xảy ra lỗi khi kết nối với AI Cloud: {e}")
+                st.error(f"⚠️ Đã xảy ra lỗi hệ thống: {e}")
