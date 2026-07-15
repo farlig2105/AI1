@@ -82,33 +82,39 @@ if df is not None:
             # RAG Engine: Trích xuất 15 dòng dữ liệu mới nhất để AI tham chiếu
             latest_data_summary = df.tail(15).to_string(index=False)
 
-            system_instruction = f"""
-            Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo, tốt nghiệp Học viện Tài chính.
-            Dưới đây là 15 dòng số liệu mới nhất trong cơ sở dữ liệu của chúng ta:
-            ---
-            {latest_data_summary}
-            ---
-            Yêu cầu:
-            1. Ưu tiên sử dụng số liệu thực tế phía trên để trả lời câu hỏi nếu liên quan.
-            2. Trả lời ngắn gọn, trực diện bằng Tiếng Việt.
-            3. Tuyệt đối không tự bịa ra các con số không có trong bảng dữ liệu trên.
-            """
+            # Đóng gói chỉ thị hệ thống và dữ liệu bảng vào một chuỗi ngữ cảnh
+            context_instruction = f"""Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo, tốt nghiệp Học viện Tài chính.
+Hãy sử dụng bảng số liệu CPI mới nhất sau đây để phân tích và trả lời câu hỏi của người dùng:
+---
+{latest_data_summary}
+---
+Yêu cầu:
+1. Ưu tiên sử dụng số liệu thực tế phía trên để phân tích nếu câu hỏi liên quan đến số liệu hoặc xu hướng.
+2. Trả lời ngắn gọn, trực diện, chuyên nghiệp bằng Tiếng Việt.
+3. Tuyệt đối không tự bịa ra các con số không có trong bảng dữ liệu trên.
+"""
 
-            # Chuyển đổi lịch sử chat sang định dạng chuẩn của Google Gemini
+            # Chuyển đổi lịch sử chat sang định dạng tương thích của Google Gemini
             contents = []
-            for msg in st.session_state.messages:
+            
+            # 1. Đưa các đoạn hội thoại cũ vào (trừ tin nhắn cuối cùng vừa gõ)
+            for msg in st.session_state.messages[:-1]:
                 role = "user" if msg["role"] == "user" else "model"
                 contents.append({
                     "role": role,
                     "parts": [{"text": msg["content"]}]
                 })
+            
+            # 2. Đưa tin nhắn cuối cùng kèm theo Chỉ dẫn + Dữ liệu RAG vào cuối để AI tập trung xử lý
+            final_user_content = f"{context_instruction}\n\n**Câu hỏi của người dùng:** {prompt}"
+            contents.append({
+                "role": "user",
+                "parts": [{"text": final_user_content}]
+            })
 
-            # Cấu hình dữ liệu gửi đi (Payload)
+            # Cấu hình dữ liệu gửi đi (Payload) - Bỏ hoàn toàn trường systemInstruction gây lỗi tương thích!
             payload = {
                 "contents": contents,
-                "systemInstruction": {
-                    "parts": [{"text": system_instruction}]
-                },
                 "generationConfig": {
                     "temperature": 0.2
                 }
@@ -120,12 +126,12 @@ if df is not None:
 
             try:
                 with st.spinner("AI đang phân tích số liệu trên Cloud..."):
-                    # 🎯 BƯỚC SỬA LỖI QUAN TRỌNG: Thử nghiệm với đường dẫn v1 (Stable) chính thức trước
+                    # Thử gọi API phiên bản ổn định v1 trước
                     url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
                     response = requests.post(url, json=payload, headers=headers)
                     response_json = response.json()
 
-                    # 🔄 NẾU THẤT BẠI (Lỗi 404): Tự động chuyển hướng sang v1beta làm dự phòng
+                    # Nếu lỗi 404, tự động chuyển hướng sang v1beta làm dự phòng
                     if "error" in response_json and response_json["error"].get("code") == 404:
                         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
                         response = requests.post(url, json=payload, headers=headers)
