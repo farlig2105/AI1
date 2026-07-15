@@ -1,289 +1,367 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import requests
+import time
+from openai import OpenAI
 
-# 1. Cấu hình giao diện Streamlit (Dark Mode, layout rộng)
+# ==========================================
+# 1. CẤU HÌNH GIAO DIỆN WEB & CSS SIÊU PREMIUM (1000x UI)
+# ==========================================
 st.set_page_config(
-    page_title="Hệ thống Nghiên cứu Kinh tế Vĩ mô & Lạm phát",
-    page_icon="📈",
+    page_title="Hệ thống Dữ liệu Vĩ mô & AI",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# -----------------------------------------------------------------------------
-# PHẦN 2: CÁC HÀM XỬ LÝ DỮ LIỆU & CALL API
-# -----------------------------------------------------------------------------
+# Inject CSS để biến đổi giao diện mặc định thành phong cách Fintech Glassmorphism sang trọng
+st.markdown("""
+    <style>
+        /* Nhập font chữ Inter tinh tế */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        /* Cấu hình màu nền gradient tối sâu thẳm */
+        .main {
+            background: radial-gradient(circle at 50% 50%, #141923 0%, #0b0d13 100%) !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        /* Hộp Kính mờ (Glassmorphic Cards) phát sáng cho các thẻ Metric KPI */
+        [data-testid="stMetric"] {
+            background: rgba(255, 255, 255, 0.02) !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            padding: 20px 25px !important;
+            border-radius: 16px !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+        }
+        
+        /* Hiệu ứng di chuột nổi bật cho KPI Cards */
+        [data-testid="stMetric"]:hover {
+            border-color: rgba(0, 255, 204, 0.3) !important;
+            box-shadow: 0 10px 40px 0 rgba(0, 255, 204, 0.1) !important;
+            transform: translateY(-4px) !important;
+        }
+        
+        /* Tùy chỉnh màu sắc chữ số trong thẻ Metric */
+        div[data-testid="stMetricValue"] {
+            font-size: 32px !important;
+            font-weight: 700 !important;
+            color: #00FFCC !important;
+            letter-spacing: -1px;
+        }
+        div[data-testid="stMetricLabel"] {
+            font-size: 13px !important;
+            color: #8F9CAE !important;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600 !important;
+        }
+        
+        /* Tùy biến bộ lọc Pills của Streamlit thành phong cách SaaS Neon */
+        div[data-testid="stPills"] button {
+            background-color: rgba(255, 255, 255, 0.02) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            color: #8F9CAE !important;
+            border-radius: 20px !important;
+            padding: 6px 18px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+        }
+        div[data-testid="stPills"] button:hover {
+            border-color: rgba(0, 255, 204, 0.4) !important;
+            color: #fff !important;
+        }
+        div[data-testid="stPills"] button[aria-selected="true"] {
+            background-color: rgba(0, 255, 204, 0.12) !important;
+            border-color: #00FFCC !important;
+            color: #00FFCC !important;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.25) !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Làm đẹp thanh cuộn khung chat mỏng nhẹ nghệ thuật */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 204, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 204, 0.5);
+        }
+        
+        .stChatInput {
+            border-radius: 24px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-@st.cache_data(ttl=86400)  # Cache 24 giờ để tối ưu hiệu năng web
-def fetch_wb_inflation(country_iso3):
-    """
-    Truy vấn chỉ số lạm phát tiêu dùng hàng năm từ World Bank Data360 API.
-    """
-    api_url = "https://data360api.worldbank.org/v1/data360/data"
-    
-    # 336 là ID chuẩn của 'Inflation, consumer prices (annual %)' trong Data360
-    params = {
-        "indicators": "336",
-        "countries": country_iso3,
-        "timeperiods": "2016,2017,2018,2019,2020,2021,2022,2023,2024,2025"
-    }
-    
-    try:
-        response = requests.get(api_url, params=params, timeout=8)
-        if response.status_code == 200:
-            raw_data = response.json()
-            data_list = raw_data.get("data", [])
-            
-            parsed_records = []
-            for item in data_list:
-                period = item.get("period")
-                value = item.get("value")
-                if period is not None and value is not None:
-                    parsed_records.append({
-                        "Năm": int(period),
-                        "Tỷ lệ Lạm phát (%)": round(float(value), 2)
-                    })
-            
-            df_wb = pd.DataFrame(parsed_records).sort_values(by="Năm")
-            return df_wb
-    except Exception as e:
-        st.sidebar.error(f"⚠️ Lỗi kết nối World Bank API: {e}")
-    return None
+# Khung tiêu đề chính thiết kế tối giản hiện đại
+st.markdown("""
+    <div style="margin-bottom: 15px;">
+        <h1 style="font-weight: 700; color: #ffffff; margin-bottom: 5px; letter-spacing: -1px;">📈 Hệ Thống Dữ Liệu Vĩ Mô & Trợ Lý AI</h1>
+        <p style="color: #8F9CAE; font-size: 15px; margin: 0;">Nền tảng phân tích chu kỳ kinh tế và chỉ số lạm phát chuyên sâu.</p>
+    </div>
+""", unsafe_allow_html=True)
 
-
-def query_lm_studio(prompt, system_instruction, endpoint_url):
-    """
-    Gửi prompt cùng ngữ cảnh dữ liệu sang máy chủ LM Studio (thông qua URL Ngrok/Local).
-    """
-    headers = {
-        "Content-Type": "application/json"
-    }
-    
-    # Chuẩn bị payload theo định dạng OpenAI Chat Completions API hỗ trợ bởi LM Studio
-    payload = {
-        "messages": [
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.3, # Đặt thấp để mô hình đưa ra câu trả lời chính xác, ít sáng tạo lung tung
-        "max_tokens": 1000
-    }
-    
-    try:
-        response = requests.post(f"{endpoint_url}/v1/chat/completions", json=payload, headers=headers, timeout=30)
-        if response.status_code == 200:
-            result = response.json()
-            return result["choices"][0]["message"]["content"]
-        else:
-            return f"❌ Lỗi từ máy chủ LM Studio (Mã lỗi: {response.status_code})"
-    except Exception as e:
-        return f"❌ Không thể kết nối đến LM Studio qua Endpoint đã cấu hình. Vui lòng kiểm tra lại Ngrok/Server. Chi tiết: {e}"
-
-
-# -----------------------------------------------------------------------------
-# PHẦN 3: THIẾT LẬP DỮ LIỆU MẪU TRONG NƯỚC (DOMESTIC DATASET)
-# -----------------------------------------------------------------------------
-
-# Giả lập bộ dữ liệu lịch sử CPI và lạm phát cơ bản trong nước để phục vụ nghiên cứu
-@st.cache_data
-def get_domestic_data():
-    # Dữ liệu theo năm
-    annual_data = {
-        "Năm": [2019, 2020, 2021, 2022, 2023, 2024, 2025],
-        "CPI Bình quân (%)": [2.80, 3.23, 1.84, 3.15, 3.25, 4.08, 3.50],
-        "Lạm phát Cơ bản (%)": [2.01, 2.31, 0.81, 2.39, 4.16, 3.20, 2.80]
-    }
-    df_annual = pd.DataFrame(annual_data)
-    
-    # Dữ liệu chi tiết 12 tháng gần nhất
-    monthly_data = {
-        "Tháng/Năm": [
-            "07/2025", "08/2025", "09/2025", "10/2025", "11/2025", "12/2025",
-            "01/2026", "02/2026", "03/2026", "04/2026", "05/2026", "06/2026"
-        ],
-        "CPI so với cùng kỳ (%)": [3.12, 3.20, 3.35, 3.10, 3.05, 3.50, 3.65, 3.80, 3.40, 3.42, 3.30, 3.25],
-        "Nhóm Giao thông (%)": [-1.20, 0.50, 1.10, 0.80, -0.40, 1.50, 2.10, 3.05, 1.80, 1.15, 0.90, 0.60],
-        "Nhóm Hàng ăn (%)": [4.50, 4.30, 4.80, 4.10, 3.90, 4.20, 4.60, 5.10, 4.30, 4.25, 4.10, 4.00]
-    }
-    df_monthly = pd.DataFrame(monthly_data)
-    return df_annual, df_monthly
-
-df_annual_grouped, df_active = get_domestic_data()
-
-# -----------------------------------------------------------------------------
-# PHẦN 4: SIDEBAR CẤU HÌNH KỸ THUẬT
-# -----------------------------------------------------------------------------
-
-st.sidebar.image("https://img.icons8.com/nolan/96/combo-chart.png", width=60)
-st.sidebar.title("Cấu hình Nghiên cứu")
-
-st.sidebar.markdown("### 🔌 Kết nối LM Studio")
-# Ô nhập URL Ngrok hoặc Localhost của máy chủ LM Studio
-lm_studio_endpoint = st.sidebar.text_input(
-    "Endpoint API (Ngrok hoặc Local IP):",
-    value="http://localhost:1234",
-    placeholder="Ví dụ: https://abcd-12-34.ngrok-free.app"
+# BỘ LỌC THỜI GIAN TOÀN HỆ THỐNG (SaaS Pills)
+timeframe = st.pills(
+    "Phạm vi phân tích toàn hệ thống:",
+    options=["1 năm qua", "5 năm qua", "Tất cả 10 năm"],
+    default="Tất cả 10 năm",
+    key="global_timeframe"
 )
+st.markdown("---")
 
+# ==========================================
+# 2. ĐƯỜNG DẪN NGROK CỐ ĐỊNH (decode-thigh-dinginess)
+# ==========================================
+NGROK_STATIC_URL = "https://decode-thigh-dinginess.ngrok-free.dev"
+
+# Thiết kế Sidebar tinh tế
+st.sidebar.markdown("### 🖥️ MÁY CHỦ HỆ THỐNG")
+st.sidebar.markdown(
+    f"""
+    <div style="background: rgba(0, 255, 204, 0.03); border: 1px solid rgba(0, 255, 204, 0.15); padding: 18px; border-radius: 14px; backdrop-filter: blur(5px);">
+        <span style="color: #00FFCC; font-weight: 700; font-size: 14px;">● AI ENGINE ONLINE</span><br>
+        <small style="color: #6C7A8C; display: block; margin-top: 5px;">Ngrok Endpoint:</small>
+        <code style="color: #E2E8F0; font-size: 11px; word-break: break-all; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; display: block; margin-top: 3px;">{NGROK_STATIC_URL}</code>
+    </div>
+    """, 
+    unsafe_allow_html=True
+)
 st.sidebar.markdown("---")
-st.sidebar.info(
-    "💡 **Mẹo nghiên cứu:**\n"
-    "Dữ liệu được tải động từ World Bank Data360 sẽ được nhúng trực tiếp vào bộ não của AI "
-    "giúp tăng độ chính xác trong lập luận so sánh vĩ mô quốc tế."
-)
+st.sidebar.caption("Phát triển bởi Nhóm nghiên cứu Học viện Tài chính.")
 
-# -----------------------------------------------------------------------------
-# PHẦN 5: GIAO DIỆN CHÍNH (MAIN LAYOUT)
-# -----------------------------------------------------------------------------
+# ==========================================
+# 3. ĐỌC & XỬ LÝ DỮ LIỆU TỪ FILE CSV
+# ==========================================
+@st.cache_data
+def load_data():
+    try:
+        df = pd.read_csv('cpi_data.csv', parse_dates=['Ngay'])
+        df = df.sort_values(by='Ngay')
+        return df
+    except FileNotFoundError:
+        st.error("⚠️ Không tìm thấy file 'cpi_data.csv' trong mã nguồn!")
+        return None
 
-st.title("📈 HỆ THỐNG NGHIÊN CỨU VĨ MÔ & TƯƠNG QUAN LẠM PHÁT CO-PILOT")
-st.caption("Ứng dụng phân tích dữ liệu CPI nội địa kết hợp API World Bank Data360 và Trợ lý AI cục bộ (RAG)")
+df = load_data()
 
-# Phân chia bố cục làm 2 cột chính
-col1, col2 = st.columns([1.1, 0.9])
+if df is not None:
+    # 1. Lọc giới hạn tối đa 10 năm qua từ mốc hiện tại
+    ten_years_ago = pd.Timestamp.now() - pd.DateOffset(years=10)
+    df_filtered = df[df['Ngay'] >= ten_years_ago].copy()
+    data_column = df_filtered.columns[1]
 
-# =============================================================================
-# CỘT 1: PHẦN SỐ LIỆU VÀ BIỂU ĐỒ TRỰC QUAN HOÁ
-# =============================================================================
-with col1:
-    st.subheader("📊 Số liệu vĩ mô hiện hành")
+    # 2. Áp dụng bộ lọc thời gian động "global_timeframe"
+    if timeframe == "1 năm qua":
+        df_active = df_filtered[df_filtered['Ngay'] >= pd.Timestamp.now() - pd.DateOffset(years=1)].copy()
+        label_suffix = "1 Năm Qua"
+    elif timeframe == "5 năm qua":
+        df_active = df_filtered[df_filtered['Ngay'] >= pd.Timestamp.now() - pd.DateOffset(years=5)].copy()
+        label_suffix = "5 Năm Qua"
+    else:
+        df_active = df_filtered.copy()
+        label_suffix = "10 Năm Qua"
+
+    # 3. Gom nhóm tính trung bình từng năm
+    df_annual = df_active.copy()
+    df_annual['Năm'] = df_annual['Ngay'].dt.year
+    df_annual_grouped = df_annual.groupby('Năm')[data_column].mean().reset_index()
+    df_annual_grouped.columns = ['Năm', f'Chỉ số {data_column} Trung Bình']
+
+    # 4. Tính toán các chỉ số KPI động theo khoảng thời gian đã chọn
+    latest_row = df_active.iloc[-1]
+    prev_row = df_active.iloc[-2] if len(df_active) > 1 else latest_row
+    current_val = latest_row[data_column]
+    prev_val = prev_row[data_column]
     
-    # 1. Hiển thị bảng số liệu trong nước
-    tab_annual, tab_monthly = st.tabs(["🗓️ Theo Năm", "📅 12 Tháng gần nhất"])
+    mo_m_change = ((current_val - prev_val) / prev_val) * 100 if prev_val != 0 else 0
+    max_val = df_active[data_column].max()
+    max_date = df_active[df_active[data_column] == max_val]['Ngay'].dt.strftime('%m/%Y').values[0]
+    min_val = df_active[data_column].min()
+    min_date = df_active[df_active[data_column] == min_val]['Ngay'].dt.strftime('%m/%Y').values[0]
+
+    # ==========================================
+    # 4. KHU VỰC THẺ CHỈ SỐ KPI CARDS (ĐỘNG)
+    # ==========================================
+    kpi1, kpi2, kpi3 = st.columns(3, gap="medium")
     
-    with tab_annual:
-        st.dataframe(df_annual_grouped, use_container_width=True, hide_index=True)
-    with tab_monthly:
-        st.dataframe(df_active, use_container_width=True, hide_index=True)
-        
-    # 2. Phần kết nối và trực quan hoá lạm phát quốc tế (API World Bank)
-    st.markdown("---")
-    st.markdown("### 🌐 Đối chiếu Lạm phát Quốc tế (World Bank)")
-    
-    country_selected = st.selectbox(
-        "Chọn quốc gia để so sánh tương quan:",
-        options=[
-            "Mỹ (USA)", 
-            "Singapore (SGP)", 
-            "Trung Quốc (CHN)", 
-            "Thái Lan (THA)", 
-            "Hàn Quốc (KOR)"
-        ],
-        index=0,
-        key="wb_country_select"
-    )
-    
-    # Trích xuất mã ISO3 trong dấu ngoặc (Ví dụ: "Mỹ (USA)" -> "USA")
-    iso3_code = country_selected.split("(")[1].replace(")", "").strip()
-    
-    # Truy vấn dữ liệu thực tế từ API World Bank
-    with st.spinner("🔄 Đang truy vấn dữ liệu từ máy chủ World Bank..."):
-        df_wb_data = fetch_wb_inflation(iso3_code)
-        
-    if df_wb_data is not None and not df_wb_data.empty:
-        # Tạo biểu đồ cột phát sáng màu hổ phách
-        fig_wb = px.bar(
-            df_wb_data,
-            x="Năm",
-            y="Tỷ lệ Lạm phát (%)",
-            template="plotly_dark",
-            text="Tỷ lệ Lạm phát (%)"
+    with kpi1:
+        st.metric(
+            label=f"Chỉ số {data_column} Hiện Tại", 
+            value=f"{current_val:,.2f}", 
+            delta=f"{mo_m_change:+.2f}% (Cận Kỳ)",
+            delta_color="inverse" if "CPI" in data_column else "normal"
+        )
+    with kpi2:
+        st.metric(
+            label=f"Đỉnh {label_suffix}", 
+            value=f"{max_val:,.2f}", 
+            delta=f"Cực đại vào tháng {max_date}",
+            delta_color="off"
+        )
+    with kpi3:
+        st.metric(
+            label=f"Đáy {label_suffix}", 
+            value=f"{min_val:,.2f}", 
+            delta=f"Cực tiểu vào tháng {min_date}",
+            delta_color="off"
         )
         
-        fig_wb.update_traces(
-            marker_color='rgba(255, 128, 0, 0.85)',
-            marker_line_color='#FF8000',
-            marker_line_width=1.5,
-            textposition='outside',
-            hovertemplate="<b>Năm:</b> %{x}<br><b>Lạm phát:</b> %{y}%<extra></extra>"
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ==========================================
+    # 5. PHÂN CHIA GIAO DIỆN CHÍNH (2 CỘT TỶ LỆ VÀNG)
+    # ==========================================
+    col1, col2 = st.columns([1.55, 1], gap="large")
+
+    # --- CỘT TRÁI: BIỂU ĐỒ & BẢNG SỐ LIỆU ---
+    with col1:
+        st.markdown(f"### 📊 Phân tích xu hướng {data_column}")
+        
+        # Vẽ biểu đồ đường trơn (Spline) mượt mà
+        fig = px.line(
+            df_active, 
+            x='Ngay', 
+            y=data_column, 
+            template="plotly_dark"
         )
         
-        fig_wb.update_xaxes(
-            type='category',
+        fig.update_traces(
+            line=dict(color='#00FFCC', width=3.5, shape='spline'),
+            mode='lines',
+            hovertemplate="<b>Thời gian:</b> %{x|%m/%Y}<br><b>Giá trị:</b> %{y:.2f}<extra></extra>"
+        )
+        
+        fig.update_xaxes(
+            title="",
             gridcolor="rgba(255, 255, 255, 0.03)"
         )
         
-        fig_wb.update_yaxes(
-            title="Phần trăm (%)",
+        fig.update_yaxes(
+            title="",
             gridcolor="rgba(255, 255, 255, 0.03)"
         )
         
-        fig_wb.update_layout(
+        fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=0, r=0, t=20, b=0),
-            height=300
+            margin=dict(l=0, r=10, t=10, b=0),
+            height=380
         )
         
-        st.plotly_chart(fig_wb, use_container_width=True, config={'displayModeBar': False})
-    else:
-        st.warning(f"⚠️ Không nhận được dữ liệu phản hồi từ World Bank cho mã quốc gia {iso3_code}.")
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
+        # Bảng dữ liệu đại diện năm (Đã ẩn cột số thứ tự bằng hide_index=True)
+        st.markdown(f"#### 🔍 Giá trị đại diện {data_column} trung bình theo từng năm")
+        
+        formatted_annual_table = df_annual_grouped.style.format({
+            'Năm': '{:.0f}',
+            f'Chỉ số {data_column} Trung Bình': '{:.2f}'
+        }).background_gradient(
+            subset=[f'Chỉ số {data_column} Trung Bình'], 
+            cmap="viridis"
+        )
+        
+        st.dataframe(formatted_annual_table, use_container_width=True, hide_index=True)
 
-# =============================================================================
-# CỘT 2: TRỢ LÝ TRÍ TUỆ NHÂN TẠO CO-PILOT (CHAT RAG)
-# =============================================================================
-with col2:
-    st.subheader("🤖 Trợ lý Phân tích Vĩ mô")
-    
-    # Khởi tạo bộ nhớ cuộc trò chuyện nếu chưa tồn tại
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    # --- CỘT PHẢI: KHUNG CHAT AI KÍNH MỜ ---
+    with col2:
+        st.markdown("### 🤖 Trợ lý AI Phân tích")
         
-    # Tạo khung chứa các tin nhắn chat cũ để cuộn
-    chat_container = st.container(height=520)
-    
-    # Hiển thị lịch sử chat
-    with chat_container:
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-                
-    # Nhận phản hồi/câu hỏi mới từ người dùng
-    if prompt := st.chat_input("Hỏi về xu hướng lạm phát, áp lực tỷ giá hay đối chiếu quốc tế..."):
-        
-        # Hiển thị tin nhắn người dùng ngay lập tức lên màn hình
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        chat_container = st.container(height=450)
+
         with chat_container:
-            with st.chat_message("user"):
-                st.markdown(prompt)
-                
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        
-        # 1. Chuẩn bị dữ liệu nội địa
-        recent_monthly_summary = df_active.to_string(index=False)
-        annual_summary = df_annual_grouped.to_string(index=False)
-        
-        # 2. Chuẩn bị dữ liệu World Bank vừa gọi từ API
-        wb_summary_text = "Không có dữ liệu quốc tế."
-        if df_wb_data is not None:
-            wb_summary_text = df_wb_data.to_string(index=False)
+            for message in st.session_state.messages:
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"])
+
+        if prompt := st.chat_input("Hỏi tôi về xu hướng lạm phát hoặc phân tích số liệu..."):
             
-        # 3. Tạo siêu prompt thiết lập vai trò và nhúng dữ liệu làm ngữ cảnh (RAG)
-        system_instruction = f"""
-Bạn là một chuyên gia phân tích kinh tế vĩ mô sắc sảo, tốt nghiệp Học viện Tài chính[cite: 1].
-Dưới đây là hai nguồn dữ liệu thực tế, đáng tin cậy phục vụ cho quá trình nghiên cứu của bạn[cite: 1]:
+            with chat_container:
+                with st.chat_message("user"):
+                    st.markdown(prompt)
+            
+            st.session_state.messages.append({"role": "user", "content": prompt})
 
---- NGUỒN 1: CHỈ SỐ TRUNG BÌNH TRONG NƯỚC THEO NĂM ---
-{annual_summary}
+            # Gửi cả số liệu chi tiết tháng và bảng trung bình năm
+            recent_monthly_summary = df_active.tail(12).to_string(index=False)
+            annual_summary = df_annual_grouped.to_string(index=False)
 
---- NGUỒN 2: CHỈ SỐ LẠM PHÁT THẾ GIỚI TỪ WORLD BANK (Mẫu so sánh: {country_selected}) ---
-{wb_summary_text}
+            system_instruction = f"""
+            Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo, tốt nghiệp Học viện Tài chính.
+            Dưới đây là dữ liệu vĩ mô thực tế để hỗ trợ phân tích:
+            
+            1. CHỈ SỐ TRUNG BÌNH THEO NĂM:
+            ---
+            {annual_summary}
+            ---
+            
+            2. CHỈ SỐ CHI TIẾT THEO THÁNG:
+            ---
+            {recent_monthly_summary}
+            ---
+            
+            Yêu cầu:
+            1. Phân tích xu hướng dựa trên dữ liệu thực tế được cung cấp.
+            2. Trả lời ngắn gọn, trực diện, lập luận logic bằng Tiếng Việt.
+            3. Tuyệt đối không tự bịa ra các con số không tồn tại trong hai bảng dữ liệu trên.
+            """
 
---- DỮ LIỆU CHI TIẾT 12 THÁNG GẦN NHẤT TRONG NƯỚC ---
-{recent_monthly_summary}
+            clean_url = NGROK_STATIC_URL.strip().rstrip('/')
+            
+            try:
+                client = OpenAI(
+                    base_url=f"{clean_url}/v1",
+                    api_key="lm-studio"
+                )
 
-Yêu cầu phân tích:
-1. Khi người dùng đặt câu hỏi, hãy luôn tìm cách đối chiếu, liên hệ logic giữa số liệu nội địa và số liệu quốc tế từ World Bank ở trên[cite: 1].
-2. Lập luận khoa học, sử dụng ngôn ngữ kinh tế học chuẩn xác (lạm phát cầu kéo, chi phí đẩy, độ trễ chính sách, tỷ giá, nhập khẩu lạm phát)[cite: 1].
-3. Trả lời trực diện, ngắn gọn bằng tiếng Việt, tránh lý thuyết suông và TUYỆT ĐỐI không bịa đặt số liệu nằm ngoài các bảng được cung cấp ở trên[cite: 1].
-"""
-        
-        # 4. Gửi yêu cầu phân tích sang LM Studio
-        with chat_container:
-            with st.chat_message("assistant"):
-                with st.spinner("🧠 Trợ lý AI đang lập luận vĩ mô..."):
-                    ai_response = query_lm_studio(prompt, system_instruction, lm_studio_endpoint)
-                    st.markdown(ai_response)
+                with chat_container:
+                    status_placeholder = st.empty()
                     
-        st.session_state.messages.append({"role": "assistant", "content": ai_response})
+                    with status_placeholder.status("⚙️ Đang phân tích ma trận dữ liệu niên độ...", expanded=False) as status:
+                        time.sleep(0.5)
+                        status.update(label="🧮 Đang tính toán tương quan lạm phát chu kỳ...", state="running")
+                        time.sleep(0.5)
+                        status.update(label="✍️ Đang hoàn thiện báo cáo phân tích kinh tế...", state="running")
+                        
+                        response = client.chat.completions.create(
+                            model="local-model",
+                            messages=[
+                                {"role": "system", "content": system_instruction},
+                                *st.session_state.messages
+                            ],
+                            temperature=0.2
+                        )
+                        
+                        ai_response = response.choices[0].message.content
+                        status.update(label="Hoàn tất phân tích vĩ mô!", state="complete")
+                    
+                    status_placeholder.empty()
+
+                with chat_container:
+                    with st.chat_message("assistant"):
+                        st.markdown(ai_response)
+                
+                st.session_state.messages.append({"role": "assistant", "content": ai_response})
+                
+            except Exception as e:
+                st.error(f"""
+                **⚠️ HỆ THỐNG AI ĐANG NGOẠI TUYẾN (OFFLINE)** 
+                
+                Vui lòng khởi động máy chủ LM Studio và chạy lệnh Ngrok trên máy tính của bạn.
+                """)
