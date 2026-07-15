@@ -63,22 +63,33 @@ if df is not None:
         with st.expander("🔍 Xem bảng dữ liệu chi tiết"):
             st.dataframe(df, use_container_width=True)
 
-    # --- CỘT PHẢI: CHATBOT AI CHẠY LOCAL ---
+    # --- CỘT PHẢI: CHATBOT AI CHẠY LOCAL (CÓ KHUNG TRƯỢT) ---
     with col2:
         st.subheader("🤖 Trợ lý AI Phân tích số liệu")
         
-        # Khởi tạo lịch sử chat
+        # Khởi tạo lịch sử chat trong session_state
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        # Hiển thị lại các câu trả lời cũ
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+        # 🎯 TẠO KHUNG CUỘN CỐ ĐỊNH (Chiều cao 500px)
+        # Khung này giúp tin nhắn tự trượt lên trên và có thanh cuộn để xem lại
+        chat_container = st.container(height=500)
 
-        # Khung chat chính
+        # Hiển thị lại các câu trả lời cũ BÊN TRONG khung cuộn
+        with chat_container:
+            for message in st.session_state.messages:
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"])
+
+        # Khung nhập câu hỏi (nằm bên dưới khung cuộn)
         if prompt := st.chat_input("Hỏi tôi về xu hướng lạm phát hoặc phân tích số liệu..."):
-            st.chat_message("user").markdown(prompt)
+            
+            # 1. Hiển thị ngay câu hỏi của user vào khung cuộn
+            with chat_container:
+                with st.chat_message("user"):
+                    st.markdown(prompt)
+            
+            # Lưu vào lịch sử chat
             st.session_state.messages.append({"role": "user", "content": prompt})
 
             # Kiểm tra xem đã nhập đường dẫn Ngrok chưa
@@ -101,19 +112,20 @@ if df is not None:
             3. Tuyệt đối không tự bịa ra các con số không có trong bảng dữ liệu trên.
             """
 
-            # Chuẩn hóa đường dẫn URL (loại bỏ dấu gạch chéo dư thừa ở cuối)
+            # Chuẩn hóa đường dẫn URL Ngrok
             clean_url = ngrok_url.strip().rstrip('/')
             
             try:
-                # Khởi tạo kết nối tới cổng API của LM Studio thông qua Ngrok
+                # Khởi tạo kết nối tới LM Studio qua Ngrok
                 client = OpenAI(
                     base_url=f"{clean_url}/v1",
-                    api_key="lm-studio"  # LM Studio không yêu cầu key thực tế
+                    api_key="lm-studio"
                 )
 
-                with st.spinner("Đang gửi truy vấn đến LM Studio trên máy tính của bạn..."):
+                # Gọi AI và hiển thị hiệu ứng load ngầm
+                with st.spinner("Đang gửi truy vấn đến LM Studio..."):
                     response = client.chat.completions.create(
-                        model="local-model",  # Tự động chọn model đang chạy trên LM Studio
+                        model="local-model",
                         messages=[
                             {"role": "system", "content": system_instruction},
                             *st.session_state.messages
@@ -123,12 +135,16 @@ if df is not None:
                     
                     ai_response = response.choices[0].message.content
                 
-                with st.chat_message("assistant"):
-                    st.markdown(ai_response)
+                # 2. Hiển thị câu trả lời của AI BÊN TRONG khung cuộn (Sẽ tự động đẩy các tin nhắn cũ trượt lên)
+                with chat_container:
+                    with st.chat_message("assistant"):
+                        st.markdown(ai_response)
+                
+                # Lưu câu trả lời của AI vào lịch sử chat
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
                 
             except Exception as e:
-                # 🛑 HIỂN THỊ KHỐI BÁO LỖI CHI TIẾT
+                # Hiển thị thông báo lỗi chi tiết
                 st.error(f"""
                 **⚠️ LỖI KẾT NỐI CHI TIẾT:** 
                 
@@ -137,11 +153,10 @@ if df is not None:
                 `ERR_NGROK_3200` / ConnectionError
                 """)
                 
-                # 💡 KHUNG HƯỚNG DẪN TỰ SỬA LỖI NHANH
                 st.info("""
                 **💡 Các bước tự kiểm tra nhanh:**
                 
                 1. **Trên phần mềm LM Studio:** Bạn đã chọn một Model AI ở thanh menu trên cùng và bấm tải (load) nó chưa?
-                2. **Kiểm tra cổng:** LM Studio đã chuyển thành cổng `1235` (hoặc cổng bạn đang cấu hình) và đang hiện nút màu đỏ **'Stop Server'** (tức là server đang chạy) chưa?
-                3. **Kiểm tra màn hình Ngrok:** Khi bạn bấm gửi tin nhắn trên Web, màn hình đen của Ngrok ở máy tính của bạn có nhảy thêm dòng chữ nào báo nhận tín hiệu không?
+                2. **Kiểm tra cổng:** LM Studio đã chuyển thành cổng `1235` (hoặc cổng bạn đang cấu hình) và đang hiện nút màu đỏ **'Stop Server'** chưa?
+                3. **Kiểm tra màn hình Ngrok:** Màn hình CMD của Ngrok có đang chạy và hiển thị đúng đường dẫn không?
                 """)
