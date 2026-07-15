@@ -18,7 +18,7 @@ st.markdown("---")
 # 2. ĐƯỜNG DẪN NGROK CỐ ĐỊNH (THAY THẾ TẠI ĐÂY)
 # ==========================================
 # Hãy dán đường dẫn cố định bạn vừa lấy ở Bước 1 vào đây:
-NGROK_STATIC_URL = "https://TÊN_MIỀN_CỦA_BẠN.ngrok-free.app"
+NGROK_STATIC_URL = "https://decode-thigh-dinginess.ngrok-free.dev"
 
 # Hiển thị trạng thái kết nối ở Sidebar cho chuyên nghiệp
 st.sidebar.header("⚙️ Trạng thái Hệ thống")
