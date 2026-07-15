@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import time  # Thêm thư viện time để làm hiệu ứng chuyển chữ mượt mà
+import time
 from openai import OpenAI
 
 # ==========================================
@@ -19,7 +19,7 @@ st.markdown("---")
 # 2. ĐƯỜNG DẪN NGROK CỐ ĐỊNH 
 # ==========================================
 # Hãy dán đường dẫn cố định của bạn vào đây:
-NGROK_STATIC_URL = "https://decode-thigh-dinginess.ngrok-free.dev"
+NGROK_STATIC_URL = "https://TÊN_MIỀN_CỦA_BẠN.ngrok-free.app"
 
 # Hiển thị trạng thái kết nối ở Sidebar
 st.sidebar.header("⚙️ Trạng thái Hệ thống")
@@ -42,6 +42,12 @@ def load_data():
 df = load_data()
 
 if df is not None:
+    # 🎯 3.1. LỌC DỮ LIỆU TRONG VÒNG 10 NĂM TRỞ LẠI ĐÂY
+    # Tính toán mốc thời gian 10 năm trước từ thời điểm hiện tại
+    ten_years_ago = pd.Timestamp.now() - pd.DateOffset(years=10)
+    df = df[df['Ngay'] >= ten_years_ago]
+
+    # Lấy tên cột dữ liệu (Ví dụ: CPI)
     data_column = df.columns[1]
 
     # ==========================================
@@ -51,18 +57,20 @@ if df is not None:
 
     # --- CỘT TRÁI: BIỂU ĐỒ & BẢNG SỐ LIỆU ---
     with col1:
-        st.subheader(f"📊 Biểu đồ biến động {data_column}")
+        st.subheader(f"📊 Biểu đồ biến động {data_column} (10 năm qua)")
         
         fig = px.line(
             df, 
             x='Ngay', 
             y=data_column, 
-            title=f"Lịch sử biến động {data_column} từ 2020 đến nay",
+            title=f"Lịch sử biến động {data_column} trong 10 năm trở lại đây",
             template="plotly_dark"
         )
+        # Tự động căn chỉnh trục X hiển thị định dạng năm rõ ràng hơn
+        fig.update_xaxes(dtick="M12", tickformat="%Y") 
         st.plotly_chart(fig, use_container_width=True)
 
-        with st.expander("🔍 Xem bảng dữ liệu chi tiết"):
+        with st.expander("🔍 Xem bảng dữ liệu chi tiết (10 năm qua)"):
             st.dataframe(df, use_container_width=True)
 
     # --- CỘT PHẢI: CHATBOT AI CÓ KHUNG CUỘN TRƯỢT ---
@@ -116,13 +124,12 @@ if df is not None:
                     api_key="lm-studio"
                 )
 
-                # 🛠️ HIỆU ỨNG LOAD CHỮ CHUYỂN ĐỘNG LINH HOẠT
+                # HIỆU ỨNG LOAD CHỮ CHUYỂN ĐỘNG LINH HOẠT
                 with chat_container:
-                    # Tạo một placeholder tạm thời để hiển thị trạng thái loading
                     status_placeholder = st.empty()
                     
                     with status_placeholder.status("🤖 Đang đọc dữ liệu CPI...", expanded=False) as status:
-                        time.sleep(0.6)  # Tạo độ trễ ngắn để người dùng kịp nhìn chữ thay đổi
+                        time.sleep(0.6)
                         
                         status.update(label="🧮 Đang thực hiện tính toán...", state="running")
                         time.sleep(0.6)
