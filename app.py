@@ -13,16 +13,16 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Inject Custom CSS để "SaaS hóa" toàn bộ giao diện
+# Inject Custom CSS để "SaaS hóa" toàn bộ giao diện theo chuẩn cao cấp
 st.markdown("""
     <style>
-        /* Tùy chỉnh font chữ và nền tối cao cấp */
+        /* Tùy chỉnh font chữ Inter hiện đại */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         html, body, [data-testid="stSidebar"] {
             font-family: 'Inter', sans-serif;
         }
         
-        /* Làm đẹp các khối Metric (Chỉ số) */
+        /* Làm đẹp các khối Metric hiển thị số liệu */
         div[data-testid="stMetricValue"] {
             font-size: 28px !important;
             font-weight: 700 !important;
@@ -35,12 +35,12 @@ st.markdown("""
             letter-spacing: 1px;
         }
         
-        /* Hiệu ứng bo góc và viền mờ cho các Container */
+        /* Bo tròn góc và viền mịn cho các thẻ Container */
         div[data-testid="stVerticalBlock"] > div {
             border-radius: 12px;
         }
         
-        /* Tùy biến thanh cuộn đẹp mắt */
+        /* Tùy biến thanh cuộn của khung chat siêu mỏng */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -62,11 +62,11 @@ st.title("📈 Dashboard Kinh Tế Vĩ Mô & Trợ Lý AI")
 st.markdown("---")
 
 # ==========================================
-# 2. ĐƯỜNG DẪN NGROK CỐ ĐỊNH 
+# 2. ĐƯỜNG DẪN NGROK CỐ ĐỊNH (ĐÃ CẬP NHẬT CHÍNH XÁC)
 # ==========================================
-NGROK_STATIC_URL = "decode-thigh-dinginess.ngrok-free.dev"
+NGROK_STATIC_URL = "https://decode-thigh-dinginess.ngrok-free.dev"
 
-# Thiết kế Sidebar tinh gọn, chuyên nghiệp
+# Giao diện Sidebar hiển thị thông số kết nối chuyên nghiệp
 st.sidebar.markdown("### 🖥️ MÁY CHỦ HỆ THỐNG")
 st.sidebar.markdown(
     f"""
@@ -97,19 +97,19 @@ def load_data():
 df = load_data()
 
 if df is not None:
-    # Lọc dữ liệu trong vòng 10 năm trở lại đây
+    # Lọc dữ liệu trong vòng đúng 10 năm trở lại đây
     ten_years_ago = pd.Timestamp.now() - pd.DateOffset(years=10)
     df_filtered = df[df['Ngay'] >= ten_years_ago].copy()
     data_column = df_filtered.columns[1]
 
-    # Tính toán các chỉ số vĩ mô cho KPI Cards
+    # Tính toán các chỉ số vĩ mô quan trọng cho 3 thẻ KPI
     latest_row = df_filtered.iloc[-1]
     prev_row = df_filtered.iloc[-2] if len(df_filtered) > 1 else latest_row
     
     current_val = latest_row[data_column]
     prev_val = prev_row[data_column]
     
-    # Tính % biến động so với kỳ trước (Tháng trước)
+    # Tính % biến động MoM so với kỳ trước
     mo_m_change = ((current_val - prev_val) / prev_val) * 100 if prev_val != 0 else 0
     
     max_val = df_filtered[data_column].max()
@@ -119,7 +119,7 @@ if df is not None:
     min_date = df_filtered[df_filtered[data_column] == min_val]['Ngay'].dt.strftime('%m/%Y').values[0]
 
     # ==========================================
-    # 4. KHU VỰC THẺ CHỈ SỐ KPI CARDS (MỚI)
+    # 4. KHU VỰC THẺ CHỈ SỐ KPI CARDS TỔNG QUAN
     # ==========================================
     kpi1, kpi2, kpi3 = st.columns(3)
     
@@ -128,7 +128,7 @@ if df is not None:
             label=f"Chỉ số {data_column} Hiện Tại", 
             value=f"{current_val:,.2f}", 
             delta=f"{mo_m_change:+.2f}% (MoM)",
-            delta_color="inverse" if "CPI" in data_column else "normal"  # CPI tăng thì đỏ (inverse), giảm thì xanh
+            delta_color="inverse" if "CPI" in data_column else "normal"  # CPI tăng thì cảnh báo đỏ, giảm thì xanh mát
         )
     with kpi2:
         st.metric(
@@ -148,7 +148,7 @@ if df is not None:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ==========================================
-    # 5. CHIA GIAO DIỆN LÀM 2 CỘT (LAYOUT CHÍNH)
+    # 5. PHÂN CHIA LAYOUT 2 CỘT CHÍNH
     # ==========================================
     col1, col2 = st.columns([1.6, 1], gap="large")
 
@@ -156,7 +156,7 @@ if df is not None:
     with col1:
         st.markdown(f"### 📊 Phân tích xu hướng {data_column}")
         
-        # Thiết kế biểu đồ chuẩn Fintech
+        # Thiết kế biểu đồ dạng tối giản cao cấp
         fig = px.line(
             df_filtered, 
             x='Ngay', 
@@ -164,14 +164,14 @@ if df is not None:
             template="plotly_dark"
         )
         
-        # Nâng cấp đường vẽ thành Neon Cyan, bo cong spline mềm mại
+        # Bo cong mềm mại đường đồ thị (Spline) màu Neon Cyan rực rỡ
         fig.update_traces(
             line=dict(color='#00FFCC', width=3.5, shape='spline'),
             mode='lines',
             hovertemplate="<b>Thời gian:</b> %{x|%m/%Y}<br><b>Giá trị:</b> %{y:.2f}<extra></extra>"
         )
         
-        # Thêm các nút lọc nhanh thời gian tiện lợi
+        # Thêm các nút lọc nhanh khoảng thời gian
         fig.update_xaxes(
             title="",
             gridcolor="rgba(255, 255, 255, 0.05)",
@@ -202,24 +202,22 @@ if df is not None:
         
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # Bảng dữ liệu định dạng màu nhiệt độ (Gradient) chuyên nghiệp
+        # Bảng dữ liệu định dạng nhiệt độ chuyển sắc (Gradient Heatmap)
         with st.expander("🔍 Bảng số liệu vĩ mô chi tiết (Gradient Heatmap)"):
-            
-            # Làm đẹp bảng bằng Pandas Styler (Chuyển đổi định dạng ngày và màu sắc ô)
             styled_df = df_filtered.copy()
             styled_df['Ngay'] = styled_df['Ngay'].dt.strftime('%Y-%m-%d')
             
-            # Áp dụng dải màu chuyển sắc sang trọng từ lục sang đỏ dựa trên giá trị chỉ số
+            # Tô dải màu coolwarm (Từ xanh lục mát mẻ sang đỏ ấm dần)
             formatted_table = styled_df.style.format({
                 data_column: "{:.2f}"
             }).background_gradient(
                 subset=[data_column], 
-                cmap="coolwarm"  # Đỏ cho giá trị cao, Xanh cho giá trị thấp
+                cmap="coolwarm"
             )
             
             st.dataframe(formatted_table, use_container_width=True, height=250)
             
-            # Tích hợp nút tải nhanh CSV ngay dưới bảng
+            # Xuất dữ liệu tải xuống nhanh
             csv_data = df_filtered.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Tải xuống dữ liệu sạch (.CSV)",
@@ -228,30 +226,34 @@ if df is not None:
                 mime="text/csv"
             )
 
-    # --- CỘT PHẢI: CHATBOT AI KHUNG KÍNH MỜ ---
+    # --- CỘT PHẢI: KHUNG CHAT AI CÓ THANH CUỘN CỐ ĐỊNH ---
     with col2:
         st.markdown("### 🤖 Trợ lý AI Phân tích")
         
+        # Tạo lịch sử hội thoại
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        # Khung cuộn cố định được bo viền cực đẹp
+        # Khung chat cuộn cố định có chiều cao 450px để kiểm soát giao diện
         chat_container = st.container(height=450)
 
+        # Đọc lại lịch sử tin nhắn trong khung cuộn
         with chat_container:
             for message in st.session_state.messages:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
+        # Khung nhập câu hỏi ở dưới cùng
         if prompt := st.chat_input("Hỏi tôi về xu hướng lạm phát hoặc phân tích số liệu..."):
             
+            # Hiện câu hỏi ngay lập tức vào khung cuộn
             with chat_container:
                 with st.chat_message("user"):
                     st.markdown(prompt)
             
             st.session_state.messages.append({"role": "user", "content": prompt})
 
-            # RAG Engine: Lấy dữ liệu 10 năm để gửi cho AI (đầy đủ thông tin hơn bản cũ)
+            # RAG Engine: Trích xuất toàn bộ dữ liệu 10 năm chuyển thành ngữ cảnh
             latest_data_summary = df_filtered.to_string(index=False)
 
             system_instruction = f"""
@@ -269,12 +271,13 @@ if df is not None:
             clean_url = NGROK_STATIC_URL.strip().rstrip('/')
             
             try:
+                # Kết nối trực tiếp đến LM Studio thông qua API bảo mật từ Ngrok cố định
                 client = OpenAI(
                     base_url=f"{clean_url}/v1",
                     api_key="lm-studio"
                 )
 
-                # Hiệu ứng đổi chữ trạng thái cực ngầu
+                # HIỆU ỨNG CHUYỂN ĐỔI CHỮ LOADING ĐỘNG
                 with chat_container:
                     status_placeholder = st.empty()
                     
@@ -284,6 +287,7 @@ if df is not None:
                         time.sleep(0.5)
                         status.update(label="✍️ Đang tổng hợp báo cáo kinh tế vĩ mô...", state="running")
                         
+                        # Gọi API xử lý dữ liệu từ mô hình local
                         response = client.chat.completions.create(
                             model="local-model",
                             messages=[
@@ -296,8 +300,10 @@ if df is not None:
                         ai_response = response.choices[0].message.content
                         status.update(label="Kết xuất hoàn tất!", state="complete")
                     
+                    # Ẩn hoàn toàn thanh trạng thái sau khi đã nhận câu trả lời để giao diện sạch sẽ
                     status_placeholder.empty()
 
+                # Đẩy câu trả lời của AI vào khung cuộn, tự động trượt các tin nhắn cũ lên
                 with chat_container:
                     with st.chat_message("assistant"):
                         st.markdown(ai_response)
@@ -305,6 +311,7 @@ if df is not None:
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
                 
             except Exception as e:
+                # Hiển thị thông báo khi không kết nối được máy chủ
                 st.error(f"""
                 **⚠️ HỆ THỐNG AI ĐANG NGOẠI TUYẾN (OFFLINE)** 
                 
