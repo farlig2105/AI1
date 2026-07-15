@@ -35,7 +35,7 @@ ngrok_input = st.sidebar.text_input(
     help="Dán URL sinh ra từ lệnh ngrok trên máy của bạn vào đây."
 ).strip()
 
-# 🎯 TỰ ĐỘNG SỬA ĐƯỜNG DẪN THÔNG MINH
+# TỰ ĐỘNG SỬA ĐƯỜNG DẪN THÔNG MINH
 base_url = ngrok_input
 
 # Nếu người dùng quên nhập "https://", hệ thống sẽ tự điền vào
@@ -89,7 +89,7 @@ if df is not None:
     with col2:
         st.subheader("🤖 Trợ lý AI Phân tích số liệu")
         
-        # 🎯 SỬA LỖI KIỂM TRA TÊN MIỀN: Chấp nhận cả ngrok-free.app và ngrok-free.dev
+        # Chấp nhận cả ngrok-free.app và ngrok-free.dev
         is_valid_ngrok = "ngrok-free" in ngrok_input
         
         if not is_valid_ngrok:
@@ -97,8 +97,12 @@ if df is not None:
         else:
             st.success(f"🔌 Đang kết nối trực tiếp với GPU ở nhà qua: {base_url}")
 
-            # Khởi tạo OpenAI Client trỏ về đường hầm Ngrok của bạn
-            client = OpenAI(base_url=base_url, api_key="lm-studio")
+            # 🎯 CẢI TIẾN: Thêm default_headers để vượt qua trang chặn của Ngrok miễn phí
+            client = OpenAI(
+                base_url=base_url, 
+                api_key="lm-studio",
+                default_headers={"ngrok-skip-browser-warning": "true"}
+            )
 
             # Khởi tạo lịch sử chat
             if "messages" not in st.session_state:
@@ -147,9 +151,12 @@ if df is not None:
                     st.session_state.messages.append({"role": "assistant", "content": ai_response})
                     
                 except Exception as e:
-                    st.error(
-                        "⚠️ Lỗi kết nối! Hãy chắc chắn rằng:\n"
-                        "1. LM Studio của bạn đã bấm 'Start Server' (cổng 1235).\n"
-                        "2. Ngrok đang chạy ổn định ở cổng 1235.\n"
-                        "3. Đường dẫn trong Sidebar khớp chính xác với Ngrok cung cấp."
+                    # 🎯 CẢI TIẾN: In trực tiếp chi tiết lỗi của hệ thống ra màn hình để chẩn đoán
+                    st.error(f"⚠️ LỖI KẾT NỐI CHI TIẾT: {e}")
+                    
+                    st.info(
+                        "💡 **Các bước tự kiểm tra nhanh:**\n"
+                        "1. **Trên phần mềm LM Studio:** Bạn đã chọn một Model AI ở thanh menu trên cùng và bấm tải (load) nó chưa?\n"
+                        "2. **Kiểm tra cổng:** LM Studio đã chuyển thành cổng `1235` và đang hiện nút 'Stop Server' (màu đỏ - tức là server đang chạy) chưa?\n"
+                        "3. **Kiểm tra màn hình Ngrok:** Khi bạn bấm gửi tin nhắn trên Web, màn hình đen của Ngrok ở máy tính của bạn có nhảy thêm dòng chữ nào báo nhận tín hiệu không?"
                     )
