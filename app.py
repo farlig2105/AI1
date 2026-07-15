@@ -113,7 +113,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# 🎯 BỘ LỌC THỜI GIAN TOÀN HỆ THỐNG (SaaS Pills) - Đồng bộ hoàn hảo cho cả KPI và biểu đồ
+# BỘ LỌC THỜI GIAN TOÀN HỆ THỐNG (SaaS Pills)
 timeframe = st.pills(
     "Phạm vi phân tích toàn hệ thống:",
     options=["1 năm qua", "5 năm qua", "Tất cả 10 năm"],
@@ -174,7 +174,7 @@ if df is not None:
         df_active = df_filtered.copy()
         label_suffix = "10 Năm Qua"
 
-    # 3. Gom nhóm tính trung bình từng năm dựa trên khoảng thời gian đang kích hoạt
+    # 3. Gom nhóm tính trung bình từng năm
     df_annual = df_active.copy()
     df_annual['Năm'] = df_annual['Ngay'].dt.year
     df_annual_grouped = df_annual.groupby('Năm')[data_column].mean().reset_index()
@@ -230,7 +230,7 @@ if df is not None:
     with col1:
         st.markdown(f"### 📊 Phân tích xu hướng {data_column}")
         
-        # Vẽ biểu đồ đường trơn (Spline) mượt mà với dữ liệu đã được Streamlit lọc sẵn
+        # Vẽ biểu đồ đường trơn (Spline) mượt mà
         fig = px.line(
             df_active, 
             x='Ngay', 
@@ -244,7 +244,6 @@ if df is not None:
             hovertemplate="<b>Thời gian:</b> %{x|%m/%Y}<br><b>Giá trị:</b> %{y:.2f}<extra></extra>"
         )
         
-        # Bỏ rangeselector tích hợp sẵn của Plotly để triệt tiêu lỗi đồng bộ hóa trục
         fig.update_xaxes(
             title="",
             gridcolor="rgba(255, 255, 255, 0.03)"
@@ -264,7 +263,7 @@ if df is not None:
         
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # Bảng dữ liệu đại diện năm (gọn gàng, vừa vặn khung hình)
+        # Bảng dữ liệu đại diện năm (Đã ẩn cột số thứ tự bằng hide_index=True)
         st.markdown(f"#### 🔍 Giá trị đại diện {data_column} trung bình theo từng năm")
         
         formatted_annual_table = df_annual_grouped.style.format({
@@ -272,10 +271,11 @@ if df is not None:
             f'Chỉ số {data_column} Trung Bình': '{:.2f}'
         }).background_gradient(
             subset=[f'Chỉ số {data_column} Trung Bình'], 
-            cmap="viridis" # Dải chuyển sắc lục-lam-vàng siêu hiện đại trên nền tối
+            cmap="viridis"
         )
         
-        st.dataframe(formatted_annual_table, use_container_width=True)
+        # 🎯 SỬA ĐỔI CHÍNH Ở ĐÂY: Thêm hide_index=True để bỏ cột số thứ tự
+        st.dataframe(formatted_annual_table, use_container_width=True, hide_index=True)
         
         # Nút tải dữ liệu nhanh
         csv_annual_data = df_annual_grouped.to_csv(index=False).encode('utf-8')
@@ -308,7 +308,7 @@ if df is not None:
             
             st.session_state.messages.append({"role": "user", "content": prompt})
 
-            # Gửi cả số liệu chi tiết tháng và bảng trung bình năm để AI phản hồi chuẩn xác nhất
+            # Gửi cả số liệu chi tiết tháng và bảng trung bình năm
             recent_monthly_summary = df_active.tail(12).to_string(index=False)
             annual_summary = df_annual_grouped.to_string(index=False)
 
