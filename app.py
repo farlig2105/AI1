@@ -64,7 +64,7 @@ st.markdown("---")
 # ==========================================
 # 2. ĐƯỜNG DẪN NGROK CỐ ĐỊNH 
 # ==========================================
-NGROK_STATIC_URL = "https://TÊN_MIỀN_CỦA_BẠN.ngrok-free.app"
+NGROK_STATIC_URL = "decode-thigh-dinginess.ngrok-free.dev"
 
 # Thiết kế Sidebar tinh gọn, chuyên nghiệp
 st.sidebar.markdown("### 🖥️ MÁY CHỦ HỆ THỐNG")
