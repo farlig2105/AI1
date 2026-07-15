@@ -97,7 +97,6 @@ if df is not None:
             # Chuyển đổi lịch sử chat sang định dạng chuẩn của Google Gemini
             contents = []
             for msg in st.session_state.messages:
-                # Gemini yêu cầu vai trò của trợ lý phải là "model" thay vì "assistant"
                 role = "user" if msg["role"] == "user" else "model"
                 contents.append({
                     "role": role,
@@ -119,20 +118,24 @@ if df is not None:
                 "Content-Type": "application/json"
             }
 
-            # Gọi trực tiếp REST API v1beta chính thức của Google Gemini
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-
             try:
                 with st.spinner("AI đang phân tích số liệu trên Cloud..."):
+                    # 🎯 BƯỚC SỬA LỖI QUAN TRỌNG: Thử nghiệm với đường dẫn v1 (Stable) chính thức trước
+                    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
                     response = requests.post(url, json=payload, headers=headers)
                     response_json = response.json()
 
-                    # Kiểm tra xem Google có trả về lỗi cụ thể nào không
+                    # 🔄 NẾU THẤT BẠI (Lỗi 404): Tự động chuyển hướng sang v1beta làm dự phòng
+                    if "error" in response_json and response_json["error"].get("code") == 404:
+                        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+                        response = requests.post(url, json=payload, headers=headers)
+                        response_json = response.json()
+
+                    # Kiểm tra kết quả phản hồi cuối cùng
                     if "error" in response_json:
                         error_msg = response_json["error"].get("message", "Lỗi không xác định")
                         st.error(f"⚠️ Lỗi từ Google API: {error_msg}")
                     else:
-                        # Trích xuất văn bản phản hồi từ cấu trúc JSON của Gemini
                         ai_response = response_json["candidates"][0]["content"]["parts"][0]["text"]
                         
                         with st.chat_message("assistant"):
