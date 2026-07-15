@@ -387,3 +387,30 @@ def fetch_world_bank_data(country_iso3):
     except Exception as e:
         return None
     return None
+st.markdown("---")
+st.subheader("🌐 Đối chiếu Lạm phát Quốc tế (World Bank API)")
+
+# Dropdown chọn quốc gia để so sánh
+selected_country = st.selectbox("Chọn quốc gia đối chiếu:", ["USA", "SGP", "CHN", "THA"])
+
+# Gọi và hiển thị dữ liệu
+wb_data = fetch_world_bank_data(selected_country)
+if wb_data:
+    st.write(f"Dữ liệu lạm phát từ World Bank cho: {selected_country}")
+    # Xử lý json và hiển thị bảng/biểu đồ ở đây
+    # ví dụ: st.dataframe(wb_data['data'])
+else:
+    st.warning("Hiện tại chưa tải được dữ liệu từ World Bank.")
+    # Giả sử 'wb_data_text' là chuỗi văn bản đã được chuyển đổi từ json ở Bước 2
+system_instruction = f"""
+Bạn là chuyên gia phân tích kinh tế vĩ mô. 
+Hãy phân tích dữ liệu dựa trên nguồn dữ liệu mới từ World Bank:
+{str(wb_data)}
+
+Yêu cầu:
+1. So sánh xu hướng lạm phát giữa dữ liệu nội địa và quốc tế.
+2. Sử dụng ngôn ngữ kinh tế học chuẩn xác (lạm phát cầu kéo, chi phí đẩy...).
+3. Tuân thủ quy trình phân tích: Đánh giá nền tảng, chi phí đẩy, cầu kéo, và yếu tố mùa vụ.
+"""
+
+# Gọi hàm query_lm_studio với instruction đã cập nhật
