@@ -15,14 +15,15 @@ st.title("📈 Dashboard Kinh Tế Vĩ Mô & Trợ Lý AI")
 st.markdown("---")
 
 # ==========================================
-# 2. CẤU HÌNH SIDEBAR (ĐƯỜNG DẪN NGROK)
+# 2. ĐƯỜNG DẪN NGROK CỐ ĐỊNH (THAY THẾ TẠI ĐÂY)
 # ==========================================
-st.sidebar.header("⚙️ Cấu hình Kết nối AI")
-ngrok_url = st.sidebar.text_input(
-    "Đường dẫn Ngrok (URL)", 
-    placeholder="https://xxx-xxx.ngrok-free.dev",
-    help="Nhập địa chỉ ngrok public trỏ đến LM Studio trên máy tính của bạn."
-)
+# Hãy dán đường dẫn cố định bạn vừa lấy ở Bước 1 vào đây:
+NGROK_STATIC_URL = "https://TÊN_MIỀN_CỦA_BẠN.ngrok-free.app"
+
+# Hiển thị trạng thái kết nối ở Sidebar cho chuyên nghiệp
+st.sidebar.header("⚙️ Trạng thái Hệ thống")
+st.sidebar.success("🟢 Đã cấu hình máy chủ AI cố định")
+st.sidebar.caption(f"Endpoint: {NGROK_STATIC_URL}")
 
 # ==========================================
 # 3. ĐỌC DỮ LIỆU TỪ FILE CSV
@@ -63,41 +64,34 @@ if df is not None:
         with st.expander("🔍 Xem bảng dữ liệu chi tiết"):
             st.dataframe(df, use_container_width=True)
 
-    # --- CỘT PHẢI: CHATBOT AI CHẠY LOCAL (CÓ KHUNG TRƯỢT) ---
+    # --- CỘT PHẢI: CHATBOT AI CÓ KHUNG CUỘN TRƯỢT ---
     with col2:
         st.subheader("🤖 Trợ lý AI Phân tích số liệu")
         
-        # Khởi tạo lịch sử chat trong session_state
+        # Khởi tạo lịch sử chat
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        # 🎯 TẠO KHUNG CUỘN CỐ ĐỊNH (Chiều cao 500px)
-        # Khung này giúp tin nhắn tự trượt lên trên và có thanh cuộn để xem lại
+        # Khung cuộn cố định (Chiều cao 500px)
         chat_container = st.container(height=500)
 
-        # Hiển thị lại các câu trả lời cũ BÊN TRONG khung cuộn
+        # Hiển thị lại các câu trả lời cũ
         with chat_container:
             for message in st.session_state.messages:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
-        # Khung nhập câu hỏi (nằm bên dưới khung cuộn)
+        # Khung chat chính (Bên dưới khung cuộn)
         if prompt := st.chat_input("Hỏi tôi về xu hướng lạm phát hoặc phân tích số liệu..."):
             
-            # 1. Hiển thị ngay câu hỏi của user vào khung cuộn
+            # Hiển thị ngay câu hỏi của user vào khung cuộn
             with chat_container:
                 with st.chat_message("user"):
                     st.markdown(prompt)
             
-            # Lưu vào lịch sử chat
             st.session_state.messages.append({"role": "user", "content": prompt})
 
-            # Kiểm tra xem đã nhập đường dẫn Ngrok chưa
-            if not ngrok_url:
-                st.warning("⚠️ Vui lòng cấu hình 'Đường dẫn Ngrok' ở Sidebar bên trái!")
-                st.stop()
-
-            # RAG Engine: Trích xuất 15 dòng dữ liệu mới nhất để AI tham chiếu
+            # RAG Engine: Trích xuất 15 dòng dữ liệu mới nhất
             latest_data_summary = df.tail(15).to_string(index=False)
 
             system_instruction = f"""
@@ -112,17 +106,16 @@ if df is not None:
             3. Tuyệt đối không tự bịa ra các con số không có trong bảng dữ liệu trên.
             """
 
-            # Chuẩn hóa đường dẫn URL Ngrok
-            clean_url = ngrok_url.strip().rstrip('/')
+            # Chuẩn hóa url cố định
+            clean_url = NGROK_STATIC_URL.strip().rstrip('/')
             
             try:
-                # Khởi tạo kết nối tới LM Studio qua Ngrok
+                # Khởi tạo kết nối tới LM Studio qua link Ngrok cố định
                 client = OpenAI(
                     base_url=f"{clean_url}/v1",
                     api_key="lm-studio"
                 )
 
-                # Gọi AI và hiển thị hiệu ứng load ngầm
                 with st.spinner("Đang gửi truy vấn đến LM Studio..."):
                     response = client.chat.completions.create(
                         model="local-model",
@@ -135,28 +128,25 @@ if df is not None:
                     
                     ai_response = response.choices[0].message.content
                 
-                # 2. Hiển thị câu trả lời của AI BÊN TRONG khung cuộn (Sẽ tự động đẩy các tin nhắn cũ trượt lên)
+                # Hiển thị câu trả lời mới vào khung cuộn
                 with chat_container:
                     with st.chat_message("assistant"):
                         st.markdown(ai_response)
                 
-                # Lưu câu trả lời của AI vào lịch sử chat
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
                 
             except Exception as e:
-                # Hiển thị thông báo lỗi chi tiết
+                # Hiển thị thông báo lỗi thân thiện nếu bạn chưa bật LM Studio hoặc chưa chạy lệnh Ngrok
                 st.error(f"""
-                **⚠️ LỖI KẾT NỐI CHI TIẾT:** 
+                **⚠️ KHÔNG THỂ KẾT NỐI ĐẾN MÁY CHỦ AI** 
                 
-                The endpoint `{clean_url}` is offline hoặc không thể phản hồi.
-                
-                `ERR_NGROK_3200` / ConnectionError
+                Hệ thống AI đang ngoại tuyến (Offline). 
                 """)
                 
-                st.info("""
-                **💡 Các bước tự kiểm tra nhanh:**
+                st.info(f"""
+                **💡 Cách kích hoạt nhanh máy chủ:**
                 
-                1. **Trên phần mềm LM Studio:** Bạn đã chọn một Model AI ở thanh menu trên cùng và bấm tải (load) nó chưa?
-                2. **Kiểm tra cổng:** LM Studio đã chuyển thành cổng `1235` (hoặc cổng bạn đang cấu hình) và đang hiện nút màu đỏ **'Stop Server'** chưa?
-                3. **Kiểm tra màn hình Ngrok:** Màn hình CMD của Ngrok có đang chạy và hiển thị đúng đường dẫn không?
+                1. Mở phần mềm **LM Studio** trên máy tính của bạn, chọn model và đảm bảo Server đã được bật (cổng `1235`).
+                2. Mở CMD trên máy tính và chạy lệnh:
+                   `ngrok http 1235 --domain={clean_url.replace("https://", "")}`
                 """)
