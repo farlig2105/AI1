@@ -365,3 +365,25 @@ if df is not None:
                 
                 Vui lòng khởi động máy chủ LM Studio và chạy lệnh Ngrok trên máy tính của bạn.
                 """)
+import requests
+import streamlit as st
+
+@st.cache_data(ttl=3600) # Lưu cache dữ liệu 1 tiếng để tăng tốc
+def fetch_world_bank_data(country_iso3):
+    # Endpoint theo tài liệu API World Bank
+    api_url = "https://data360api.worldbank.org/v1/data360/data"
+    
+    # Tham số: indicator 336 thường là lạm phát (Inflation, consumer prices)
+    params = {
+        "indicators": "336", 
+        "countries": country_iso3,
+        "timeperiods": "2016,2017,2018,2019,2020,2021,2022,2023,2024"
+    }
+    
+    try:
+        response = requests.get(api_url, params=params)
+        if response.status_code == 200:
+            return response.json() # Trả về dữ liệu thô để xử lý
+    except Exception as e:
+        return None
+    return None
