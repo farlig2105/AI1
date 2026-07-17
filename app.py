@@ -307,7 +307,7 @@ if df is not None:
 
             # SỬA ĐỔI ĐOẠN SYSTEM_INSTRUCTION NÀY ĐỂ AI CHỈ TRẢ LỜI ĐÚNG TRỌNG TÂM
             system_instruction = f"""
-            Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo, tốt nghiệp Học viện Tài chính.
+            Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo.
             Dưới đây là dữ liệu vĩ mô thực tế để hỗ trợ phân tích:
             
             1. CHỈ SỐ TRUNG BÌNH THEO NĂM:
