@@ -174,13 +174,17 @@ if df is not None:
         df_active = df_filtered.copy()
         label_suffix = "10 Năm Qua"
 
-    # 3. Gom nhóm tính trung bình từng năm
+    # 3. Gom nhóm tính trung bình từng năm và sắp xếp năm mới nhất lên trên cùng
     df_annual = df_active.copy()
     df_annual['Năm'] = df_annual['Ngay'].dt.year
     df_annual_grouped = df_annual.groupby('Năm')[data_column].mean().reset_index()
     df_annual_grouped.columns = ['Năm', f'Chỉ số {data_column} Trung Bình']
+    
+    # Thực hiện sắp xếp giảm dần theo cột 'Năm' (Mới nhất ở trên cùng)
+    df_annual_grouped = df_annual_grouped.sort_values(by='Năm', ascending=False)
 
     # 4. Tính toán các chỉ số KPI động theo khoảng thời gian đã chọn
+    # Lưu ý: Lấy dòng cuối thực tế của chuỗi dữ liệu thời gian (vẫn dùng df_active để bảo toàn trật tự thời gian)
     latest_row = df_active.iloc[-1]
     prev_row = df_active.iloc[-2] if len(df_active) > 1 else latest_row
     current_val = latest_row[data_column]
@@ -230,7 +234,7 @@ if df is not None:
     with col1:
         st.markdown(f"### 📊 Phân tích xu hướng {data_column}")
         
-        # Vẽ biểu đồ đường trơn (Spline) mượt mà
+        # Vẽ biểu đồ đường trơn (Spline) mượt mà (vẫn đi từ trái qua phải theo trật tự thời gian df_active)
         fig = px.line(
             df_active, 
             x='Ngay', 
@@ -263,7 +267,7 @@ if df is not None:
         
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # Bảng dữ liệu đại diện năm (Đã ẩn cột số thứ tự bằng hide_index=True)
+        # Bảng dữ liệu đại diện năm (Đã được đảo ngược năm mới nhất lên trên cùng)
         st.markdown(f"#### 🔍 Giá trị đại diện {data_column} trung bình theo từng năm")
         
         formatted_annual_table = df_annual_grouped.style.format({
@@ -298,7 +302,7 @@ if df is not None:
             
             st.session_state.messages.append({"role": "user", "content": prompt})
 
-            # Gửi cả số liệu chi tiết tháng và bảng trung bình năm
+            # Gửi cả số liệu chi tiết tháng và bảng trung bình năm cho LLM
             recent_monthly_summary = df_active.tail(12).to_string(index=False)
             annual_summary = df_annual_grouped.to_string(index=False)
 
