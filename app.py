@@ -184,7 +184,6 @@ if df is not None:
     df_annual_grouped = df_annual_grouped.sort_values(by='Năm', ascending=False)
 
     # 4. Tính toán các chỉ số KPI động theo khoảng thời gian đã chọn
-    # Lưu ý: Lấy dòng cuối thực tế của chuỗi dữ liệu thời gian (vẫn dùng df_active để bảo toàn trật tự thời gian)
     latest_row = df_active.iloc[-1]
     prev_row = df_active.iloc[-2] if len(df_active) > 1 else latest_row
     current_val = latest_row[data_column]
@@ -234,7 +233,7 @@ if df is not None:
     with col1:
         st.markdown(f"### 📊 Phân tích xu hướng {data_column}")
         
-        # Vẽ biểu đồ đường trơn (Spline) mượt mà (vẫn đi từ trái qua phải theo trật tự thời gian df_active)
+        # Vẽ biểu đồ đường trơn (Spline) mượt mà
         fig = px.line(
             df_active, 
             x='Ngay', 
@@ -306,6 +305,7 @@ if df is not None:
             recent_monthly_summary = df_active.tail(12).to_string(index=False)
             annual_summary = df_annual_grouped.to_string(index=False)
 
+            # SỬA ĐỔI ĐOẠN SYSTEM_INSTRUCTION NÀY ĐỂ AI CHỈ TRẢ LỜI ĐÚNG TRỌNG TÂM
             system_instruction = f"""
             Bạn là một nhà phân tích kinh tế vĩ mô sắc sảo, tốt nghiệp Học viện Tài chính.
             Dưới đây là dữ liệu vĩ mô thực tế để hỗ trợ phân tích:
@@ -320,10 +320,11 @@ if df is not None:
             {recent_monthly_summary}
             ---
             
-            Yêu cầu:
-            1. Phân tích xu hướng dựa trên dữ liệu thực tế được cung cấp.
-            2. Trả lời ngắn gọn, trực diện, lập luận logic bằng Tiếng Việt.
-            3. Tuyệt đối không tự bịa ra các con số không tồn tại trong hai bảng dữ liệu trên.
+            Yêu cầu bắt buộc về phản hồi (Tuyệt đối tuân thủ):
+            1. ĐỌC THẬT KỸ CÂU HỎI của người dùng và CHỈ TRẢ LỜI ĐÚNG TRỌNG TÂM CÂU HỎI. Không viết lan man, không phân tích hay diễn giải thêm bất kỳ thông tin bên lề nào nằm ngoài câu hỏi.
+            2. Câu trả lời phải cực kỳ ngắn gọn, sắc bén và đi thẳng trực tiếp vào vấn đề (Direct-to-the-point), KHÔNG THỪA KHÔNG THIẾU.
+            3. Tuyệt đối KHÔNG được thêm các câu chào hỏi xã giao hoặc các câu dẫn, câu kết thừa thãi (Ví dụ: KHÔNG viết "Chào bạn", "Dưới đây là câu trả lời...", "Hy vọng thông tin này giúp ích cho bạn...", "Chúc bạn học tập tốt..."). Đi thẳng vào nội dung cốt lõi của câu trả lời ngay từ dòng đầu tiên.
+            4. Chỉ lập luận logic bằng Tiếng Việt dựa trên hai bảng dữ liệu thực tế được cung cấp ở trên. Tuyệt đối không tự bịa ra các con số hoặc giả định không tồn tại trong dữ liệu.
             """
 
             clean_url = NGROK_STATIC_URL.strip().rstrip('/')
@@ -349,7 +350,7 @@ if df is not None:
                                 {"role": "system", "content": system_instruction},
                                 *st.session_state.messages
                             ],
-                            temperature=0.2
+                            temperature=0.1  # Hạ thấp nhiệt độ xuống 0.1 để AI trả lời có tính kỷ luật cao nhất, không sáng tạo tùy tiện
                         )
                         
                         ai_response = response.choices[0].message.content
