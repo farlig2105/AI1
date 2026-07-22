@@ -307,12 +307,13 @@ if df is not None:
             with sc2:
                 fx_sim = st.slider("Tỷ giá USD/VND (%)", -5, 10, 2)
                 
-            sim_impact = (oil_sim * 0.04) + (fx_sim * 0.11)
+            oil_impact = oil_sim * 0.04
+            fx_impact = fx_sim * 0.11
+            sim_impact = oil_impact + fx_impact
             projected_cpi = current_val * (1 + sim_impact/100)
             
-            # ĐÃ ĐƯỢC SỬA: Thay $\rightarrow$ bằng mũi tên unicode → thuần túy
             st.markdown(f"""
-                <div class="glass-card" style="margin-top:10px;">
+                <div class="glass-card" style="margin-top:10px; margin-bottom:15px;">
                     <div style="font-size:13px; color:#8F9CAE;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
                     <div style="font-size:24px; font-weight:700; color:{'#FF4B4B' if sim_impact > 0 else '#00FFCC'};">
                         {sim_impact:+.2f}% &rarr; ~{projected_cpi:,.2f} điểm
@@ -320,6 +321,35 @@ if df is not None:
                     <small style="color:#64748B;">Mô hình ước lượng dựa trên trọng số biến động năng lượng & hàng hóa nhập khẩu.</small>
                 </div>
             """, unsafe_allow_html=True)
+
+            # BẢNG GIẢI THÍCH CHI TIẾT TÁC ĐỘNG
+            st.markdown("##### 📋 Phân tích Cơ chế Tác động Chi tiết")
+            
+            explanation_data = {
+                "Biến số Vĩ mô": ["🛢️ Giá Dầu WTI", "💵 Tỷ giá USD/VND", "📊 Tổng hợp Stress-Test"],
+                "Mức điều chỉnh": [f"{oil_sim:+d}%", f"{fx_sim:+d}%", "—"],
+                "Trọng số": ["0.04", "0.11", "—"],
+                "Đóng góp CPI": [f"{oil_impact:+.2f}%", f"{fx_impact:+.2f}%", f"{sim_impact:+.2f}%"],
+                "Cơ chế truyền dẫn & Tác động thực tế": [
+                    "Ảnh hưởng trực tiếp đến nhóm Giao thông (xăng dầu), lan tỏa sang chi phí vận tải, logistics và giá thành sản xuất hàng hóa.",
+                    "Tạo áp lực 'Nhập khẩu lạm phát' (Imported Inflation), làm tăng chi phí nguyên vật liệu, máy móc & hàng hóa đầu vào.",
+                    f"Tổng hợp các biến số khiến chỉ số {data_column} dự báo {'tăng' if sim_impact > 0 else 'giảm'} {abs(sim_impact):.2f}%, đạt mức ~{projected_cpi:,.2f} điểm."
+                ]
+            }
+            df_explain = pd.DataFrame(explanation_data)
+            
+            st.dataframe(
+                df_explain, 
+                use_container_width=True, 
+                hide_index=True,
+                column_config={
+                    "Biến số Vĩ mô": st.column_config.TextColumn(width="medium"),
+                    "Mức điều chỉnh": st.column_config.TextColumn(width="small"),
+                    "Trọng số": st.column_config.TextColumn(width="small"),
+                    "Đóng góp CPI": st.column_config.TextColumn(width="small"),
+                    "Cơ chế truyền dẫn & Tác động thực tế": st.column_config.TextColumn(width="large"),
+                }
+            )
 
         with tab_insights:
             st.markdown("##### 📌 Tóm tắt Điểm nóng Vĩ mô")
