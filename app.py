@@ -6,7 +6,7 @@ import time
 from openai import OpenAI
 
 # ==========================================
-# 1. CẤU HÌNH GIAO DIỆN WEB & CSS SIÊU PREMIUM (1000x GLASSMORPHISM)
+# 1. CẤU HÌNH GIAO DIỆN WEB & CSS SIÊU PREMIUM
 # ==========================================
 st.set_page_config(
     page_title="Hệ thống Dữ liệu Vĩ mô & AI",
@@ -28,7 +28,6 @@ st.markdown("""
             background: radial-gradient(circle at 50% 0%, #1a2035 0%, #0a0c10 100%) !important;
         }
         
-        /* Glassmorphism Card hiệu ứng phát sáng nhẹ */
         .glass-card {
             background: rgba(255, 255, 255, 0.025);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -39,7 +38,6 @@ st.markdown("""
             margin-bottom: 15px;
         }
         
-        /* KPI Metric Cards */
         [data-testid="stMetric"] {
             background: rgba(255, 255, 255, 0.02) !important;
             border: 1px solid rgba(0, 255, 204, 0.15) !important;
@@ -66,7 +64,6 @@ st.markdown("""
             font-weight: 600 !important;
         }
         
-        /* Định dạng Tabs hiện đại */
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px;
             background-color: rgba(255, 255, 255, 0.03);
@@ -88,7 +85,6 @@ st.markdown("""
             border: 1px solid rgba(0, 255, 204, 0.3) !important;
         }
         
-        /* Styling Pills */
         div[data-testid="stPills"] button {
             background-color: rgba(255, 255, 255, 0.03) !important;
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -102,7 +98,6 @@ st.markdown("""
             color: #00FFCC !important;
         }
 
-        /* AI Welcome Card khi chưa chat */
         .ai-welcome {
             border: 1px dashed rgba(0, 255, 204, 0.3);
             background: rgba(0, 255, 204, 0.02);
@@ -112,13 +107,12 @@ st.markdown("""
             margin-top: 10px;
         }
         
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(0, 255, 204, 0.2); border-radius: 4px; }
     </style>
 """, unsafe_allow_html=True)
 
-# Header chính kèm Badge Trạng thái
+# Header chính
 h_col1, h_col2 = st.columns([3, 1])
 with h_col1:
     st.markdown("""
@@ -140,7 +134,7 @@ with h_col2:
         </div>
     """, unsafe_allow_html=True)
 
-# BỘ LỌC THỜI GIAN TOÀN HỆ THỐNG
+# BỘ LỌC THỜI GIAN
 timeframe = st.pills(
     "Phạm vi phân tích:",
     options=["1 năm qua", "5 năm qua", "Tất cả 10 năm"],
@@ -166,7 +160,6 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-# Nút dọn dẹp bộ nhớ chat trong Sidebar
 if st.sidebar.button("🧹 Xóa lịch sử hội thoại AI", use_container_width=True):
     st.session_state.messages = []
     st.rerun()
@@ -175,7 +168,7 @@ st.sidebar.markdown("---")
 st.sidebar.caption("Phát triển bởi Nhóm nghiên cứu Học viện Tài chính.")
 
 # ==========================================
-# 3. ĐỌC & XỬ LÝ DỮ LIỆU CSV
+# 3. ĐỌC & XỬ LÝ DỮ LIỆU
 # ==========================================
 @st.cache_data
 def load_data():
@@ -204,17 +197,14 @@ if df is not None:
         df_active = df_filtered.copy()
         label_suffix = "10 Năm Qua"
 
-    # Tính SMA 12 tháng (Đường trung bình động)
     df_active['SMA12'] = df_active[data_column].rolling(window=12, min_periods=1).mean()
 
-    # Nhóm theo năm
     df_annual = df_active.copy()
     df_annual['Năm'] = df_annual['Ngay'].dt.year
     df_annual_grouped = df_annual.groupby('Năm')[data_column].mean().reset_index()
     df_annual_grouped.columns = ['Năm', f'Chỉ số {data_column} Trung Bình']
     df_annual_grouped = df_annual_grouped.sort_values(by='Năm', ascending=False)
 
-    # Metric KPI
     latest_row = df_active.iloc[-1]
     prev_row = df_active.iloc[-2] if len(df_active) > 1 else latest_row
     current_val = latest_row[data_column]
@@ -233,7 +223,7 @@ if df is not None:
     min_date = df_active[df_active[data_column] == min_val]['Ngay'].dt.strftime('%m/%Y').values[0]
 
     # ==========================================
-    # 4. KPI CARDS (4 CỘT)
+    # 4. KPI CARDS
     # ==========================================
     kpi1, kpi2, kpi3, kpi4 = st.columns(4, gap="small")
     with kpi1:
@@ -248,11 +238,10 @@ if df is not None:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ==========================================
-    # 5. BỐ TRÍ LAYOUT CÂN BẰNG TỶ LỆ VÀNG
+    # 5. BỐ TRÍ LAYOUT
     # ==========================================
     col1, col2 = st.columns([1.3, 1], gap="large")
 
-    # --- CỘT TRÁI: DẠNG TABS CỰC KỲ GỌN GÀNG ---
     with col1:
         tab_chart, tab_table, tab_sim, tab_insights = st.tabs([
             "📈 Biểu đồ Chu kỳ", 
@@ -265,13 +254,11 @@ if df is not None:
             show_sma = st.checkbox("Hiển thị Đường trung bình động SMA (12 tháng)", value=True)
             
             fig = go.Figure()
-            # Đường CPI gốc
             fig.add_trace(go.Scatter(
                 x=df_active['Ngay'], y=df_active[data_column],
                 mode='lines', name=data_column,
                 line=dict(color='#00FFCC', width=3)
             ))
-            # Đường SMA 12 tháng
             if show_sma:
                 fig.add_trace(go.Scatter(
                     x=df_active['Ngay'], y=df_active['SMA12'],
@@ -301,7 +288,6 @@ if df is not None:
             
             st.dataframe(formatted_annual_table, use_container_width=True, height=280, hide_index=True)
             
-            # Nút Tải Dữ Liệu
             csv_data = df_active.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Tải xuống dữ liệu CSV chi tiết",
@@ -324,11 +310,12 @@ if df is not None:
             sim_impact = (oil_sim * 0.04) + (fx_sim * 0.11)
             projected_cpi = current_val * (1 + sim_impact/100)
             
+            # ĐÃ ĐƯỢC SỬA: Thay $\rightarrow$ bằng mũi tên unicode → thuần túy
             st.markdown(f"""
                 <div class="glass-card" style="margin-top:10px;">
                     <div style="font-size:13px; color:#8F9CAE;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
                     <div style="font-size:24px; font-weight:700; color:{'#FF4B4B' if sim_impact > 0 else '#00FFCC'};">
-                        {sim_impact:+.2f}% $\rightarrow$ ~{projected_cpi:,.2f} điểm
+                        {sim_impact:+.2f}% &rarr; ~{projected_cpi:,.2f} điểm
                     </div>
                     <small style="color:#64748B;">Mô hình ước lượng dựa trên trọng số biến động năng lượng & hàng hóa nhập khẩu.</small>
                 </div>
@@ -342,14 +329,13 @@ if df is not None:
             * **Xu hướng trung hạn:** Đường SMA 12 tháng đang {'đi lên' if df_active['SMA12'].iloc[-1] > df_active['SMA12'].iloc[-6] else 'đi ngang/giảm'}, phản ánh áp lực chu kỳ tích lũy.
             """)
 
-    # --- CỘT PHẢI: AI ASSISTANT CHUYÊN NGHIỆP ---
+    # --- CỘT PHẢI: AI ASSISTANT ---
     with col2:
         st.markdown("### 🤖 Trợ lý AI Phân tích")
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        # Gợi ý câu hỏi nhanh
         st.caption("💡 Câu hỏi gợi ý:")
         q1, q2, q3 = st.columns(3)
         clicked_prompt = None
@@ -360,11 +346,9 @@ if df is not None:
         if q3.button("📜 Tóm tắt 10 năm", use_container_width=True):
             clicked_prompt = "Tóm tắt toàn diện chu kỳ lạm phát trong 10 năm qua."
 
-        # Khung Chat Container
         chat_container = st.container(height=380)
 
         with chat_container:
-            # Nếu chưa có tin nhắn -> Hiển thị Màn hình chào Onboarding đẹp mắt
             if len(st.session_state.messages) == 0:
                 st.markdown("""
                     <div class="ai-welcome">
@@ -446,7 +430,6 @@ if df is not None:
             except Exception as e:
                 st.error("⚠️ Không thể kết nối với AI Engine. Vui lòng kiểm tra lại Ngrok / LM Studio!")
 
-        # Trích dẫn Nguồn
         with st.expander("📚 Nguồn Dữ liệu & Tri thức RAG"):
             st.markdown("""
             * **[GSO]:** Tổng cục Thống kê Việt Nam (*cpi_data.csv*).
