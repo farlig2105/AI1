@@ -238,18 +238,92 @@ if df is not None:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ==========================================
-    # 5. BỐ TRÍ LAYOUT
+    # 5. BỐ TRÍ LAYOUT (TAB LÝ THUYẾT ĐƯỢC ĐẨY LÊN ĐẦU)
     # ==========================================
     col1, col2 = st.columns([1.3, 1], gap="large")
 
     with col1:
-        tab_chart, tab_table, tab_sim, tab_theory, tab_insights = st.tabs([
+        tab_theory, tab_chart, tab_table, tab_sim, tab_insights = st.tabs([
+            "💡 Lý thuyết",
             "📈 Biểu đồ Chu kỳ", 
             "📊 Bảng Niên độ", 
             "🛠️ Mô phỏng Kịch bản",
-            "💡 Lý thuyết & Đa nguồn",
             "📌 Highlight Vĩ mô"
         ])
+
+        # TAB 1: LÝ THUYẾT CHI TIẾT DỄ HỂU CHO CẢ NGƯỜI MỚI
+        with tab_theory:
+            st.markdown("##### 🛒 1. Nhập môn Kinh tế Vĩ mô: CPI & Lạm phát là gì?")
+            st.caption("Hãy bắt đầu bằng một ví dụ thực tế trong cuộc sống hàng ngày:")
+            
+            st.markdown("""
+            <div class="glass-card" style="border-left: 4px solid #00FFCC;">
+                <p style="font-size: 13px; color: #E2E8F0; margin: 0; line-height: 1.6;">
+                    💡 <b>Ví dụ trực quan:</b> Giả sử năm ngoái bạn mang <b>100.000 VNĐ</b> đi chợ mua được <b>2 bát phở</b>. Năm nay, vẫn cầm 100.000 VNĐ đó bạn chỉ mua được <b>1 bát phở và 1 ly trà đá</b>.
+                    <br>&rarr; Đồng tiền của bạn đã bị giảm sức mua. Sự suy giảm sức mua đó chính là <b>Lạm phát</b>, và công cụ để tính toán chính xác mức độ tăng giá phở/trà đá đó là <b>Chỉ số CPI</b>.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            c_th1, c_th2 = st.columns(2)
+            with c_th1:
+                st.markdown("""
+                <div class="glass-card" style="height: 100%;">
+                    <h6 style="color: #00FFCC; margin-top:0; font-size: 14px;">🧺 CPI (Consumer Price Index)</h6>
+                    <span style="background: rgba(0,255,204,0.1); color: #00FFCC; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">THƯỚC ĐO TĨNH</span>
+                    <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
+                        • <b>Tên gọi:</b> Chỉ số Giá tiêu dùng.<br>
+                        • <b>Bản chất:</b> Hãy tưởng tượng Tổng cục Thống kê (GSO) gom khoảng 752 mặt hàng thiết yếu (Gạo, thịt, xăng, điện, học phí, y tế...) vào một <b>"Chiếc Giỏ Hàng Chuẩn"</b>.<br>
+                        • <b>Cách hoạt động:</b> Định kỳ hàng tháng, GSO đi cộng tổng số tiền cần thiết để mua trọn vẹn "Chiếc Giỏ Hàng" này. Sự chênh lệch tổng số tiền so với gốc gọi là Chỉ số CPI.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            with c_th2:
+                st.markdown("""
+                <div class="glass-card" style="height: 100%;">
+                    <h6 style="color: #FF007A; margin-top:0; font-size: 14px;">🎈 Lạm phát (Inflation)</h6>
+                    <span style="background: rgba(255,0,122,0.1); color: #FF007A; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">TỐC ĐỘ TĂNG TRƯỞNG</span>
+                    <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
+                        • <b>Bản chất:</b> Là <b>tốc độ biến động (%)</b> của mặt bằng giá chung theo thời gian.<br>
+                        • <b>Mối đe dọa:</b> Lạm phát nhẹ (2-3%/năm) kích thích sản xuất kinh doanh. Nhưng nếu lạm phát quá cao, lương người lao động không theo kịp giá hàng hóa, gây mất giá đồng tiền.<br>
+                        • <b>Nguyên nhân chính:</b> Do chi phí đầu vào tăng (Dầu khí, tỷ giá) hoặc do lượng tiền bơm ra thị trường vượt quá hàng hóa.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("##### 🔗 2. Mối quan hệ tương tác & Công thức liên kết")
+            
+            st.markdown("""
+            * **CPI là biến đầu vào $\rightarrow$ Lạm phát là kết quả đầu ra:** 
+              CPI đóng vai trò như một "thước đo độ cao". Tỷ lệ Lạm phát chính là "tốc độ mà độ cao đó gia tăng". Lạm phát so với cùng kỳ năm trước (YoY - Year on Year) được tính bằng công thức toán học:
+            """)
+            
+            st.latex(r"\text{Tỷ lệ Lạm phát (YoY)} = \frac{\text{CPI}_{\text{Kỳ này}} - \text{CPI}_{\text{Cùng kỳ năm ngoái}}}{\text{CPI}_{\text{Cùng kỳ năm ngoái}}} \times 100\%")
+
+            st.markdown("""
+            * **Cơ chế tác động 2 chiều:**
+              1. **Chiều thuận (Tác động thực tế):** Khi giá các mặt hàng chiến lược như **Giá Dầu** hoặc **Tỷ giá USD/VND** tăng $\rightarrow$ Chi phí sản xuất & vận chuyển tăng $\rightarrow$ **CPI tăng** $\rightarrow$ **Lạm phát tăng**.
+              2. **Chiều ngược (Vòng xoáy kỳ vọng):** Khi mọi người *nghĩ* rằng lạm phát sẽ cao trong tương lai, người dân sẽ có xu hướng rút tiền mua bất động sản/vàng/hàng hóa tích trữ $\rightarrow$ Lực cầu tăng đột biến $\rightarrow$ Tiếp tục đẩy **CPI tăng mạnh hơn**.
+            """)
+
+            st.markdown("---")
+            st.markdown("##### 🚀 3. Tại sao Bài toán Đề tài cần 'Dự báo Đa nguồn Thời gian thực'?")
+            st.markdown("""
+            <div class="glass-card" style="background: rgba(0, 255, 204, 0.015); border: 1px solid rgba(0, 255, 204, 0.2);">
+                <b style="color: #FF4B4B; font-size: 13px;">⚠️ Hạn chế chết người của Phương pháp Thống kê Truyền thống:</b>
+                <p style="font-size: 12px; color: #94A3B8; margin-top: 4px; line-height: 1.5;">
+                    Tổng cục Thống kê (GSO) chỉ công bố CPI <b>mỗi tháng 1 lần (độ trễ khoảng 30 ngày)</b>. Nếu ngày 05 xảy ra chiến tranh làm giá dầu thế giới tăng vọt 30%, Chính phủ & Nhà đầu tư không thể chờ đến ngày 30 mới biết lạm phát ảnh hưởng thế nào để điều hành tiền tệ.
+                </p>
+                <b style="color: #00FFCC; font-size: 13px;">💡 Giải pháp Đột phá của Mô hình (Real-Time Multi-Source Nowcasting):</b>
+                <p style="font-size: 12px; color: #CBD5E1; margin-top: 4px; line-height: 1.6;">
+                    Thay vì thụ động chờ báo cáo tháng, ứng dụng thu thập dữ liệu <b>ĐA NGUỒN</b> liên tục từng giờ:
+                    <br>1. <b>Nguồn Tần suất cao (Cập nhật hàng ngày):</b> Giá Dầu WTI/Brent, Tỷ giá USD/VND, Giá Vàng, Chỉ số Nông sản toàn cầu.
+                    <br>2. <b>Nguồn Dữ liệu Lịch sử (Tần suất thấp):</b> Chuỗi CPI chính thống của GSO qua các năm để làm mốc so sánh.
+                    <br>3. <b>Trí tuệ Nhân tạo (RAG + AI Engine):</b> Quét tin tức vĩ mô, văn bản điều hành chính sách tiền tệ để đưa ra <b>Dự báo CPI tức thời (Nowcasting)</b>, giúp xóa bỏ độ trễ 30 ngày.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
         with tab_chart:
             show_sma = st.checkbox("Hiển thị Đường trung bình động SMA (12 tháng)", value=True)
@@ -401,57 +475,6 @@ if df is not None:
             </table>
             """
             st.markdown(table_html, unsafe_allow_html=True)
-
-        # TAB MỚI: PHÂN TÍCH LÝ THUYẾT & KIẾN TRÚC ĐA NGUỒN
-        with tab_theory:
-            st.markdown("##### 📌 Bản chất Kinh tế học & Phương pháp luận Đa nguồn")
-            
-            c_th1, c_th2 = st.columns(2)
-            with c_th1:
-                st.markdown("""
-                <div class="glass-card" style="height: 100%;">
-                    <h6 style="color: #00FFCC; margin-top:0;">1. CPI (Consumer Price Index)</h6>
-                    <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6;">
-                        Là <b>Chỉ số giá tiêu dùng</b>, thước đo tĩnh phản ánh mức giá trung bình của một rổ hàng hóa & dịch vụ đại diện (Lương thực, Y tế, Giao thông, Giáo dục...) do Tổng cục Thống kê (GSO) công bố.
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-            with c_th2:
-                st.markdown("""
-                <div class="glass-card" style="height: 100%;">
-                    <h6 style="color: #FF007A; margin-top:0;">2. Lạm phát (Inflation)</h6>
-                    <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6;">
-                        Là <b>Tốc độ gia tăng liên tục</b> của mặt bằng giá chung trong nền kinh tế. Lạm phát thể hiện sự mất giá của đồng tiền và sức mua suy giảm theo thời gian.
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-
-            st.markdown("###### 🔄 Mối quan hệ Tương tác:")
-            st.markdown("""
-            * **CPI là biến đầu vào đo lường:** Lạm phát được tính toán trực tiếp từ tốc độ thay đổi phần trăm của CPI qua các thời kỳ:
-            """)
-            st.latex(r"\text{Tỷ lệ Lạm phát (YoY)} = \frac{\text{CPI}_t - \text{CPI}_{t-12}}{\text{CPI}_{t-12}} \times 100\%")
-            st.markdown("""
-            * **Động lực hai chiều:** Khi giá các mặt hàng chiến lược (Năng lượng, Tỷ giá) biến động, CPI sẽ tăng lên, từ đó đẩy tỷ lệ Lạm phát tăng theo. Ngược lại, kỳ vọng lạm phát cao sẽ thúc đẩy người dân tích trữ tài sản, tiếp tục đẩy CPI tăng.
-            """)
-
-            st.markdown("---")
-            st.markdown("##### 🚀 Tại sao cần Dự báo Đa nguồn Thời gian thực (Nowcasting)?")
-            st.markdown("""
-            <div class="glass-card">
-                <b style="color: #00FFCC;">Thách thức của phương pháp truyền thống:</b>
-                <p style="font-size: 12px; color: #94A3B8; margin-top: 4px;">
-                    Dữ liệu CPI chính thức do GSO công bố thường có <b>độ trễ khoảng 30 ngày</b> (cuối mỗi tháng). Điều này khiến công tác quản trị chính sách tiền tệ và đầu tư bị bị động trước các cú sốc vĩ mô bất ngờ.
-                </p>
-                <b style="color: #10B981;">Giải pháp Đa nguồn theo Thời gian thực (Real-time Multi-source):</b>
-                <p style="font-size: 12px; color: #CBD5E1; margin-top: 4px; line-height: 1.6;">
-                    Mô hình tích hợp 3 luồng dữ liệu chính:
-                    <br>1. <b>Tần suất thấp (Low-frequency):</b> Chuỗi thời gian CPI lịch sử từ GSO & Ngân hàng Nhà nước.
-                    <br>2. <b>Tần suất cao (High-frequency / Real-time):</b> Biến động giá Dầu WTI/Brent, Tỷ giá USD/VND thị trường liên ngân hàng, giá nông sản thế giới cập nhật liên tục.
-                    <br>3. <b>Dữ liệu Phi cấu trúc & RAG Engine:</b> AI quét tri thức tin tức vĩ mô, văn bản chính sách để điều chỉnh sai số tức thời (Nowcasting).
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
 
         with tab_insights:
             st.markdown("##### 📌 Tóm tắt Điểm nóng Vĩ mô")
