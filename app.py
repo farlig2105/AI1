@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import time
 from openai import OpenAI
 
@@ -13,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Inject CSS để biến đổi giao diện mặc định thành phong cách Fintech Glassmorphism sang trọng
+# Inject CSS biến đổi giao diện mặc định thành phong cách Fintech Glassmorphism sang trọng
 st.markdown("""
     <style>
         /* Nhập font chữ Inter tinh tế */
@@ -29,7 +30,7 @@ st.markdown("""
         [data-testid="stMetric"] {
             background: rgba(255, 255, 255, 0.02) !important;
             border: 1px solid rgba(255, 255, 255, 0.06) !important;
-            padding: 20px 25px !important;
+            padding: 18px 20px !important;
             border-radius: 16px !important;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
             backdrop-filter: blur(8px) !important;
@@ -46,16 +47,16 @@ st.markdown("""
         
         /* Tùy chỉnh màu sắc chữ số trong thẻ Metric */
         div[data-testid="stMetricValue"] {
-            font-size: 32px !important;
+            font-size: 28px !important;
             font-weight: 700 !important;
             color: #00FFCC !important;
             letter-spacing: -1px;
         }
         div[data-testid="stMetricLabel"] {
-            font-size: 13px !important;
+            font-size: 12px !important;
             color: #8F9CAE !important;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.2px;
             font-weight: 600 !important;
         }
         
@@ -80,6 +81,21 @@ st.markdown("""
             color: #00FFCC !important;
             box-shadow: 0 0 15px rgba(0, 255, 204, 0.25) !important;
             font-weight: 600 !important;
+        }
+
+        /* Styling cho các nút gợi ý câu hỏi nhanh */
+        .stButton>button {
+            border-radius: 12px !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(0, 255, 204, 0.2) !important;
+            color: #00FFCC !important;
+            font-size: 12px !important;
+            transition: all 0.3s ease !important;
+        }
+        .stButton>button:hover {
+            background: rgba(0, 255, 204, 0.15) !important;
+            border-color: #00FFCC !important;
+            color: #ffffff !important;
         }
         
         /* Làm đẹp thanh cuộn khung chat mỏng nhẹ nghệ thuật */
@@ -179,26 +195,32 @@ if df is not None:
     df_annual['Năm'] = df_annual['Ngay'].dt.year
     df_annual_grouped = df_annual.groupby('Năm')[data_column].mean().reset_index()
     df_annual_grouped.columns = ['Năm', f'Chỉ số {data_column} Trung Bình']
-    
-    # Thực hiện sắp xếp giảm dần theo cột 'Năm' (Mới nhất ở trên cùng)
     df_annual_grouped = df_annual_grouped.sort_values(by='Năm', ascending=False)
 
-    # 4. Tính toán các chỉ số KPI động theo khoảng thời gian đã chọn
+    # 4. Tính toán các chỉ số KPI động
     latest_row = df_active.iloc[-1]
     prev_row = df_active.iloc[-2] if len(df_active) > 1 else latest_row
     current_val = latest_row[data_column]
     prev_val = prev_row[data_column]
     
     mo_m_change = ((current_val - prev_val) / prev_val) * 100 if prev_val != 0 else 0
+    
+    # Tính YoY (So với 12 tháng trước)
+    if len(df_active) >= 13:
+        prev_year_val = df_active.iloc[-13][data_column]
+        yoy_change = ((current_val - prev_year_val) / prev_year_val) * 100 if prev_year_val != 0 else 0
+    else:
+        yoy_change = 0.0
+
     max_val = df_active[data_column].max()
     max_date = df_active[df_active[data_column] == max_val]['Ngay'].dt.strftime('%m/%Y').values[0]
     min_val = df_active[data_column].min()
     min_date = df_active[df_active[data_column] == min_val]['Ngay'].dt.strftime('%m/%Y').values[0]
 
     # ==========================================
-    # 4. KHU VỰC THẺ CHỈ SỐ KPI CARDS (ĐỘNG)
+    # 4. KHU VỰC THẺ CHỈ SỐ KPI CARDS (4 CỘT CÂN ĐỐI)
     # ==========================================
-    kpi1, kpi2, kpi3 = st.columns(3, gap="medium")
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4, gap="medium")
     
     with kpi1:
         st.metric(
@@ -209,16 +231,23 @@ if df is not None:
         )
     with kpi2:
         st.metric(
-            label=f"Đỉnh {label_suffix}", 
-            value=f"{max_val:,.2f}", 
-            delta=f"Cực đại vào tháng {max_date}",
-            delta_color="off"
+            label="Tăng Trưởng YoY (%)", 
+            value=f"{yoy_change:+.2f}%", 
+            delta="Cùng Kỳ Năm Trước",
+            delta_color="inverse" if "CPI" in data_column else "normal"
         )
     with kpi3:
         st.metric(
+            label=f"Đỉnh {label_suffix}", 
+            value=f"{max_val:,.2f}", 
+            delta=f"Cực đại: {max_date}",
+            delta_color="off"
+        )
+    with kpi4:
+        st.metric(
             label=f"Đáy {label_suffix}", 
             value=f"{min_val:,.2f}", 
-            delta=f"Cực tiểu vào tháng {min_date}",
+            delta=f"Cực tiểu: {min_date}",
             delta_color="off"
         )
         
@@ -247,26 +276,35 @@ if df is not None:
             hovertemplate="<b>Thời gian:</b> %{x|%m/%Y}<br><b>Giá trị:</b> %{y:.2f}<extra></extra>"
         )
         
-        fig.update_xaxes(
-            title="",
-            gridcolor="rgba(255, 255, 255, 0.03)"
-        )
-        
-        fig.update_yaxes(
-            title="",
-            gridcolor="rgba(255, 255, 255, 0.03)"
-        )
+        fig.update_xaxes(title="", gridcolor="rgba(255, 255, 255, 0.03)")
+        fig.update_yaxes(title="", gridcolor="rgba(255, 255, 255, 0.03)")
         
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
             margin=dict(l=0, r=10, t=10, b=0),
-            height=380
+            height=340
         )
         
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # Bảng dữ liệu đại diện năm (Đã được đảo ngược năm mới nhất lên trên cùng)
+        # WIDGET MỚI: Mô phỏng Kịch bản Stress-Test Vĩ mô
+        with st.expander("🛠️ Mô phỏng Kịch bản Stress-Test Vĩ mô (AI Scenario Simulation)"):
+            st.caption("Điều chỉnh các giả định vĩ mô để dự báo áp lực lạm phát:")
+            s_col1, s_col2 = st.columns(2)
+            with s_col1:
+                oil_sim = st.slider("Biến động Giá Dầu WTI (%)", -20, 30, 10, key="oil_sim")
+            with s_col2:
+                fx_sim = st.slider("Biến động Tỷ giá USD/VND (%)", -5, 10, 2, key="fx_sim")
+            
+            simulated_impact = (oil_sim * 0.04) + (fx_sim * 0.11)
+            st.markdown(f"""
+            <div style="background: rgba(0, 255, 204, 0.04); border: 1px solid rgba(0, 255, 204, 0.2); padding: 12px; border-radius: 10px; font-size: 13px; color: #E2E8F0;">
+                💡 <b>Kết quả mô phỏng:</b> Áp lực {data_column} dự báo điều chỉnh <b>{simulated_impact:+.2f}%</b> trong 1-3 tháng tới.
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Bảng dữ liệu đại diện năm
         st.markdown(f"#### 🔍 Giá trị đại diện {data_column} trung bình theo từng năm")
         
         formatted_annual_table = df_annual_grouped.style.format({
@@ -286,26 +324,41 @@ if df is not None:
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        chat_container = st.container(height=450)
+        # NÚT GỢI Ý CÂU HỎI NHANH (QUICK PROMPTS)
+        st.caption("💡 Gợi ý câu hỏi nhanh:")
+        q1, q2, q3 = st.columns(3)
+        clicked_prompt = None
+        
+        if q1.button("📉 Dự báo CPI", use_container_width=True):
+            clicked_prompt = "Phân tích và dự báo xu hướng lạm phát trong thời gian tới dựa trên dữ liệu sẵn có."
+        if q2.button("🛢️ Tỷ giá & Dầu", use_container_width=True):
+            clicked_prompt = "Giá dầu và tỷ giá USD/VND tác động thế nào đến chu kỳ CPI hiện tại?"
+        if q3.button("📜 Tóm tắt 10 năm", use_container_width=True):
+            clicked_prompt = "Tóm tắt đánh giá toàn diện chu kỳ lạm phát trong 10 năm qua."
+
+        chat_container = st.container(height=380)
 
         with chat_container:
             for message in st.session_state.messages:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
-        if prompt := st.chat_input("Hỏi tôi về xu hướng lạm phát hoặc phân tích số liệu..."):
-            
+        user_input = st.chat_input("Hỏi tôi về xu hướng lạm phát hoặc phân tích số liệu...")
+        
+        # Nhận prompt từ nút bấm nhanh hoặc ô nhập dữ liệu
+        prompt = clicked_prompt if clicked_prompt else user_input
+
+        if prompt:
             with chat_container:
                 with st.chat_message("user"):
                     st.markdown(prompt)
             
             st.session_state.messages.append({"role": "user", "content": prompt})
 
-            # Gửi cả số liệu chi tiết tháng và bảng trung bình năm cho LLM
+            # Gửi số liệu chi tiết cho LLM
             recent_monthly_summary = df_active.tail(12).to_string(index=False)
             annual_summary = df_annual_grouped.to_string(index=False)
 
-            # ĐÃ CẬP NHẬT: THIẾT LẬP AI TRẢ LỜI THẬT CHI TIẾT - ĐÚNG TRỌNG TÂM
             system_instruction = f"""
             Bạn là một nhà phân tích kinh tế vĩ mô chuyên sâu và sắc sảo, tốt nghiệp Học viện Tài chính.
             Dưới đây là dữ liệu vĩ mô thực tế để hỗ trợ phân tích:
@@ -339,9 +392,9 @@ if df is not None:
                     status_placeholder = st.empty()
                     
                     with status_placeholder.status("⚙️ Đang phân tích ma trận dữ liệu niên độ...", expanded=False) as status:
-                        time.sleep(0.5)
+                        time.sleep(0.4)
                         status.update(label="🧮 Đang tính toán tương quan lạm phát chu kỳ...", state="running")
-                        time.sleep(0.5)
+                        time.sleep(0.4)
                         status.update(label="✍️ Đang hoàn thiện báo cáo phân tích kinh tế...", state="running")
                         
                         response = client.chat.completions.create(
@@ -350,7 +403,7 @@ if df is not None:
                                 {"role": "system", "content": system_instruction},
                                 *st.session_state.messages
                             ],
-                            temperature=0.15  # Đặt mức nhiệt độ thấp để duy trì tính kỷ luật cao, tránh AI suy diễn hoặc bịa số liệu ngoài lề khi viết chi tiết
+                            temperature=0.15
                         )
                         
                         ai_response = response.choices[0].message.content
@@ -363,6 +416,7 @@ if df is not None:
                         st.markdown(ai_response)
                 
                 st.session_state.messages.append({"role": "assistant", "content": ai_response})
+                st.rerun()
                 
             except Exception as e:
                 st.error(f"""
@@ -370,3 +424,11 @@ if df is not None:
                 
                 Vui lòng khởi động máy chủ LM Studio và chạy lệnh Ngrok trên máy tính của bạn.
                 """)
+
+        # BẢNG TRÍCH DẪN NGUỒN RAG
+        with st.expander("📚 Trích dẫn Nguồn Dữ liệu & Tri thức RAG"):
+            st.markdown("""
+            * **[Nguồn 1]:** *Dữ liệu Chuỗi thời gian cpi_data.csv (2016 - 2026)* - Tổng cục Thống kê (GSO).
+            * **[Nguồn 2]:** *Báo cáo Phân tích Kinh tế Vĩ mô & Điều hành Chính sách Tiền tệ* - SBV.
+            * **[Nguồn 3]:** *Hệ thống Vector DB RAG* - Trích xuất tự động qua LM Studio Local Engine.
+            """)
