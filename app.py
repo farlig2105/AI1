@@ -238,7 +238,7 @@ if df is not None:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ==========================================
-    # 5. BỐ TRÍ LAYOUT (TAB LÝ THUYẾT ĐƯỢC ĐẨY LÊN ĐẦU)
+    # 5. BỐ TRÍ LAYOUT
     # ==========================================
     col1, col2 = st.columns([1.3, 1], gap="large")
 
@@ -251,7 +251,7 @@ if df is not None:
             "📌 Highlight Vĩ mô"
         ])
 
-        # TAB 1: LÝ THUYẾT CHI TIẾT DỄ HỂU CHO CẢ NGƯỜI MỚI
+        # TAB 1: LÝ THUYẾT ĐÃ KHẮC PHỤC HOÀN TOÀN LỖI HIỂN THỊ & BỔ SUNG GIẢI THÍCH KÝ HIỆU
         with tab_theory:
             st.markdown("##### 🛒 1. Nhập môn Kinh tế Vĩ mô: CPI & Lạm phát là gì?")
             st.caption("Hãy bắt đầu bằng một ví dụ thực tế trong cuộc sống hàng ngày:")
@@ -295,16 +295,32 @@ if df is not None:
             st.markdown("##### 🔗 2. Mối quan hệ tương tác & Công thức liên kết")
             
             st.markdown("""
-            * **CPI là biến đầu vào $\rightarrow$ Lạm phát là kết quả đầu ra:** 
+            * **CPI là biến đầu vào → Lạm phát là kết quả đầu ra:** 
               CPI đóng vai trò như một "thước đo độ cao". Tỷ lệ Lạm phát chính là "tốc độ mà độ cao đó gia tăng". Lạm phát so với cùng kỳ năm trước (YoY - Year on Year) được tính bằng công thức toán học:
             """)
             
+            # CÔNG THỨC LẠM PHÁT
             st.latex(r"\text{Tỷ lệ Lạm phát (YoY)} = \frac{\text{CPI}_{\text{Kỳ này}} - \text{CPI}_{\text{Cùng kỳ năm ngoái}}}{\text{CPI}_{\text{Cùng kỳ năm ngoái}}} \times 100\%")
+
+            # BẢNG GIẢI THÍCH CHI TIẾT TỪNG KÝ HIỆU
+            st.markdown("""
+            <div class="glass-card" style="margin-top: 12px; padding: 16px;">
+                <b style="color: #00FFCC; font-size: 13px;">📖 Giải thích chi tiết từng ký hiệu trong công thức:</b>
+                <ul style="font-size: 12px; color: #CBD5E1; margin-top: 10px; margin-bottom: 0; padding-left: 20px; line-height: 1.8;">
+                    <li><b>Tỷ lệ Lạm phát (YoY):</b> Chỉ số đo lường mức độ gia tăng giá cả so với cùng kỳ năm trước (<i>Year-on-Year</i>), tính bằng đơn vị phần trăm (%).</li>
+                    <li><b>CPI<sub>Kỳ này</sub>:</b> Chỉ số CPI thu thập tại thời điểm hiện tại cần tính toán (ví dụ: Tháng 03/2026).</li>
+                    <li><b>CPI<sub>Cùng kỳ năm ngoái</sub>:</b> Chỉ số CPI thu thập đúng vào tháng này nhưng của 1 năm trước (ví dụ: Tháng 03/2025).</li>
+                    <li><b>Thao tác trừ (CPI<sub>Kỳ này</sub> − CPI<sub>Cùng kỳ</sub>):</b> Đo lường mức độ biến động tuyệt đối (tăng hoặc giảm bao nhiêu điểm chỉ số).</li>
+                    <li><b>Thao tác chia cho CPI<sub>Cùng kỳ</sub>:</b> Đưa mức chênh lệch tuyệt đối về dạng tốc độ tăng trưởng tương đối.</li>
+                    <li><b>× 100%:</b> Quy đổi giá trị tương đối thành dạng tỷ lệ phần trăm (%) chuẩn hóa.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
 
             st.markdown("""
             * **Cơ chế tác động 2 chiều:**
-              1. **Chiều thuận (Tác động thực tế):** Khi giá các mặt hàng chiến lược như **Giá Dầu** hoặc **Tỷ giá USD/VND** tăng $\rightarrow$ Chi phí sản xuất & vận chuyển tăng $\rightarrow$ **CPI tăng** $\rightarrow$ **Lạm phát tăng**.
-              2. **Chiều ngược (Vòng xoáy kỳ vọng):** Khi mọi người *nghĩ* rằng lạm phát sẽ cao trong tương lai, người dân sẽ có xu hướng rút tiền mua bất động sản/vàng/hàng hóa tích trữ $\rightarrow$ Lực cầu tăng đột biến $\rightarrow$ Tiếp tục đẩy **CPI tăng mạnh hơn**.
+              1. **Chiều thuận (Tác động thực tế):** Giá các mặt hàng chiến lược (Giá Dầu, Tỷ giá USD/VND) tăng → Chi phí sản xuất & vận chuyển tăng → **CPI tăng** → **Lạm phát tăng**.
+              2. **Chiều ngược (Vòng xoáy kỳ vọng):** Người dân *nghĩ* lạm phát sẽ cao trong tương lai → Ồ ạt rút tiền mua tài sản tích trữ (BĐS, Vàng, Hàng hóa) → Lực cầu tăng đột biến → **Tiếp tục đẩy CPI tăng mạnh hơn**.
             """)
 
             st.markdown("---")
@@ -397,7 +413,6 @@ if df is not None:
                 </div>
             """, unsafe_allow_html=True)
 
-            # BẢNG HTML TỰ ĐỘNG XUỐNG DÒNG - KHÔNG MẤT CHỮ
             st.markdown("##### 📋 Phân tích Cơ chế Tác động Chi tiết")
             
             oil_color = "#FF4B4B" if oil_impact > 0 else ("#00FFCC" if oil_impact < 0 else "#94A3B8")
