@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS nâng cấp hiệu ứng Glow, Glassmorphism và layout cân đối
+# CSS nâng cấp hiệu ứng Glow, Glassmorphism, Tab UI Fintech x1000 và layout cân đối
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -64,25 +64,51 @@ st.markdown("""
             font-weight: 600 !important;
         }
         
+        /* ==========================================
+           NÂNG CẤP TAB HEADER (GLASSMORPHISM & NEON GLOW)
+           ========================================== */
         .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-            background-color: rgba(255, 255, 255, 0.03);
-            padding: 6px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 10px !important;
+            background: rgba(15, 23, 42, 0.65) !important;
+            padding: 8px 10px !important;
+            border-radius: 16px !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(16px) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+            margin-bottom: 20px !important;
         }
+        
         .stTabs [data-baseweb="tab"] {
-            height: 40px;
-            border-radius: 8px;
-            color: #94A3B8;
-            font-weight: 600;
-            font-size: 13px;
-            border: none !important;
+            height: 44px !important;
+            border-radius: 12px !important;
+            color: #94A3B8 !important;
+            font-weight: 600 !important;
+            font-size: 13.5px !important;
+            border: 1px solid transparent !important;
+            padding: 0 18px !important;
+            background-color: transparent !important;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
+
+        .stTabs [data-baseweb="tab"]:hover {
+            color: #F8FAFC !important;
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            transform: translateY(-2px) !important;
+        }
+
         .stTabs [aria-selected="true"] {
-            background-color: rgba(0, 255, 204, 0.15) !important;
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.18) 0%, rgba(0, 180, 216, 0.12) 100%) !important;
             color: #00FFCC !important;
-            border: 1px solid rgba(0, 255, 204, 0.3) !important;
+            border: 1px solid rgba(0, 255, 204, 0.45) !important;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.22), inset 0 0 10px rgba(0, 255, 204, 0.1) !important;
+            font-weight: 700 !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .stTabs [data-baseweb="tab-highlight"],
+        .stTabs [data-baseweb="tab-border-bar"] {
+            display: none !important;
         }
         
         div[data-testid="stPills"] button {
@@ -251,7 +277,7 @@ if df is not None:
             "📌 Highlight Vĩ mô"
         ])
 
-        # TAB 1: LÝ THUYẾT ĐÃ KHẮC PHỤC HOÀN TOÀN LỖI HIỂN THỊ & BỔ SUNG GIẢI THÍCH KÝ HIỆU
+        # TAB 1: LÝ THUYẾT CHI TIẾT
         with tab_theory:
             st.markdown("##### 🛒 1. Nhập môn Kinh tế Vĩ mô: CPI & Lạm phát là gì?")
             st.caption("Hãy bắt đầu bằng một ví dụ thực tế trong cuộc sống hàng ngày:")
@@ -299,17 +325,15 @@ if df is not None:
               CPI đóng vai trò như một "thước đo độ cao". Tỷ lệ Lạm phát chính là "tốc độ mà độ cao đó gia tăng". Lạm phát so với cùng kỳ năm trước (YoY - Year on Year) được tính bằng công thức toán học:
             """)
             
-            # CÔNG THỨC LẠM PHÁT
             st.latex(r"\text{Tỷ lệ Lạm phát (YoY)} = \frac{\text{CPI}_{\text{Kỳ này}} - \text{CPI}_{\text{Cùng kỳ năm ngoái}}}{\text{CPI}_{\text{Cùng kỳ năm ngoái}}} \times 100\%")
 
-            # BẢNG GIẢI THÍCH CHI TIẾT TỪNG KÝ HIỆU
             st.markdown("""
             <div class="glass-card" style="margin-top: 12px; padding: 16px;">
                 <b style="color: #00FFCC; font-size: 13px;">📖 Giải thích chi tiết từng ký hiệu trong công thức:</b>
                 <ul style="font-size: 12px; color: #CBD5E1; margin-top: 10px; margin-bottom: 0; padding-left: 20px; line-height: 1.8;">
                     <li><b>Tỷ lệ Lạm phát (YoY):</b> Chỉ số đo lường mức độ gia tăng giá cả so với cùng kỳ năm trước (<i>Year-on-Year</i>), tính bằng đơn vị phần trăm (%).</li>
-                    <li><b>CPI<sub>Kỳ này</sub>:</b> Chỉ số CPI thu thập tại thời điểm hiện tại cần tính toán (ví dụ: Tháng 03/2026).</li>
-                    <li><b>CPI<sub>Cùng kỳ năm ngoái</sub>:</b> Chỉ số CPI thu thập đúng vào tháng này nhưng của 1 năm trước (ví dụ: Tháng 03/2025).</li>
+                    <li><b>CPI<sub>Kỳ này</sub>:</b> Chỉ số CPI thu thập tại thời điểm hiện tại cần tính toán.</li>
+                    <li><b>CPI<sub>Cùng kỳ năm ngoái</sub>:</b> Chỉ số CPI thu thập đúng vào tháng này nhưng của 1 năm trước.</li>
                     <li><b>Thao tác trừ (CPI<sub>Kỳ này</sub> − CPI<sub>Cùng kỳ</sub>):</b> Đo lường mức độ biến động tuyệt đối (tăng hoặc giảm bao nhiêu điểm chỉ số).</li>
                     <li><b>Thao tác chia cho CPI<sub>Cùng kỳ</sub>:</b> Đưa mức chênh lệch tuyệt đối về dạng tốc độ tăng trưởng tương đối.</li>
                     <li><b>× 100%:</b> Quy đổi giá trị tương đối thành dạng tỷ lệ phần trăm (%) chuẩn hóa.</li>
@@ -499,22 +523,22 @@ if df is not None:
             * **Xu hướng trung hạn:** Đường SMA 12 tháng đang {'đi lên' if df_active['SMA12'].iloc[-1] > df_active['SMA12'].iloc[-6] else 'đi ngang/giảm'}, phản ánh áp lực chu kỳ tích lũy.
             """)
 
-    # --- CỘT PHẢI: AI ASSISTANT ---
+    # --- CỘT PHẢI: AI ASSISTANT (ĐI THẲNG VÀO TRỌNG TÂM - ƯU TIÊN DỰ BÁO LẠM PHÁT) ---
     with col2:
-        st.markdown("### 🤖 Trợ lý AI Phân tích")
+        st.markdown("### 🤖 Trợ lý AI Phân tích & Dự báo Lạm phát")
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        st.caption("💡 Câu hỏi gợi ý:")
+        st.caption("💡 Gợi ý câu hỏi trọng tâm:")
         q1, q2, q3 = st.columns(3)
         clicked_prompt = None
-        if q1.button("📉 Dự báo CPI", use_container_width=True):
-            clicked_prompt = "Phân tích và dự báo xu hướng lạm phát cận kỳ dựa trên dữ liệu sẵn có."
+        if q1.button("📉 Dự báo CPI quý tới", use_container_width=True):
+            clicked_prompt = "Hãy đưa ra dự báo chỉ số CPI và xu hướng lạm phát cụ thể trong các tháng tới dựa trên chuỗi số liệu đã có."
         if q2.button("🛢️ Giá dầu & Tỷ giá", use_container_width=True):
-            clicked_prompt = "Biến động giá dầu và tỷ giá tác động thế nào đến lạm phát Việt Nam?"
-        if q3.button("📜 Tóm tắt 10 năm", use_container_width=True):
-            clicked_prompt = "Tóm tắt toàn diện chu kỳ lạm phát trong 10 năm qua."
+            clicked_prompt = "Tác động truyền dẫn của biến động Giá dầu và Tỷ giá USD/VND lên áp lực lạm phát hiện tại là bao nhiêu?"
+        if q3.button("🏦 Chính sách tiền tệ", use_container_width=True):
+            clicked_prompt = "Áp lực lạm phát hiện nay ảnh hưởng trực tiếp thế nào đến quyết định điều hành lãi suất của Ngân hàng Nhà nước?"
 
         chat_container = st.container(height=380)
 
@@ -522,10 +546,10 @@ if df is not None:
             if len(st.session_state.messages) == 0:
                 st.markdown("""
                     <div class="ai-welcome">
-                        <div style="font-size: 32px; margin-bottom: 5px;">🤖</div>
-                        <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Tôi là Trợ lý AI Vĩ mô</div>
+                        <div style="font-size: 32px; margin-bottom: 5px;">🎈</div>
+                        <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Trợ lý AI Phân tích & Dự báo Lạm phát</div>
                         <p style="color: #64748B; font-size: 12px; margin-top: 5px;">
-                            Sẵn sàng giải đáp các câu hỏi về chu kỳ lạm phát, CPI, chỉ số kinh tế dựa trên dữ liệu thực tế từ GSO & SBV.
+                            Trả lời trực tiếp, chính xác trọng tâm về <b>Dự báo Lạm phát, CPI</b> và các biến số vĩ mô liên quan. Không lan man.
                         </p>
                     </div>
                 """, unsafe_allow_html=True)
@@ -534,7 +558,7 @@ if df is not None:
                     with st.chat_message(message["role"]):
                         st.markdown(message["content"])
 
-        user_input = st.chat_input("Hỏi AI về xu hướng CPI hoặc phân tích vĩ mô...")
+        user_input = st.chat_input("Hỏi trực diện về dự báo lạm phát, CPI hoặc vĩ mô...")
         prompt = clicked_prompt if clicked_prompt else user_input
 
         if prompt:
@@ -547,20 +571,30 @@ if df is not None:
             recent_monthly_summary = df_active.tail(12).to_string(index=False)
             annual_summary = df_annual_grouped.to_string(index=False)
 
+            # PROMPT SYSTEM CHẶT CHẼ: TRẢ LỜI CHÍNH XÁC TRỌNG TÂM + TRỌNG TÂM LẠM PHÁT
             system_instruction = f"""
-            Bạn là một nhà phân tích kinh tế vĩ mô chuyên sâu, tốt nghiệp Học viện Tài chính.
-            Dữ liệu vĩ mô thực tế:
+            Bạn là một Chuyên gia Phân tích & Dự báo Lạm phát Vĩ mô cấp cao (nghiên cứu sinh/giảng viên chuyên ngành Kinh tế chính trị - Tài chính tại Học viện Tài chính).
+
+            🎯 QUY TẮC PHẢN HỒI BẮT BỘC:
+            1. **TRẢ LỜI CHÍNH XÁC TRỌNG TÂM:** 
+               - Đi thẳng vào bản chất câu hỏi của người dùng. Tuyệt đối KHÔNG viết lời chào mừng, KHÔNG mở bài xã giao (không dùng "Chào bạn", "Dưới đây là...", "Cảm ơn bạn...").
+               - Không đưa ra các thông tin ngoài phạm vi câu hỏi. Câu trả lời phải súc tích, đắt giá, luận điểm rõ ràng.
+
+            2. **TRỌNG TÂM CỐT LÕI - LẠM PHÁT & CPI:**
+               - Trọng tâm công việc chính của bạn là phân tích, đánh giá và DỰ BÁO LẠM PHÁT / CPI (ngắn, trung và dài hạn).
+               - Với các câu hỏi vĩ mô liên quan (như Tỷ giá, Lãi suất, Giá dầu, Chính sách tiền tệ...), hãy trả lời chính xác vấn đề được hỏi và chốt lại tác động/liên hệ cốt lõi tới áp lực lạm phát của Việt Nam một cách súc tích.
+
+            3. **CẤU TRÚC PHẢN HỒI:**
+               - Bắt đầu ngay bằng KẾT LUẬN hoặc CÂU TRẢ LỜI TRỰC TIẾP ở ngay câu đầu tiên.
+               - Sau đó trình bày các luận điểm minh chứng hoặc kịch bản dự báo (dựa vào số liệu thực tế) bằng các gạch đầu dòng ngắn gọn.
+
+            📊 DỮ LIỆU VĨ MÔ THỰC TẾ CUNG CẤP:
             
-            TRUNG BÌNH THEO NĂM:
+            - TRUNG BÌNH THEO NĂM:
             {annual_summary}
             
-            CHI TIẾT 12 THÁNG GẦN NHẤT:
+            - CHI TIẾT 12 THÁNG GẦN NHẤT:
             {recent_monthly_summary}
-            
-            Yêu cầu phản hồi:
-            1. Đọc kỹ câu hỏi, phân tích CHI TIẾT, CHUYÊN SÂU và TOÀN DIỆN đúng trọng tâm.
-            2. Không chào hỏi xã giao thừa thãi (Không viết "Chào bạn", "Dưới đây là..."). Bắt đầu ngay bằng nội dung phân tích.
-            3. Lập luận dựa trên số liệu thực tế được cung cấp.
             """
 
             clean_url = NGROK_STATIC_URL.strip().rstrip('/')
@@ -573,9 +607,9 @@ if df is not None:
 
                 with chat_container:
                     status_placeholder = st.empty()
-                    with status_placeholder.status("⚙️ Đang xử lý ma trận dữ liệu...", expanded=False) as status:
-                        time.sleep(0.3)
-                        status.update(label="🧮 Đang tính toán tương quan vĩ mô...", state="running")
+                    with status_placeholder.status("⚙️ Đang xử lý câu hỏi...", expanded=False) as status:
+                        time.sleep(0.2)
+                        status.update(label="🧮 Đang truy xuất dữ liệu & dự báo...", state="running")
                         
                         response = client.chat.completions.create(
                             model="local-model",
@@ -583,7 +617,7 @@ if df is not None:
                                 {"role": "system", "content": system_instruction},
                                 *st.session_state.messages
                             ],
-                            temperature=0.15
+                            temperature=0.1
                         )
                         ai_response = response.choices[0].message.content
                         status.update(label="Hoàn tất!", state="complete")
