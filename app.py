@@ -6,7 +6,7 @@ import time
 from openai import OpenAI
 
 # ==========================================
-# 1. CẤU HÌNH GIAO DIỆN WEB & CSS SIÊU PREMIUM
+# 1. CẤU HÌNH GIAO DIỆN WEB & CSS PREMIUM
 # ==========================================
 st.set_page_config(
     page_title="Hệ thống Dữ liệu Vĩ mô & AI",
@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS ĐỘT PHÁ - THIẾT KẾ TAB ĐỐI XỨNG & NEON CAPSULE GLOW
+# CSS ĐỘT PHÁ - PHONG CÁCH SEGMENTED CONTROL (SHADCN / LINEAR UI)
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -25,36 +25,38 @@ st.markdown("""
         }
         
         .main {
-            background: radial-gradient(circle at 50% 0%, #111827 0%, #030712 100%) !important;
+            background: #0B0F19 !important;
         }
         
+        /* Glassmorphic Cards */
         .glass-card {
-            background: rgba(255, 255, 255, 0.025);
+            background: rgba(17, 24, 39, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 20px;
             backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             margin-bottom: 15px;
         }
         
+        /* Metric Cards */
         [data-testid="stMetric"] {
-            background: rgba(255, 255, 255, 0.02) !important;
-            border: 1px solid rgba(0, 255, 204, 0.15) !important;
-            padding: 16px 20px !important;
+            background: rgba(17, 24, 39, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            padding: 18px 22px !important;
             border-radius: 16px !important;
             backdrop-filter: blur(10px) !important;
             transition: all 0.3s ease !important;
         }
         [data-testid="stMetric"]:hover {
-            border-color: rgba(0, 255, 204, 0.4) !important;
-            box-shadow: 0 0 25px rgba(0, 255, 204, 0.15) !important;
+            border-color: rgba(16, 185, 129, 0.4) !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.15) !important;
             transform: translateY(-2px) !important;
         }
         div[data-testid="stMetricValue"] {
             font-size: 26px !important;
             font-weight: 800 !important;
-            color: #00FFCC !important;
+            color: #10B981 !important;
         }
         div[data-testid="stMetricLabel"] {
             font-size: 11px !important;
@@ -65,87 +67,83 @@ st.markdown("""
         }
         
         /* =========================================================
-           THIẾT KẾ TAB MỚI: ĐỐI XỨNG $100\%$, ĐẸP GẤP X1000 LẦN
+           THIẾT KẾ TAB MỚI: SEGMENTED CONTROL CỰC ĐẸP (NO RED LINE)
            ========================================================= */
         
-        /* Xóa sạch vạch gạch chân màu đỏ & xám mặc định của Streamlit */
+        /* 1. Xóa bỏ triệt để thanh gạch chân màu đỏ & xám mặc định */
         div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
-        div[data-testid="stTabs"] [data-baseweb="tab-border-bar"] {
+        div[data-testid="stTabs"] [data-baseweb="tab-border-bar"],
+        div[data-testid="stTabs"] [role="tablist"]::after {
             display: none !important;
             height: 0px !important;
-            visibility: hidden !important;
+            background-color: transparent !important;
+            border: none !important;
         }
 
-        /* 1. Thanh bao quanh danh sách Tab - Định hình Khung Glassmorphism */
+        /* 2. Khung chứa danh sách Tab (Thanh trượt Segmented Control) */
+        div[data-testid="stTabs"] [role="tablist"],
         div[data-testid="stTabs"] [data-baseweb="tab-list"] {
             display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            gap: 8px !important;
-            background: rgba(15, 23, 42, 0.8) !important;
-            padding: 6px !important;
-            border-radius: 18px !important;
-            border: 1px solid rgba(0, 255, 204, 0.25) !important;
-            backdrop-filter: blur(20px) !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 255, 204, 0.05) !important;
-            margin-bottom: 25px !important;
             width: 100% !important;
+            background: #111827 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 14px !important;
+            padding: 6px !important;
+            gap: 6px !important;
+            margin-bottom: 24px !important;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
         }
 
-        /* 2. Thẻ Tab mặc định - Chia đều 100% không gian đối xứng */
-        div[data-testid="stTabs"] [data-baseweb="tab"],
-        div[data-testid="stTabs"] button[data-baseweb="tab"] {
-            flex: 1 1 0% !important; /* Bắt buộc chia đều đối xứng */
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            height: 48px !important;
-            border-radius: 12px !important;
-            border: 1px solid transparent !important;
-            background-color: transparent !important;
-            padding: 0 10px !important;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        /* 3. Thẻ Tab dạng Nút bấm bo góc đối xứng 100% */
+        div[data-testid="stTabs"] button[role="tab"],
+        div[data-testid="stTabs"] [data-baseweb="tab"] {
+            flex: 1 1 0% !important; /* Ép giãn đều 100% đối xứng */
+            width: 100% !important;
+            height: 44px !important;
+            border-radius: 10px !important;
+            border: none !important;
+            background: transparent !important;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
             cursor: pointer !important;
-            outline: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 12px !important;
+            border-bottom: none !important;
         }
 
         /* Chữ trong Tab mặc định */
-        div[data-testid="stTabs"] [data-baseweb="tab"] p,
-        div[data-testid="stTabs"] [data-baseweb="tab"] span,
-        div[data-testid="stTabs"] button[data-baseweb="tab"] p {
+        div[data-testid="stTabs"] button[role="tab"] p,
+        div[data-testid="stTabs"] button[role="tab"] span {
+            color: #94A3B8 !important;
             font-weight: 600 !important;
             font-size: 13.5px !important;
-            color: #94A3B8 !important;
-            transition: all 0.3s ease !important;
+            margin: 0 !important;
+            transition: color 0.2s ease !important;
             white-space: nowrap !important;
         }
 
-        /* 3. Hiệu ứng Rê chuột (Hover) */
-        div[data-testid="stTabs"] [data-baseweb="tab"]:hover {
-            background: rgba(255, 255, 255, 0.06) !important;
-            border-color: rgba(255, 255, 255, 0.15) !important;
-            transform: translateY(-1px) !important;
+        /* 4. Hiệu ứng Hover */
+        div[data-testid="stTabs"] button[role="tab"]:hover {
+            background: rgba(255, 255, 255, 0.04) !important;
         }
-        div[data-testid="stTabs"] [data-baseweb="tab"]:hover p,
-        div[data-testid="stTabs"] [data-baseweb="tab"]:hover span {
+        div[data-testid="stTabs"] button[role="tab"]:hover p {
+            color: #F8FAFC !important;
+        }
+
+        /* 5. TAB ĐƯỢC CHỌN (ACTIVE) - Gradient Emerald sang Cyan */
+        div[data-testid="stTabs"] button[role="tab"][aria-selected="true"],
+        div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] {
+            background: linear-gradient(135deg, #0D9488 0%, #0284C7 100%) !important;
+            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35) !important;
+            border-bottom: none !important;
+        }
+
+        /* Chữ của Active Tab */
+        div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
+        div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] span {
             color: #FFFFFF !important;
-        }
-
-        /* 4. TAB ĐƯỢC CHỌN (Active Tab) - Rực rỡ Cyberpunk Neon */
-        div[data-testid="stTabs"] [aria-selected="true"],
-        div[data-testid="stTabs"] button[aria-selected="true"] {
-            background: linear-gradient(135deg, #00FFCC 0%, #00B4D8 100%) !important;
-            border: 1px solid #00FFCC !important;
-            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
-            transform: scale(1.02) !important;
-        }
-
-        /* Chữ của Active Tab - Màu tối đậm tương phản cực kì nét */
-        div[data-testid="stTabs"] [aria-selected="true"] p,
-        div[data-testid="stTabs"] [aria-selected="true"] span,
-        div[data-testid="stTabs"] button[aria-selected="true"] p {
-            color: #0A0E17 !important;
-            font-weight: 800 !important;
+            font-weight: 700 !important;
         }
         
         div[data-testid="stPills"] button {
@@ -156,14 +154,14 @@ st.markdown("""
             font-size: 12px !important;
         }
         div[data-testid="stPills"] button[aria-selected="true"] {
-            background-color: rgba(0, 255, 204, 0.15) !important;
-            border-color: #00FFCC !important;
-            color: #00FFCC !important;
+            background-color: rgba(16, 185, 129, 0.15) !important;
+            border-color: #10B981 !important;
+            color: #10B981 !important;
         }
 
         .ai-welcome {
-            border: 1px dashed rgba(0, 255, 204, 0.3);
-            background: rgba(0, 255, 204, 0.02);
+            border: 1px dashed rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.02);
             border-radius: 14px;
             padding: 20px;
             text-align: center;
@@ -171,7 +169,7 @@ st.markdown("""
         }
         
         ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(0, 255, 204, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -179,7 +177,7 @@ st.markdown("""
 h_col1, h_col2 = st.columns([3, 1])
 with h_col1:
     st.markdown("""
-        <div style="margin-bottom: 10px;">
+        <div style="margin-bottom: 12px;">
             <h2 style="font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.5px;">
                 📈 Hệ Thống Dữ Liệu Vĩ Mô & Trợ Lý AI
             </h2>
@@ -214,8 +212,8 @@ NGROK_STATIC_URL = "https://decode-thigh-dinginess.ngrok-free.dev"
 st.sidebar.markdown("### 🖥️ HỆ THỐNG MÁY CHỦ")
 st.sidebar.markdown(
     f"""
-    <div style="background: rgba(0, 255, 204, 0.03); border: 1px solid rgba(0, 255, 204, 0.15); padding: 15px; border-radius: 12px;">
-        <span style="color: #00FFCC; font-weight: 700; font-size: 13px;">● AI ENGINE ONLINE</span><br>
+    <div style="background: rgba(16, 185, 129, 0.03); border: 1px solid rgba(16, 185, 129, 0.15); padding: 15px; border-radius: 12px;">
+        <span style="color: #10B981; font-weight: 700; font-size: 13px;">● AI ENGINE ONLINE</span><br>
         <small style="color: #64748B; display: block; margin-top: 4px;">Ngrok Static Endpoint:</small>
         <code style="color: #E2E8F0; font-size: 10px; word-break: break-all; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 4px; display: block; margin-top: 4px;">{NGROK_STATIC_URL}</code>
     </div>
@@ -301,7 +299,7 @@ if df is not None:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ==========================================
-    # 5. BỐ TRÍ LAYOUT
+    # 5. BỐ TRÍ LAYOUT TAB
     # ==========================================
     col1, col2 = st.columns([1.3, 1], gap="large")
 
@@ -317,10 +315,10 @@ if df is not None:
         # TAB 1: LÝ THUYẾT CHI TIẾT
         with tab_theory:
             st.markdown("##### 🛒 1. Nhập môn Kinh tế Vĩ mô: CPI & Lạm phát là gì?")
-            st.caption("Hãy bắt đầu bằng một ví dụ thực tế trong cuộc sống hàng ngày:")
+            st.caption("Ví dụ trực quan về biến động sức mua thực tế:")
             
             st.markdown("""
-            <div class="glass-card" style="border-left: 4px solid #00FFCC;">
+            <div class="glass-card" style="border-left: 4px solid #10B981;">
                 <p style="font-size: 13px; color: #E2E8F0; margin: 0; line-height: 1.6;">
                     💡 <b>Ví dụ trực quan:</b> Giả sử năm ngoái bạn mang <b>100.000 VNĐ</b> đi chợ mua được <b>2 bát phở</b>. Năm nay, vẫn cầm 100.000 VNĐ đó bạn chỉ mua được <b>1 bát phở và 1 ly trà đá</b>.
                     <br>&rarr; Đồng tiền của bạn đã bị giảm sức mua. Sự suy giảm sức mua đó chính là <b>Lạm phát</b>, và công cụ để tính toán chính xác mức độ tăng giá phở/trà đá đó là <b>Chỉ số CPI</b>.
@@ -332,24 +330,24 @@ if df is not None:
             with c_th1:
                 st.markdown("""
                 <div class="glass-card" style="height: 100%;">
-                    <h6 style="color: #00FFCC; margin-top:0; font-size: 14px;">🧺 CPI (Consumer Price Index)</h6>
-                    <span style="background: rgba(0,255,204,0.1); color: #00FFCC; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">THƯỚC ĐO TĨNH</span>
+                    <h6 style="color: #10B981; margin-top:0; font-size: 14px;">🧺 CPI (Consumer Price Index)</h6>
+                    <span style="background: rgba(16,185,129,0.1); color: #10B981; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">THƯỚC ĐO TĨNH</span>
                     <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
                         • <b>Tên gọi:</b> Chỉ số Giá tiêu dùng.<br>
-                        • <b>Bản chất:</b> Hãy tưởng tượng Tổng cục Thống kê (GSO) gom khoảng 752 mặt hàng thiết yếu (Gạo, thịt, xăng, điện, học phí, y tế...) vào một <b>"Chiếc Giỏ Hàng Chuẩn"</b>.<br>
-                        • <b>Cách hoạt động:</b> Định kỳ hàng tháng, GSO đi cộng tổng số tiền cần thiết để mua trọn vẹn "Chiếc Giỏ Hàng" này. Sự chênh lệch tổng số tiền so với gốc gọi là Chỉ số CPI.
+                        • <b>Bản chất:</b> Tưởng tượng Tổng cục Thống kê (GSO) gom khoảng 752 mặt hàng thiết yếu vào một <b>"Chiếc Giỏ Hàng Chuẩn"</b>.<br>
+                        • <b>Cách hoạt động:</b> Định kỳ hàng tháng, GSO đi cộng tổng số tiền cần thiết để mua "Giỏ Hàng" này. Sự chênh lệch tổng số tiền so với gốc gọi là CPI.
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
             with c_th2:
                 st.markdown("""
                 <div class="glass-card" style="height: 100%;">
-                    <h6 style="color: #FF007A; margin-top:0; font-size: 14px;">🎈 Lạm phát (Inflation)</h6>
-                    <span style="background: rgba(255,0,122,0.1); color: #FF007A; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">TỐC ĐỘ TĂNG TRƯỞNG</span>
+                    <h6 style="color: #F43F5E; margin-top:0; font-size: 14px;">🎈 Lạm phát (Inflation)</h6>
+                    <span style="background: rgba(244,63,94,0.1); color: #F43F5E; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">TỐC ĐỘ TĂNG TRƯỞNG</span>
                     <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
                         • <b>Bản chất:</b> Là <b>tốc độ biến động (%)</b> của mặt bằng giá chung theo thời gian.<br>
-                        • <b>Mối đe dọa:</b> Lạm phát nhẹ (2-3%/năm) kích thích sản xuất kinh doanh. Nhưng nếu lạm phát quá cao, lương người lao động không theo kịp giá hàng hóa, gây mất giá đồng tiền.<br>
-                        • <b>Nguyên nhân chính:</b> Do chi phí đầu vào tăng (Dầu khí, tỷ giá) hoặc do lượng tiền bơm ra thị trường vượt quá hàng hóa.
+                        • <b>Mối đe dọa:</b> Lạm phát nhẹ (2-3%/năm) kích thích sản xuất. Nhưng lạm phát quá cao làm giảm giá trị tiền lương, gây mất giá đồng tiền.<br>
+                        • <b>Nguyên nhân chính:</b> Do chi phí đầu vào tăng (Dầu khí, tỷ giá) hoặc do lượng cung tiền lớn.
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -359,45 +357,44 @@ if df is not None:
             
             st.markdown("""
             * **CPI là biến đầu vào → Lạm phát là kết quả đầu ra:** 
-              CPI đóng vai trò như một "thước đo độ cao". Tỷ lệ Lạm phát chính là "tốc độ mà độ cao đó gia tăng". Lạm phát so với cùng kỳ năm trước (YoY - Year on Year) được tính bằng công thức toán học:
+              CPI đóng vai trò như thước đo độ cao. Tỷ lệ Lạm phát chính là tốc độ mà độ cao đó gia tăng (YoY - Year on Year):
             """)
             
             st.latex(r"\text{Tỷ lệ Lạm phát (YoY)} = \frac{\text{CPI}_{\text{Kỳ này}} - \text{CPI}_{\text{Cùng kỳ năm ngoái}}}{\text{CPI}_{\text{Cùng kỳ năm ngoái}}} \times 100\%")
 
             st.markdown("""
             <div class="glass-card" style="margin-top: 12px; padding: 16px;">
-                <b style="color: #00FFCC; font-size: 13px;">📖 Giải thích chi tiết từng ký hiệu trong công thức:</b>
+                <b style="color: #10B981; font-size: 13px;">📖 Giải thích chi tiết ký hiệu công thức:</b>
                 <ul style="font-size: 12px; color: #CBD5E1; margin-top: 10px; margin-bottom: 0; padding-left: 20px; line-height: 1.8;">
-                    <li><b>Tỷ lệ Lạm phát (YoY):</b> Chỉ số đo lường mức độ gia tăng giá cả so với cùng kỳ năm trước (<i>Year-on-Year</i>), tính bằng đơn vị phần trăm (%).</li>
-                    <li><b>CPI<sub>Kỳ này</sub>:</b> Chỉ số CPI thu thập tại thời điểm hiện tại cần tính toán.</li>
-                    <li><b>CPI<sub>Cùng kỳ năm ngoái</sub>:</b> Chỉ số CPI thu thập đúng vào tháng này nhưng của 1 năm trước.</li>
-                    <li><b>Thao tác trừ (CPI<sub>Kỳ này</sub> − CPI<sub>Cùng kỳ</sub>):</b> Đo lường mức độ biến động tuyệt đối (tăng hoặc giảm bao nhiêu điểm chỉ số).</li>
-                    <li><b>Thao tác chia cho CPI<sub>Cùng kỳ</sub>:</b> Đưa mức chênh lệch tuyệt đối về dạng tốc độ tăng trưởng tương đối.</li>
-                    <li><b>× 100%:</b> Quy đổi giá trị tương đối thành dạng tỷ lệ phần trăm (%) chuẩn hóa.</li>
+                    <li><b>Tỷ lệ Lạm phát (YoY):</b> Mức độ gia tăng giá cả so với cùng kỳ năm trước, tính bằng %.</li>
+                    <li><b>CPI<sub>Kỳ này</sub>:</b> Chỉ số CPI thu thập tại thời điểm hiện tại.</li>
+                    <li><b>CPI<sub>Cùng kỳ năm ngoái</sub>:</b> Chỉ số CPI thu thập đúng vào tháng này của 1 năm trước.</li>
+                    <li><b>Thao tác trừ:</b> Đo lường mức độ biến động tuyệt đối về điểm số.</li>
+                    <li><b>Thao tác chia & nhân 100%:</b> Quy đổi về tỷ lệ phần trăm (%) chuẩn hóa.</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
 
             st.markdown("""
             * **Cơ chế tác động 2 chiều:**
-              1. **Chiều thuận (Tác động thực tế):** Giá các mặt hàng chiến lược (Giá Dầu, Tỷ giá USD/VND) tăng → Chi phí sản xuất & vận chuyển tăng → **CPI tăng** → **Lạm phát tăng**.
-              2. **Chiều ngược (Vòng xoáy kỳ vọng):** Người dân *nghĩ* lạm phát sẽ cao trong tương lai → Ồ ạt rút tiền mua tài sản tích trữ (BĐS, Vàng, Hàng hóa) → Lực cầu tăng đột biến → **Tiếp tục đẩy CPI tăng mạnh hơn**.
+              1. **Chiều thuận:** Giá các mặt hàng chiến lược (Dầu, Tỷ giá USD/VND) tăng → Chi phí sản xuất & vận chuyển tăng → **CPI tăng** → **Lạm phát tăng**.
+              2. **Chiều ngược:** Người dân kỳ vọng lạm phát cao → Ồ ạt mua tài sản tích trữ (BĐS, Vàng) → Lực cầu tăng đột biến → **Tiếp tục đẩy CPI tăng**.
             """)
 
             st.markdown("---")
-            st.markdown("##### 🚀 3. Tại sao Bài toán Đề tài cần 'Dự báo Đa nguồn Thời gian thực'?")
+            st.markdown("##### 🚀 3. Tại sao cần 'Dự báo Đa nguồn Thời gian thực'?")
             st.markdown("""
-            <div class="glass-card" style="background: rgba(0, 255, 204, 0.015); border: 1px solid rgba(0, 255, 204, 0.2);">
-                <b style="color: #FF4B4B; font-size: 13px;">⚠️ Hạn chế chết người của Phương pháp Thống kê Truyền thống:</b>
+            <div class="glass-card" style="background: rgba(16, 185, 129, 0.02); border: 1px solid rgba(16, 185, 129, 0.15);">
+                <b style="color: #F43F5E; font-size: 13px;">⚠️ Hạn chế của Phương pháp Thống kê Truyền thống:</b>
                 <p style="font-size: 12px; color: #94A3B8; margin-top: 4px; line-height: 1.5;">
-                    Tổng cục Thống kê (GSO) chỉ công bố CPI <b>mỗi tháng 1 lần (độ trễ khoảng 30 ngày)</b>. Nếu ngày 05 xảy ra chiến tranh làm giá dầu thế giới tăng vọt 30%, Chính phủ & Nhà đầu tư không thể chờ đến ngày 30 mới biết lạm phát ảnh hưởng thế nào để điều hành tiền tệ.
+                    Báo cáo CPI chính thức thường chỉ công bố <b>mỗi tháng 1 lần (với độ trễ 20-30 ngày)</b>. Khi có cú sốc giá dầu thế giới, chính sách cần thông tin ngay lập tức chứ không thể chờ đến cuối tháng.
                 </p>
-                <b style="color: #00FFCC; font-size: 13px;">💡 Giải pháp Đột phá của Mô hình (Real-Time Multi-Source Nowcasting):</b>
+                <b style="color: #10B981; font-size: 13px;">💡 Giải pháp Nowcasting Đa nguồn (Real-Time AI):</b>
                 <p style="font-size: 12px; color: #CBD5E1; margin-top: 4px; line-height: 1.6;">
-                    Thay vì thụ động chờ báo cáo tháng, ứng dụng thu thập dữ liệu <b>ĐA NGUỒN</b> liên tục từng giờ:
-                    <br>1. <b>Nguồn Tần suất cao (Cập nhật hàng ngày):</b> Giá Dầu WTI/Brent, Tỷ giá USD/VND, Giá Vàng, Chỉ số Nông sản toàn cầu.
-                    <br>2. <b>Nguồn Dữ liệu Lịch sử (Tần suất thấp):</b> Chuỗi CPI chính thống của GSO qua các năm để làm mốc so sánh.
-                    <br>3. <b>Trí tuệ Nhân tạo (RAG + AI Engine):</b> Quét tin tức vĩ mô, văn bản điều hành chính sách tiền tệ để đưa ra <b>Dự báo CPI tức thời (Nowcasting)</b>, giúp xóa bỏ độ trễ 30 ngày.
+                    Ứng dụng kết hợp <b>3 tầng dữ liệu</b> liên tục:
+                    <br>1. <b>Nguồn Tần suất cao (Cập nhật hàng ngày):</b> Giá Dầu WTI/Brent, Tỷ giá USD/VND, Giá Vàng.
+                    <br>2. <b>Nguồn Dữ liệu Lịch sử:</b> Chuỗi CPI chính thống của GSO để làm mốc nền tảng.
+                    <br>3. <b>Trí tuệ Nhân tạo (RAG + LLM):</b> Truy xuất văn bản điều hành vĩ mô để tính toán <b>Dự báo CPI tức thời</b>, loại bỏ hoàn toàn độ trễ báo cáo.
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -409,13 +406,13 @@ if df is not None:
             fig.add_trace(go.Scatter(
                 x=df_active['Ngay'], y=df_active[data_column],
                 mode='lines', name=data_column,
-                line=dict(color='#00FFCC', width=3)
+                line=dict(color='#10B981', width=3)
             ))
             if show_sma:
                 fig.add_trace(go.Scatter(
                     x=df_active['Ngay'], y=df_active['SMA12'],
                     mode='lines', name='SMA 12 Tháng',
-                    line=dict(color='#FF007A', width=2, dash='dot')
+                    line=dict(color='#F43F5E', width=2, dash='dot')
                 ))
 
             fig.update_layout(
@@ -436,7 +433,7 @@ if df is not None:
             formatted_annual_table = df_annual_grouped.style.format({
                 'Năm': '{:.0f}',
                 f'Chỉ số {data_column} Trung Bình': '{:.2f}'
-            }).background_gradient(subset=[f'Chỉ số {data_column} Trung Bình'], cmap="viridis")
+            }).background_gradient(subset=[f'Chỉ số {data_column} Trung Bình'], cmap="mako")
             
             st.dataframe(formatted_annual_table, use_container_width=True, height=280, hide_index=True)
             
@@ -467,7 +464,7 @@ if df is not None:
             st.markdown(f"""
                 <div class="glass-card" style="margin-top:10px; margin-bottom:15px;">
                     <div style="font-size:13px; color:#8F9CAE;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
-                    <div style="font-size:24px; font-weight:700; color:{'#FF4B4B' if sim_impact > 0 else '#00FFCC'};">
+                    <div style="font-size:24px; font-weight:700; color:{'#F43F5E' if sim_impact > 0 else '#10B981'};">
                         {sim_impact:+.2f}% &rarr; ~{projected_cpi:,.2f} điểm
                     </div>
                     <small style="color:#64748B;">Mô hình ước lượng dựa trên trọng số biến động năng lượng & hàng hóa nhập khẩu.</small>
@@ -476,9 +473,9 @@ if df is not None:
 
             st.markdown("##### 📋 Phân tích Cơ chế Tác động Chi tiết")
             
-            oil_color = "#FF4B4B" if oil_impact > 0 else ("#00FFCC" if oil_impact < 0 else "#94A3B8")
-            fx_color = "#FF4B4B" if fx_impact > 0 else ("#00FFCC" if fx_impact < 0 else "#94A3B8")
-            total_color = "#FF4B4B" if sim_impact > 0 else ("#00FFCC" if sim_impact < 0 else "#94A3B8")
+            oil_color = "#F43F5E" if oil_impact > 0 else ("#10B981" if oil_impact < 0 else "#94A3B8")
+            fx_color = "#F43F5E" if fx_impact > 0 else ("#10B981" if fx_impact < 0 else "#94A3B8")
+            total_color = "#F43F5E" if sim_impact > 0 else ("#10B981" if sim_impact < 0 else "#94A3B8")
 
             table_html = f"""
             <style>
@@ -494,8 +491,8 @@ if df is not None:
                     margin-top: 8px;
                 }}
                 .explain-table th {{
-                    background: rgba(0, 255, 204, 0.08);
-                    color: #00FFCC;
+                    background: rgba(16, 185, 129, 0.08);
+                    color: #10B981;
                     padding: 10px 12px;
                     text-align: left;
                     font-weight: 700;
@@ -540,7 +537,7 @@ if df is not None:
                         <td style="color: {fx_color}; font-weight: 700;">{fx_impact:+.2f}%</td>
                         <td>Tạo áp lực 'Nhập khẩu lạm phát' (Imported Inflation), làm tăng chi phí nguyên vật liệu, máy móc & hàng hóa đầu vào.</td>
                     </tr>
-                    <tr style="background: rgba(0, 255, 204, 0.03);">
+                    <tr style="background: rgba(16, 185, 129, 0.03);">
                         <td><b>📊 Tổng hợp Stress-Test</b></td>
                         <td style="color: #94A3B8;">—</td>
                         <td style="color: #94A3B8;">—</td>
