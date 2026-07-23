@@ -399,6 +399,7 @@ if df is not None:
             </div>
             """, unsafe_allow_html=True)
 
+        # TAB 2: BIỂU ĐỒ CHU KỲ
         with tab_chart:
             show_sma = st.checkbox("Hiển thị Đường trung bình động SMA (12 tháng)", value=True)
             
@@ -428,12 +429,15 @@ if df is not None:
             
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
+        # TAB 3: BẢNG NIÊN ĐỘ (ĐÃ SỬA LỖI COLORMAP MATPLOTLIB)
         with tab_table:
             st.markdown("##### Số liệu trung bình từng năm")
+            
+            # ĐÃ ĐỔI `cmap="mako"` THÀNH `cmap="Viridis"` ĐỂ ĐẢM BẢO COMPATIBILITY 100% TRÊN STREAMLIT CLOUD
             formatted_annual_table = df_annual_grouped.style.format({
                 'Năm': '{:.0f}',
                 f'Chỉ số {data_column} Trung Bình': '{:.2f}'
-            }).background_gradient(subset=[f'Chỉ số {data_column} Trung Bình'], cmap="mako")
+            }).background_gradient(subset=[f'Chỉ số {data_column} Trung Bình'], cmap="Viridis")
             
             st.dataframe(formatted_annual_table, use_container_width=True, height=280, hide_index=True)
             
@@ -446,6 +450,7 @@ if df is not None:
                 use_container_width=True
             )
 
+        # TAB 4: MÔ PHỎNG KỊCH BẢN
         with tab_sim:
             st.markdown("##### 🧪 Stress-Test Áp lực Lạm phát")
             st.caption("Điều chỉnh tham số giả định để mô phỏng tác động:")
@@ -549,6 +554,7 @@ if df is not None:
             """
             st.markdown(table_html, unsafe_allow_html=True)
 
+        # TAB 5: HIGHLIGHT VĨ MÔ
         with tab_insights:
             st.markdown("##### 📌 Tóm tắt Điểm nóng Vĩ mô")
             st.markdown(f"""
@@ -557,7 +563,9 @@ if df is not None:
             * **Xu hướng trung hạn:** Đường SMA 12 tháng đang {'đi lên' if df_active['SMA12'].iloc[-1] > df_active['SMA12'].iloc[-6] else 'đi ngang/giảm'}, phản ánh áp lực chu kỳ tích lũy.
             """)
 
-    # --- CỘT PHẢI: AI ASSISTANT ---
+    # ==========================================
+    # 6. CỘT PHẢI: AI ASSISTANT
+    # ==========================================
     with col2:
         st.markdown("### 🤖 Trợ lý AI Phân tích & Dự báo Lạm phát")
         
