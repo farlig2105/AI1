@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS ĐỘT PHÁ - PHONG CÁCH SEGMENTED CONTROL (SHADCN / LINEAR UI)
+# CSS ĐỘT PHÁ - PHONG CÁCH SEGMENTED CONTROL & TABLES NÂNG CẤP
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -67,10 +67,8 @@ st.markdown("""
         }
         
         /* =========================================================
-           THIẾT KẾ TAB MỚI: SEGMENTED CONTROL CỰC ĐẸP (NO RED LINE)
+           THIẾT KẾ TAB MỚI: SEGMENTED CONTROL CỰC ĐẸP
            ========================================================= */
-        
-        /* 1. Xóa bỏ triệt để thanh gạch chân màu đỏ & xám mặc định */
         div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
         div[data-testid="stTabs"] [data-baseweb="tab-border-bar"],
         div[data-testid="stTabs"] [role="tablist"]::after {
@@ -80,7 +78,6 @@ st.markdown("""
             border: none !important;
         }
 
-        /* 2. Khung chứa danh sách Tab (Thanh trượt Segmented Control) */
         div[data-testid="stTabs"] [role="tablist"],
         div[data-testid="stTabs"] [data-baseweb="tab-list"] {
             display: flex !important;
@@ -94,10 +91,9 @@ st.markdown("""
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
         }
 
-        /* 3. Thẻ Tab dạng Nút bấm bo góc đối xứng 100% */
         div[data-testid="stTabs"] button[role="tab"],
         div[data-testid="stTabs"] [data-baseweb="tab"] {
-            flex: 1 1 0% !important; /* Ép giãn đều 100% đối xứng */
+            flex: 1 1 0% !important;
             width: 100% !important;
             height: 44px !important;
             border-radius: 10px !important;
@@ -112,7 +108,6 @@ st.markdown("""
             border-bottom: none !important;
         }
 
-        /* Chữ trong Tab mặc định */
         div[data-testid="stTabs"] button[role="tab"] p,
         div[data-testid="stTabs"] button[role="tab"] span {
             color: #94A3B8 !important;
@@ -123,7 +118,6 @@ st.markdown("""
             white-space: nowrap !important;
         }
 
-        /* 4. Hiệu ứng Hover */
         div[data-testid="stTabs"] button[role="tab"]:hover {
             background: rgba(255, 255, 255, 0.04) !important;
         }
@@ -131,7 +125,6 @@ st.markdown("""
             color: #F8FAFC !important;
         }
 
-        /* 5. TAB ĐƯỢC CHỌN (ACTIVE) - Gradient Emerald sang Cyan */
         div[data-testid="stTabs"] button[role="tab"][aria-selected="true"],
         div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] {
             background: linear-gradient(135deg, #0D9488 0%, #0284C7 100%) !important;
@@ -139,7 +132,6 @@ st.markdown("""
             border-bottom: none !important;
         }
 
-        /* Chữ của Active Tab */
         div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
         div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] span {
             color: #FFFFFF !important;
@@ -429,17 +421,95 @@ if df is not None:
             
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # TAB 3: BẢNG NIÊN ĐỘ (ĐÃ TỐI ƯU CỰC CHUẨN BANG MÀU "Greens")
+        # TAB 3: BẢNG NIÊN ĐỘ (TỐI ƯU CÂN ĐỐI & MÀU SẮC DỄ NHÌN)
         with tab_table:
-            st.markdown("##### Số liệu trung bình từng năm")
+            st.markdown("##### 📊 Số liệu CPI trung bình từng năm")
             
-            # Sử dụng 'Greens' để đảm bảo tương thích 100% với Matplotlib
-            formatted_annual_table = df_annual_grouped.style.format({
-                'Năm': '{:.0f}',
-                f'Chỉ số {data_column} Trung Bình': '{:.2f}'
-            }).background_gradient(subset=[f'Chỉ số {data_column} Trung Bình'], cmap="Greens")
+            min_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].min()
+            max_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].max()
+            cpi_range = max_cpi - min_cpi if max_cpi != min_cpi else 1
             
-            st.dataframe(formatted_annual_table, use_container_width=True, height=280, hide_index=True)
+            rows_html = ""
+            for idx, row in df_annual_grouped.iterrows():
+                year = int(row['Năm'])
+                val = row[f'Chỉ số {data_column} Trung Bình']
+                pct = 25 + ((val - min_cpi) / cpi_range) * 75
+                
+                rows_html += f"""
+                <tr>
+                    <td style="text-align: center; font-weight: 700; color: #F8FAFC;">
+                        <span style="background: rgba(16, 185, 129, 0.12); color: #34D399; padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(52, 211, 153, 0.25); font-size: 13px; display: inline-block;">
+                            {year}
+                        </span>
+                    </td>
+                    <td style="text-align: right; font-weight: 800; color: #10B981; font-size: 15px; padding-right: 20px;">
+                        {val:,.2f}
+                    </td>
+                    <td style="vertical-align: middle; padding-left: 15px; padding-right: 15px;">
+                        <div style="background: rgba(255, 255, 255, 0.06); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05);">
+                            <div style="width: {pct:.1f}%; height: 100%; background: linear-gradient(90deg, #059669 0%, #10B981 50%, #34D399 100%); border-radius: 10px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);"></div>
+                        </div>
+                    </td>
+                </tr>
+                """
+
+            table_html = f"""
+            <style>
+                .custom-cpi-table-container {{
+                    border-radius: 14px;
+                    overflow: hidden;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+                    margin-bottom: 20px;
+                    background: #111827;
+                }}
+                .custom-cpi-table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 13px;
+                    color: #F1F5F9;
+                }}
+                .custom-cpi-table th {{
+                    background: #1E293B;
+                    color: #34D399;
+                    padding: 14px 16px;
+                    font-weight: 700;
+                    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+                    text-transform: uppercase;
+                    letter-spacing: 0.8px;
+                    font-size: 11px;
+                }}
+                .custom-cpi-table tr {{
+                    transition: background 0.2s ease;
+                }}
+                .custom-cpi-table tr:nth-child(even) {{
+                    background: rgba(255, 255, 255, 0.02);
+                }}
+                .custom-cpi-table tr:hover {{
+                    background: rgba(16, 185, 129, 0.08) !important;
+                }}
+                .custom-cpi-table td {{
+                    padding: 13px 16px;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                    vertical-align: middle;
+                }}
+            </style>
+            <div class="custom-cpi-table-container">
+                <table class="custom-cpi-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center; width: 22%;">Năm</th>
+                            <th style="text-align: right; width: 38%; padding-right: 20px;">CPI Trung Bình</th>
+                            <th style="text-align: left; width: 40%; padding-left: 15px;">Mức độ Tương quan Chu kỳ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows_html}
+                    </tbody>
+                </table>
+            </div>
+            """
+            st.markdown(table_html, unsafe_allow_html=True)
             
             csv_data = df_active.to_csv(index=False).encode('utf-8')
             st.download_button(
@@ -450,7 +520,7 @@ if df is not None:
                 use_container_width=True
             )
 
-        # TAB 4: MÔ PHỎNG KỊCH BẢN
+        # TAB 4: MÔ PHỎNG KỊCH BẢN (CẬP NHẬT BẢNG MÀU TƯƠNG PHẢN CAO)
         with tab_sim:
             st.markdown("##### 🧪 Stress-Test Áp lực Lạm phát")
             st.caption("Điều chỉnh tham số giả định để mô phỏng tác động:")
@@ -467,9 +537,9 @@ if df is not None:
             projected_cpi = current_val * (1 + sim_impact/100)
             
             st.markdown(f"""
-                <div class="glass-card" style="margin-top:10px; margin-bottom:15px;">
-                    <div style="font-size:13px; color:#8F9CAE;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
-                    <div style="font-size:24px; font-weight:700; color:{'#F43F5E' if sim_impact > 0 else '#10B981'};">
+                <div class="glass-card" style="margin-top:10px; margin-bottom:15px; border-left: 4px solid {'#F43F5E' if sim_impact > 0 else '#10B981'};">
+                    <div style="font-size:12px; color:#94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
+                    <div style="font-size:26px; font-weight:800; color:{'#FB7185' if sim_impact > 0 else '#34D399'}; margin: 4px 0;">
                         {sim_impact:+.2f}% &rarr; ~{projected_cpi:,.2f} điểm
                     </div>
                     <small style="color:#64748B;">Mô hình ước lượng dựa trên trọng số biến động năng lượng & hàng hóa nhập khẩu.</small>
@@ -478,79 +548,107 @@ if df is not None:
 
             st.markdown("##### 📋 Phân tích Cơ chế Tác động Chi tiết")
             
-            oil_color = "#F43F5E" if oil_impact > 0 else ("#10B981" if oil_impact < 0 else "#94A3B8")
-            fx_color = "#F43F5E" if fx_impact > 0 else ("#10B981" if fx_impact < 0 else "#94A3B8")
-            total_color = "#F43F5E" if sim_impact > 0 else ("#10B981" if sim_impact < 0 else "#94A3B8")
+            oil_color = "#FB7185" if oil_impact > 0 else ("#34D399" if oil_impact < 0 else "#94A3B8")
+            oil_bg = "rgba(244, 63, 94, 0.12)" if oil_impact > 0 else ("rgba(16, 185, 129, 0.12)" if oil_impact < 0 else "rgba(148, 163, 184, 0.1)")
+            
+            fx_color = "#FB7185" if fx_impact > 0 else ("#34D399" if fx_impact < 0 else "#94A3B8")
+            fx_bg = "rgba(244, 63, 94, 0.12)" if fx_impact > 0 else ("rgba(16, 185, 129, 0.12)" if fx_impact < 0 else "rgba(148, 163, 184, 0.1)")
+            
+            total_color = "#FB7185" if sim_impact > 0 else ("#34D399" if sim_impact < 0 else "#94A3B8")
+            total_bg = "rgba(244, 63, 94, 0.18)" if sim_impact > 0 else ("rgba(16, 185, 129, 0.18)" if sim_impact < 0 else "rgba(148, 163, 184, 0.1)")
 
             table_html = f"""
             <style>
+                .explain-table-container {{
+                    border-radius: 14px;
+                    overflow: hidden;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+                    margin-top: 10px;
+                    background: #111827;
+                }}
                 .explain-table {{
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 12px;
-                    color: #E2E8F0;
-                    background: rgba(255, 255, 255, 0.02);
-                    border-radius: 10px;
-                    overflow: hidden;
-                    border: 1px solid rgba(255, 255, 255, 0.08);
-                    margin-top: 8px;
+                    font-size: 13px;
+                    color: #F1F5F9;
                 }}
                 .explain-table th {{
-                    background: rgba(16, 185, 129, 0.08);
-                    color: #10B981;
-                    padding: 10px 12px;
+                    background: #1E293B;
+                    color: #34D399;
+                    padding: 12px 14px;
                     text-align: left;
                     font-weight: 700;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
                     text-transform: uppercase;
-                    letter-spacing: 0.5px;
+                    letter-spacing: 0.6px;
+                    font-size: 11px;
                 }}
                 .explain-table td {{
-                    padding: 10px 12px;
+                    padding: 13px 14px;
                     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                    vertical-align: top;
-                    white-space: normal !important;
-                    word-wrap: break-word !important;
+                    vertical-align: middle;
                     line-height: 1.5;
                 }}
                 .explain-table tr:hover {{
-                    background: rgba(255, 255, 255, 0.04);
+                    background: rgba(255, 255, 255, 0.03);
+                }}
+                .badge-value {{
+                    display: inline-block;
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                    font-weight: 700;
+                    font-size: 12px;
                 }}
             </style>
-            <table class="explain-table">
-                <thead>
-                    <tr>
-                        <th style="width: 22%;">Biến số Vĩ mô</th>
-                        <th style="width: 15%;">Mức điều chỉnh</th>
-                        <th style="width: 12%;">Trọng số</th>
-                        <th style="width: 15%;">Đóng góp CPI</th>
-                        <th style="width: 36%;">Cơ chế truyền dẫn & Tác động thực tế</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><b>🛢️ Giá Dầu WTI</b></td>
-                        <td style="color: {oil_color}; font-weight: 600;">{oil_sim:+d}%</td>
-                        <td>0.04</td>
-                        <td style="color: {oil_color}; font-weight: 700;">{oil_impact:+.2f}%</td>
-                        <td>Ảnh hưởng trực tiếp đến nhóm Giao thông (xăng dầu), lan tỏa sang chi phí vận tải, logistics và giá thành sản xuất hàng hóa.</td>
-                    </tr>
-                    <tr>
-                        <td><b>💵 Tỷ giá USD/VND</b></td>
-                        <td style="color: {fx_color}; font-weight: 600;">{fx_sim:+d}%</td>
-                        <td>0.11</td>
-                        <td style="color: {fx_color}; font-weight: 700;">{fx_impact:+.2f}%</td>
-                        <td>Tạo áp lực 'Nhập khẩu lạm phát' (Imported Inflation), làm tăng chi phí nguyên vật liệu, máy móc & hàng hóa đầu vào.</td>
-                    </tr>
-                    <tr style="background: rgba(16, 185, 129, 0.03);">
-                        <td><b>📊 Tổng hợp Stress-Test</b></td>
-                        <td style="color: #94A3B8;">—</td>
-                        <td style="color: #94A3B8;">—</td>
-                        <td style="color: {total_color}; font-weight: 800; font-size: 13px;">{sim_impact:+.2f}%</td>
-                        <td>Tổng hợp các biến số khiến chỉ số {data_column} dự báo {'tăng' if sim_impact > 0 else 'giảm'} {abs(sim_impact):.2f}%, đạt mức ~{projected_cpi:,.2f} điểm.</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="explain-table-container">
+                <table class="explain-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Biến số Vĩ mô</th>
+                            <th style="width: 15%; text-align: center;">Điều chỉnh</th>
+                            <th style="width: 12%; text-align: center;">Trọng số</th>
+                            <th style="width: 16%; text-align: center;">Đóng góp CPI</th>
+                            <th style="width: 37%;">Cơ chế truyền dẫn & Tác động thực tế</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><b style="color: #F8FAFC;">🛢️ Giá Dầu WTI</b></td>
+                            <td style="text-align: center;">
+                                <span class="badge-value" style="background: {oil_bg}; color: {oil_color}; border: 1px solid {oil_color}40;">{oil_sim:+d}%</span>
+                            </td>
+                            <td style="text-align: center; color: #94A3B8; font-weight: 600;">0.04</td>
+                            <td style="text-align: center;">
+                                <span class="badge-value" style="background: {oil_bg}; color: {oil_color}; font-size: 13px;">{oil_impact:+.2f}%</span>
+                            </td>
+                            <td style="color: #CBD5E1; font-size: 12.5px;">Tác động trực tiếp lên nhóm Giao thông (xăng dầu), lan tỏa sang chi phí vận tải, logistics và giá thành sản xuất hàng hóa.</td>
+                        </tr>
+                        <tr>
+                            <td><b style="color: #F8FAFC;">💵 Tỷ giá USD/VND</b></td>
+                            <td style="text-align: center;">
+                                <span class="badge-value" style="background: {fx_bg}; color: {fx_color}; border: 1px solid {fx_color}40;">{fx_sim:+d}%</span>
+                            </td>
+                            <td style="text-align: center; color: #94A3B8; font-weight: 600;">0.11</td>
+                            <td style="text-align: center;">
+                                <span class="badge-value" style="background: {fx_bg}; color: {fx_color}; font-size: 13px;">{fx_impact:+.2f}%</span>
+                            </td>
+                            <td style="color: #CBD5E1; font-size: 12.5px;">Tạo áp lực "Nhập khẩu lạm phát" (Imported Inflation), làm tăng chi phí nguyên vật liệu, máy móc & hàng hóa đầu vào.</td>
+                        </tr>
+                        <tr style="background: rgba(16, 185, 129, 0.05); border-top: 1px solid rgba(16, 185, 129, 0.2);">
+                            <td><b style="color: #34D399; font-size: 13.5px;">📊 Tổng hợp Stress-Test</b></td>
+                            <td style="text-align: center; color: #64748B;">—</td>
+                            <td style="text-align: center; color: #64748B;">—</td>
+                            <td style="text-align: center;">
+                                <span class="badge-value" style="background: {total_bg}; color: {total_color}; font-size: 14px; border: 1px solid {total_color}50;">{sim_impact:+.2f}%</span>
+                            </td>
+                            <td style="color: #F8FAFC; font-weight: 500; font-size: 12.5px;">
+                                Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">{'tăng' if sim_impact > 0 else 'giảm'} {abs(sim_impact):.2f}%</b>, ước đạt mức <b>~{projected_cpi:,.2f} điểm</b>.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             """
             st.markdown(table_html, unsafe_allow_html=True)
 
@@ -591,93 +689,66 @@ if df is not None:
                         <div style="font-size: 32px; margin-bottom: 5px;">🎈</div>
                         <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Trợ lý AI Phân tích & Dự báo Lạm phát</div>
                         <p style="color: #64748B; font-size: 12px; margin-top: 5px;">
-                            Trả lời trực tiếp, chính xác trọng tâm về <b>Dự báo Lạm phát, CPI</b> và các biến số vĩ mô liên quan. Không lan man.
+                            Đặt câu hỏi phân tích kinh tế vĩ mô hoặc chọn một trong các gợi ý phía trên để bắt đầu.
                         </p>
                     </div>
                 """, unsafe_allow_html=True)
-            else:
-                for message in st.session_state.messages:
-                    with st.chat_message(message["role"]):
-                        st.markdown(message["content"])
 
-        user_input = st.chat_input("Hỏi trực diện về dự báo lạm phát, CPI hoặc vĩ mô...")
-        prompt = clicked_prompt if clicked_prompt else user_input
+            for msg in st.session_state.messages:
+                with st.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
 
-        if prompt:
+        user_input = st.chat_input("Nhập câu hỏi phân tích vĩ mô...")
+        prompt_to_send = clicked_prompt if clicked_prompt else user_input
+
+        if prompt_to_send:
+            st.session_state.messages.append({"role": "user", "content": prompt_to_send})
+            
             with chat_container:
                 with st.chat_message("user"):
-                    st.markdown(prompt)
-            
-            st.session_state.messages.append({"role": "user", "content": prompt})
+                    st.markdown(prompt_to_send)
 
-            recent_monthly_summary = df_active.tail(12).to_string(index=False)
-            annual_summary = df_annual_grouped.to_string(index=False)
+                with st.chat_message("assistant"):
+                    message_placeholder = st.empty()
+                    full_response = ""
 
-            system_instruction = f"""
-            Bạn là một Chuyên gia Phân tích & Dự báo Lạm phát Vĩ mô cấp cao (nghiên cứu sinh/giảng viên chuyên ngành Kinh tế chính trị - Tài chính tại Học viện Tài chính).
+                    try:
+                        client = OpenAI(
+                            base_url=f"{NGROK_STATIC_URL}/v1",
+                            api_key="lm-studio"
+                        )
 
-            🎯 QUY TẮC PHẢN HỒI BẮT BỘC:
-            1. **TRẢ LỜI CHÍNH XÁC TRỌNG TÂM:** 
-               - Đi thẳng vào bản chất câu hỏi của người dùng. Tuyệt đối KHÔNG viết lời chào mừng, KHÔNG mở bài xã giao.
-               - Không đưa ra các thông tin ngoài phạm vi câu hỏi. Câu trả lời phải súc tích, đắt giá, luận điểm rõ ràng.
+                        system_prompt = f"""
+                        Bạn là Chuyên gia Phân tích Kinh tế Vĩ mô & Dự báo Lạm phát chuyên sâu tại Việt Nam.
+                        Dữ liệu vĩ mô hiện tại trong hệ thống:
+                        - Chỉ số {data_column} gần nhất: {current_val:,.2f}
+                        - Mức tăng so với cùng kỳ năm trước (YoY): {yoy_change:+.2f}%
+                        - Đỉnh lịch sử ({label_suffix}): {max_val:,.2f} (Tháng {max_date})
+                        - Đáy lịch sử ({label_suffix}): {min_val:,.2f} (Tháng {min_date})
 
-            2. **TRỌNG TÂM CỐT LÕI - LẠM PHÁT & CPI:**
-               - Trọng tâm công việc chính của bạn là phân tích, đánh giá và DỰ BÁO LẠM PHÁT / CPI.
-               - Với các câu hỏi vĩ mô liên quan (Tỷ giá, Lãi suất, Giá dầu...), hãy trả lời chính xác và chốt lại tác động tới áp lực lạm phát của Việt Nam.
+                        Yêu cầu: Hãy trả lời ngắn gọn, lập luận logic, mang tính chuyên môn cao và dựa sát vào số liệu trên.
+                        """
 
-            3. **CẤU TRÚC PHẢN HỒI:**
-               - Bắt đầu ngay bằng KẾT LUẬN hoặc CÂU TRẢ LỜI TRỰC TIẾP ở ngay câu đầu tiên.
-               - Trình bày các luận điểm minh chứng bằng các gạch đầu dòng ngắn gọn.
+                        messages_payload = [{"role": "system", "content": system_prompt}] + [
+                            {"role": m["role"], "content": m["content"]}
+                            for m in st.session_state.messages
+                        ]
 
-            📊 DỮ LIỆU VĨ MÔ THỰC TẾ CUNG CẤP:
-            
-            - TRUNG BÌNH THEO NĂM:
-            {annual_summary}
-            
-            - CHI TIẾT 12 THÁNG GẦN NHẤT:
-            {recent_monthly_summary}
-            """
-
-            clean_url = NGROK_STATIC_URL.strip().rstrip('/')
-            
-            try:
-                client = OpenAI(
-                    base_url=f"{clean_url}/v1",
-                    api_key="lm-studio"
-                )
-
-                with chat_container:
-                    status_placeholder = st.empty()
-                    with status_placeholder.status("⚙️ Đang xử lý câu hỏi...", expanded=False) as status:
-                        time.sleep(0.2)
-                        status.update(label="🧮 Đang truy xuất dữ liệu & dự báo...", state="running")
-                        
                         response = client.chat.completions.create(
                             model="local-model",
-                            messages=[
-                                {"role": "system", "content": system_instruction},
-                                *st.session_state.messages
-                            ],
-                            temperature=0.1
+                            messages=messages_payload,
+                            stream=True
                         )
-                        ai_response = response.choices[0].message.content
-                        status.update(label="Hoàn tất!", state="complete")
-                    
-                    status_placeholder.empty()
 
-                with chat_container:
-                    with st.chat_message("assistant"):
-                        st.markdown(ai_response)
-                
-                st.session_state.messages.append({"role": "assistant", "content": ai_response})
-                st.rerun()
-                
-            except Exception as e:
-                st.error("⚠️ Không thể kết nối với AI Engine. Vui lòng kiểm tra lại Ngrok / LM Studio!")
+                        for chunk in response:
+                            if chunk.choices[0].delta.content is not None:
+                                full_response += chunk.choices[0].delta.content
+                                message_placeholder.markdown(full_response + "▌")
+                        message_placeholder.markdown(full_response)
 
-        with st.expander("📚 Nguồn Dữ liệu & Tri thức RAG"):
-            st.markdown("""
-            * **[GSO]:** Tổng cục Thống kê Việt Nam (*cpi_data.csv*).
-            * **[SBV]:** Ngân hàng Nhà nước Việt Nam.
-            * **[RAG Engine]:** LM Studio Local Vector Indexing.
-            """)
+                    except Exception as e:
+                        full_response = f"⚠️ Lỗi kết nối với Máy chủ AI ({NGROK_STATIC_URL}): {str(e)}"
+                        message_placeholder.error(full_response)
+
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            st.rerun()
