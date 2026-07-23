@@ -429,86 +429,17 @@ if df is not None:
             
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # TAB 3: BẢNG NIÊN ĐỘ
+        # TAB 3: BẢNG NIÊN ĐỘ (ĐÃ TỐI ƯU CỰC CHUẨN BANG MÀU "Greens")
         with tab_table:
-            st.markdown("##### 📊 Số liệu trung bình từng năm")
+            st.markdown("##### Số liệu trung bình từng năm")
             
-            min_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].min()
-            max_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].max()
-            cpi_range = max_cpi - min_cpi if max_cpi != min_cpi else 1
+            # Sử dụng 'Greens' để đảm bảo tương thích 100% với Matplotlib
+            formatted_annual_table = df_annual_grouped.style.format({
+                'Năm': '{:.0f}',
+                f'Chỉ số {data_column} Trung Bình': '{:.2f}'
+            }).background_gradient(subset=[f'Chỉ số {data_column} Trung Bình'], cmap="Greens")
             
-            rows_html = ""
-            for _, row in df_annual_grouped.iterrows():
-                year = int(row['Năm'])
-                val = row[f'Chỉ số {data_column} Trung Bình']
-                pct = 25 + ((val - min_cpi) / cpi_range) * 75
-                
-                rows_html += f"""
-                <tr>
-                    <td style="text-align: center; font-weight: 700; color: #F8FAFC; width: 25%;">
-                        <span style="background: rgba(255, 255, 255, 0.06); padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); font-size: 13px;">
-                            {year}
-                        </span>
-                    </td>
-                    <td style="text-align: right; font-weight: 800; color: #10B981; width: 35%; font-size: 15px; padding-right: 15px;">
-                        {val:,.2f}
-                    </td>
-                    <td style="width: 40%; vertical-align: middle; padding-left: 10px;">
-                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; height: 8px; width: 100%; overflow: hidden;">
-                            <div style="width: {pct:.1f}%; height: 100%; background: linear-gradient(90deg, #0D9488, #10B981); border-radius: 10px;"></div>
-                        </div>
-                    </td>
-                </tr>
-                """
-
-            table_html = f"""
-            <style>
-                .custom-cpi-table {{
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-size: 13px;
-                    color: #E2E8F0;
-                    background: rgba(17, 24, 39, 0.5);
-                    border-radius: 14px;
-                    overflow: hidden;
-                    border: 1px solid rgba(255, 255, 255, 0.08);
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-                    margin-bottom: 20px;
-                }}
-                .custom-cpi-table th {{
-                    background: rgba(16, 185, 129, 0.08);
-                    color: #10B981;
-                    padding: 14px 16px;
-                    font-weight: 700;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-                    text-transform: uppercase;
-                    letter-spacing: 0.6px;
-                    font-size: 11px;
-                }}
-                .custom-cpi-table td {{
-                    padding: 12px 16px;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-                    vertical-align: middle;
-                }}
-                .custom-cpi-table tr:hover {{
-                    background: rgba(16, 185, 129, 0.05);
-                    transition: background 0.2s ease;
-                }}
-            </style>
-            <table class="custom-cpi-table">
-                <thead>
-                    <tr>
-                        <th style="text-align: center; width: 25%;">Năm</th>
-                        <th style="text-align: right; width: 35%; padding-right: 15px;">Chỉ số CPI Trung Bình</th>
-                        <th style="text-align: left; width: 40%; padding-left: 10px;">Mức độ tương quan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows_html}
-                </tbody>
-            </table>
-            """
-            st.markdown(table_html, unsafe_allow_html=True)
+            st.dataframe(formatted_annual_table, use_container_width=True, height=280, hide_index=True)
             
             csv_data = df_active.to_csv(index=False).encode('utf-8')
             st.download_button(
@@ -660,66 +591,93 @@ if df is not None:
                         <div style="font-size: 32px; margin-bottom: 5px;">🎈</div>
                         <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Trợ lý AI Phân tích & Dự báo Lạm phát</div>
                         <p style="color: #64748B; font-size: 12px; margin-top: 5px;">
-                            Đặt câu hỏi phân tích kinh tế vĩ mô hoặc chọn một trong các gợi ý phía trên để bắt đầu.
+                            Trả lời trực tiếp, chính xác trọng tâm về <b>Dự báo Lạm phát, CPI</b> và các biến số vĩ mô liên quan. Không lan man.
                         </p>
                     </div>
                 """, unsafe_allow_html=True)
+            else:
+                for message in st.session_state.messages:
+                    with st.chat_message(message["role"]):
+                        st.markdown(message["content"])
 
-            for msg in st.session_state.messages:
-                with st.chat_message(msg["role"]):
-                    st.markdown(msg["content"])
+        user_input = st.chat_input("Hỏi trực diện về dự báo lạm phát, CPI hoặc vĩ mô...")
+        prompt = clicked_prompt if clicked_prompt else user_input
 
-        user_input = st.chat_input("Nhập câu hỏi phân tích vĩ mô...")
-        prompt_to_send = clicked_prompt if clicked_prompt else user_input
-
-        if prompt_to_send:
-            st.session_state.messages.append({"role": "user", "content": prompt_to_send})
-            
+        if prompt:
             with chat_container:
                 with st.chat_message("user"):
-                    st.markdown(prompt_to_send)
+                    st.markdown(prompt)
+            
+            st.session_state.messages.append({"role": "user", "content": prompt})
 
-                with st.chat_message("assistant"):
-                    message_placeholder = st.empty()
-                    full_response = ""
+            recent_monthly_summary = df_active.tail(12).to_string(index=False)
+            annual_summary = df_annual_grouped.to_string(index=False)
 
-                    try:
-                        client = OpenAI(
-                            base_url=f"{NGROK_STATIC_URL}/v1",
-                            api_key="lm-studio"
-                        )
+            system_instruction = f"""
+            Bạn là một Chuyên gia Phân tích & Dự báo Lạm phát Vĩ mô cấp cao (nghiên cứu sinh/giảng viên chuyên ngành Kinh tế chính trị - Tài chính tại Học viện Tài chính).
 
-                        system_prompt = f"""
-                        Bạn là Chuyên gia Phân tích Kinh tế Vĩ mô & Dự báo Lạm phát chuyên sâu tại Việt Nam.
-                        Dữ liệu vĩ mô hiện tại trong hệ thống:
-                        - Chỉ số {data_column} gần nhất: {current_val:,.2f}
-                        - Mức tăng so với cùng kỳ năm trước (YoY): {yoy_change:+.2f}%
-                        - Đỉnh lịch sử ({label_suffix}): {max_val:,.2f} (Tháng {max_date})
-                        - Đáy lịch sử ({label_suffix}): {min_val:,.2f} (Tháng {min_date})
+            🎯 QUY TẮC PHẢN HỒI BẮT BỘC:
+            1. **TRẢ LỜI CHÍNH XÁC TRỌNG TÂM:** 
+               - Đi thẳng vào bản chất câu hỏi của người dùng. Tuyệt đối KHÔNG viết lời chào mừng, KHÔNG mở bài xã giao.
+               - Không đưa ra các thông tin ngoài phạm vi câu hỏi. Câu trả lời phải súc tích, đắt giá, luận điểm rõ ràng.
 
-                        Yêu cầu: Hãy trả lời ngắn gọn, lập luận logic, mang tính chuyên môn cao và dựa sát vào số liệu trên.
-                        """
+            2. **TRỌNG TÂM CỐT LÕI - LẠM PHÁT & CPI:**
+               - Trọng tâm công việc chính của bạn là phân tích, đánh giá và DỰ BÁO LẠM PHÁT / CPI.
+               - Với các câu hỏi vĩ mô liên quan (Tỷ giá, Lãi suất, Giá dầu...), hãy trả lời chính xác và chốt lại tác động tới áp lực lạm phát của Việt Nam.
 
-                        messages_payload = [{"role": "system", "content": system_prompt}] + [
-                            {"role": m["role"], "content": m["content"]}
-                            for m in st.session_state.messages
-                        ]
+            3. **CẤU TRÚC PHẢN HỒI:**
+               - Bắt đầu ngay bằng KẾT LUẬN hoặc CÂU TRẢ LỜI TRỰC TIẾP ở ngay câu đầu tiên.
+               - Trình bày các luận điểm minh chứng bằng các gạch đầu dòng ngắn gọn.
 
+            📊 DỮ LIỆU VĨ MÔ THỰC TẾ CUNG CẤP:
+            
+            - TRUNG BÌNH THEO NĂM:
+            {annual_summary}
+            
+            - CHI TIẾT 12 THÁNG GẦN NHẤT:
+            {recent_monthly_summary}
+            """
+
+            clean_url = NGROK_STATIC_URL.strip().rstrip('/')
+            
+            try:
+                client = OpenAI(
+                    base_url=f"{clean_url}/v1",
+                    api_key="lm-studio"
+                )
+
+                with chat_container:
+                    status_placeholder = st.empty()
+                    with status_placeholder.status("⚙️ Đang xử lý câu hỏi...", expanded=False) as status:
+                        time.sleep(0.2)
+                        status.update(label="🧮 Đang truy xuất dữ liệu & dự báo...", state="running")
+                        
                         response = client.chat.completions.create(
                             model="local-model",
-                            messages=messages_payload,
-                            stream=True
+                            messages=[
+                                {"role": "system", "content": system_instruction},
+                                *st.session_state.messages
+                            ],
+                            temperature=0.1
                         )
+                        ai_response = response.choices[0].message.content
+                        status.update(label="Hoàn tất!", state="complete")
+                    
+                    status_placeholder.empty()
 
-                        for chunk in response:
-                            if chunk.choices[0].delta.content is not None:
-                                full_response += chunk.choices[0].delta.content
-                                message_placeholder.markdown(full_response + "▌")
-                        message_placeholder.markdown(full_response)
+                with chat_container:
+                    with st.chat_message("assistant"):
+                        st.markdown(ai_response)
+                
+                st.session_state.messages.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+                
+            except Exception as e:
+                st.error("⚠️ Không thể kết nối với AI Engine. Vui lòng kiểm tra lại Ngrok / LM Studio!")
 
-                    except Exception as e:
-                        full_response = f"⚠️ Lỗi kết nối với Máy chủ AI ({NGROK_STATIC_URL}): {str(e)}"
-                        message_placeholder.error(full_response)
-
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
-            st.rerun()
+        with st.expander("📚 Nguồn Dữ liệu & Tri thức RAG"):
+            st.markdown("""
+            * **[GSO]:** Tổng cục Thống kê Việt Nam (*cpi_data.csv*).
+            * **[SBV]:** Ngân hàng Nhà nước Việt Nam.
+            * **[RAG Engine]:** LM Studio Local Vector Indexing.
+            """)
