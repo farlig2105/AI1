@@ -343,7 +343,7 @@ if df is not None:
                 st.markdown("""
                 <div class="glass-card" style="height: 100%;">
                     <h6 style="color: #F43F5E; margin-top:0; font-size: 14px;">🎈 Lạm phát (Inflation)</h6>
-                    <span style="background: rgba(244,63,94,0.1); color: #F43F5E; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">TỐC ĐỘ TĂNG TRƯỞNG</span>
+                    <span style="background: rgba(244,63,94,0.1); color: #F43F5E; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">TỐC ĐỘ TĂNG TRƯỜNG</span>
                     <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
                         • <b>Bản chất:</b> Là <b>tốc độ biến động (%)</b> của mặt bằng giá chung theo thời gian.<br>
                         • <b>Mối đe dọa:</b> Lạm phát nhẹ (2-3%/năm) kích thích sản xuất. Nhưng lạm phát quá cao làm giảm giá trị tiền lương, gây mất giá đồng tiền.<br>
@@ -429,15 +429,15 @@ if df is not None:
             
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # TAB 3: BẢNG NIÊN ĐỘ (ĐÃ SỬA LỖI COLORMAP MATPLOTLIB)
+        # TAB 3: BẢNG NIÊN ĐỘ (ĐÃ TỐI ƯU CỰC CHUẨN BANG MÀU "Greens")
         with tab_table:
             st.markdown("##### Số liệu trung bình từng năm")
             
-            # ĐÃ ĐỔI `cmap="mako"` THÀNH `cmap="Viridis"` ĐỂ ĐẢM BẢO COMPATIBILITY 100% TRÊN STREAMLIT CLOUD
+            # Sử dụng 'Greens' để đảm bảo tương thích 100% với Matplotlib
             formatted_annual_table = df_annual_grouped.style.format({
                 'Năm': '{:.0f}',
                 f'Chỉ số {data_column} Trung Bình': '{:.2f}'
-            }).background_gradient(subset=[f'Chỉ số {data_column} Trung Bình'], cmap="Viridis")
+            }).background_gradient(subset=[f'Chỉ số {data_column} Trung Bình'], cmap="Greens")
             
             st.dataframe(formatted_annual_table, use_container_width=True, height=280, hide_index=True)
             
