@@ -429,17 +429,89 @@ if df is not None:
             
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # TAB 3: BẢNG NIÊN ĐỘ (ĐÃ TỐI ƯU CỰC CHUẨN BANG MÀU "Greens")
+        # TAB 3: BẢNG NIÊN ĐỘ (ĐÃ THIẾT KẾ LẠI CÂN ĐỐI & SANG TRỌNG)
         with tab_table:
-            st.markdown("##### Số liệu trung bình từng năm")
+            st.markdown("##### 📊 Số liệu trung bình từng năm")
             
-            # Sử dụng 'Greens' để đảm bảo tương thích 100% với Matplotlib
-            formatted_annual_table = df_annual_grouped.style.format({
-                'Năm': '{:.0f}',
-                f'Chỉ số {data_column} Trung Bình': '{:.2f}'
-            }).background_gradient(subset=[f'Chỉ số {data_column} Trung Bình'], cmap="Greens")
+            # Tính toán min/max để vẽ thanh tiến trình trực quan
+            min_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].min()
+            max_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].max()
+            cpi_range = max_cpi - min_cpi if max_cpi != min_cpi else 1
             
-            st.dataframe(formatted_annual_table, use_container_width=True, height=280, hide_index=True)
+            # Tạo các hàng HTML cân đối tỉ lệ
+            rows_html = ""
+            for _, row in df_annual_grouped.iterrows():
+                year = int(row['Năm'])
+                val = row[f'Chỉ số {data_column} Trung Bình']
+                # Tính độ dài thanh gradient (từ 25% đến 100%)
+                pct = 25 + ((val - min_cpi) / cpi_range) * 75
+                
+                rows_html += f"""
+                <tr>
+                    <td style="text-align: center; font-weight: 700; color: #F8FAFC; width: 25%;">
+                        <span style="background: rgba(255, 255, 255, 0.06); padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); font-size: 13px;">
+                            {year}
+                        </span>
+                    </td>
+                    <td style="text-align: right; font-weight: 800; color: #10B981; width: 35%; font-size: 15px; padding-right: 15px;">
+                        {val:,.2f}
+                    </td>
+                    <td style="width: 40%; vertical-align: middle; padding-left: 10px;">
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; height: 8px; width: 100%; overflow: hidden;">
+                            <div style="width: {pct:.1f}%; height: 100%; background: linear-gradient(90deg, #0D9488, #10B981); border-radius: 10px;"></div>
+                        </div>
+                    </td>
+                </tr>
+                """
+
+            table_html = f"""
+            <style>
+                .custom-cpi-table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 13px;
+                    color: #E2E8F0;
+                    background: rgba(17, 24, 39, 0.5);
+                    border-radius: 14px;
+                    overflow: hidden;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+                    margin-bottom: 20px;
+                }}
+                .custom-cpi-table th {{
+                    background: rgba(16, 185, 129, 0.08);
+                    color: #10B981;
+                    padding: 14px 16px;
+                    font-weight: 700;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                    text-transform: uppercase;
+                    letter-spacing: 0.6px;
+                    font-size: 11px;
+                }}
+                .custom-cpi-table td {{
+                    padding: 12px 16px;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+                    vertical-align: middle;
+                }}
+                .custom-cpi-table tr:hover {{
+                    background: rgba(16, 185, 129, 0.05);
+                    transition: background 0.2s ease;
+                }}
+            </style>
+            <table class="custom-cpi-table">
+                <thead>
+                    <tr>
+                        <th style="text-align: center; width: 25%;">Năm</th>
+                        <th style="text-align: right; width: 35%; padding-right: 15px;">Chỉ số CPI Trung Bình</th>
+                        <th style="text-align: left; width: 40%; padding-left: 10px;">Mức độ tương quan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows_html}
+                </tbody>
+            </table>
+            """
+            st.markdown(table_html, unsafe_allow_html=True)
             
             csv_data = df_active.to_csv(index=False).encode('utf-8')
             st.download_button(
