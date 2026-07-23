@@ -350,7 +350,7 @@ if df is not None:
               CPI đóng vai trò như thước đo độ cao. Tỷ lệ Lạm phát chính là tốc độ mà độ cao đó gia tăng (YoY - Year on Year):
             """)
             
-            st.latex(r"\text{Tỷ lệ Lạm phát (YoY)} = \frac{\text{CPI}_{\text{Kỳ này}} - \text{CPI}_{\text{Cùng kỳ năm ngoái}}}{\text{CPI}_{\text{Cùng kỳ năm ngoái}}} \times 100\%")
+            st.latex(r"\\text{Tỷ lệ Lạm phát (YoY)} = \\frac{\\text{CPI}_{\\text{Kỳ này}} - \\text{CPI}_{\\text{Cùng kỳ năm ngoái}}}{\\text{CPI}_{\\text{Cùng kỳ năm ngoái}}} \\times 100\\%")
 
             st.markdown("""
             <div class="glass-card" style="margin-top: 12px; padding: 16px;">
@@ -419,7 +419,7 @@ if df is not None:
             
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # TAB 3: BẢNG NIÊN ĐỘ (ĐÃ SỬA LỖI HIỂN THỊ HTML THÔ)
+        # TAB 3: BẢNG NIÊN ĐỘ
         with tab_table:
             st.markdown("##### 📊 Số liệu CPI trung bình từng năm")
             
@@ -514,7 +514,7 @@ if df is not None:
                 use_container_width=True
             )
 
-        # TAB 4: MÔ PHỎNG KỊCH BẢN (ĐÃ SỬA LỖI HIỂN THỊ HTML THÔ)
+        # TAB 4: MÔ PHỎNG KỊCH BẢN
         with tab_sim:
             st.markdown("##### 🧪 Stress-Test Áp lực Lạm phát")
             st.caption("Điều chỉnh tham số giả định để mô phỏng tác động:")
@@ -534,7 +534,7 @@ if df is not None:
             <div class="glass-card" style="margin-top:10px; margin-bottom:15px; border-left: 4px solid {'#F43F5E' if sim_impact > 0 else '#10B981'};">
                 <div style="font-size:12px; color:#94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
                 <div style="font-size:26px; font-weight:800; color:{'#FB7185' if sim_impact > 0 else '#34D399'}; margin: 4px 0;">
-                    {sim_impact:+.2f}% &rarr; ~{projected_cpi:,.2f} điểm
+                    {sim_impact:+.2f}% &rr; ~{projected_cpi:,.2f} điểm
                 </div>
                 <small style="color:#64748B;">Mô hình ước lượng dựa trên trọng số biến động năng lượng & hàng hóa nhập khẩu.</small>
             </div>
@@ -654,7 +654,7 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
             """)
 
     # ==========================================
-    # 6. CỘT PHẢI: AI ASSISTANT
+    # 6. CỘT PHẢI: AI ASSISTANT VỚI ACTION INDICATOR
     # ==========================================
     with col2:
         st.markdown("### 🤖 Trợ lý AI Phân tích & Dự báo Lạm phát")
@@ -672,8 +672,27 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
         if q3.button("🏦 Chính sách tiền tệ", use_container_width=True):
             clicked_prompt = "Áp lực lạm phát hiện nay ảnh hưởng trực tiếp thế nào đến quyết định điều hành lãi suất của Ngân hàng Nhà nước?"
 
-        chat_container = st.container(height=380)
+        chat_container = st.container(height=400)
 
+        # Hàm xác định câu chỉ ra hành động phù hợp với trọng tâm câu hỏi
+        def get_action_description(prompt_text: str) -> tuple[str, str]:
+            p_lower = prompt_text.lower()
+            if any(k in p_lower for k in ["dự báo", "cpi", "tháng tới", "quý tới", "xu hướng"]):
+                act_status = "⚡ Đang trích xuất chuỗi lịch sử CPI, tính toán đường SMA12 và mô phỏng xu hướng lạm phát cận kỳ..."
+                act_heading = "🎯 **Hành động phân tích:** Đang tổng hợp chuỗi thời gian CPI cận kỳ, phân tích độ lệch so với đỉnh/đáy lịch sử và tính toán kịch bản dự báo lạm phát..."
+            elif any(k in p_lower for k in ["dầu", "giá dầu", "tỷ giá", "usd", "wti", "vàng"]):
+                act_status = "⚡ Đang tính toán hệ số truyền dẫn từ biến động Giá Dầu WTI và Tỷ giá USD/VND vào CPI..."
+                act_heading = "🎯 **Hành động phân tích:** Đang đo lường mức độ ảnh hưởng của chi phí năng lượng nhập khẩu và áp lực tỷ giá đến mặt bằng giá tiêu dùng..."
+            elif any(k in p_lower for k in ["tiền tệ", "lãi suất", "nhnn", "ngân hàng", "chính sách"]):
+                act_status = "⚡ Đang đối chiếu chỉ tiêu lạm phát mục tiêu và đánh giá dư địa điều hành chính sách tiền tệ..."
+                act_heading = "🎯 **Hành động phân tích:** Đang đánh giá tác động của áp lực lạm phát hiện tại lên không gian điều hành lãi suất và thanh khoản của Ngân hàng Nhà nước..."
+            else:
+                act_status = f"⚡ Đang truy vấn cơ sở dữ liệu vĩ mô và tổng hợp luận điểm cho câu hỏi: '{prompt_text[:30]}...' "
+                act_heading = f"🎯 **Hành động phân tích:** Đang truy xuất tập số liệu vĩ mô thời gian thực và phân tích trọng tâm câu hỏi của người dùng..."
+            
+            return act_status, act_heading
+
+        # Render lịch sử trò chuyện
         with chat_container:
             if len(st.session_state.messages) == 0:
                 st.markdown("""
@@ -687,13 +706,15 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
                 """, unsafe_allow_html=True)
 
             for msg in st.session_state.messages:
-                with st.chat_message(msg["role"]):
-                    st.markdown(msg["content"])
+                if msg.get("content"):
+                    with st.chat_message(msg["role"]):
+                        st.markdown(msg["content"])
 
         user_input = st.chat_input("Nhập câu hỏi phân tích vĩ mô...")
         prompt_to_send = clicked_prompt if clicked_prompt else user_input
 
         if prompt_to_send:
+            # 1. Thêm câu hỏi người dùng vào history
             st.session_state.messages.append({"role": "user", "content": prompt_to_send})
             
             with chat_container:
@@ -701,30 +722,49 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
                     st.markdown(prompt_to_send)
 
                 with st.chat_message("assistant"):
+                    act_status, act_heading = get_action_description(prompt_to_send)
+                    
+                    # Trạng thái tĩnh/động hiển thị khi AI đang suy nghĩ
+                    status_box = st.empty()
+                    status_box.markdown(f"""
+                    <div style="background: rgba(13, 148, 136, 0.12); border: 1px solid rgba(13, 148, 136, 0.35); padding: 10px 14px; border-radius: 10px; font-size: 12.5px; color: #2DD4BF; margin-bottom: 12px;">
+                        {act_status}
+                    </div>
+                    """, unsafe_allow_html=True)
+
                     message_placeholder = st.empty()
                     full_response = ""
 
                     try:
+                        # Khởi tạo OpenAI client kèm header tránh bị ngrok chặn
                         client = OpenAI(
                             base_url=f"{NGROK_STATIC_URL}/v1",
-                            api_key="lm-studio"
+                            api_key="lm-studio",
+                            default_headers={"ngrok-skip-browser-warning": "true"},
+                            timeout=35.0
                         )
 
                         system_prompt = f"""
-                        Bạn là Chuyên gia Phân tích Kinh tế Vĩ mô & Dự báo Lạm phát chuyên sâu tại Việt Nam.
-                        Dữ liệu vĩ mô hiện tại trong hệ thống:
-                        - Chỉ số {data_column} gần nhất: {current_val:,.2f}
-                        - Mức tăng so với cùng kỳ năm trước (YoY): {yoy_change:+.2f}%
-                        - Đỉnh lịch sử ({label_suffix}): {max_val:,.2f} (Tháng {max_date})
-                        - Đáy lịch sử ({label_suffix}): {min_val:,.2f} (Tháng {min_date})
+Bạn là Chuyên gia Phân tích Kinh tế Vĩ mô & Dự báo Lạm phát chuyên sâu tại Việt Nam.
 
-                        Yêu cầu: Hãy trả lời ngắn gọn, lập luận logic, mang tính chuyên môn cao và dựa sát vào số liệu trên.
-                        """
+DỮ LIỆU VĨ MÔ THỜI GIAN THỰC ĐANG CÓ TRONG HỆ THỐNG:
+- Chỉ số {data_column} cận kỳ: {current_val:,.2f} điểm
+- Tăng trưởng so với cùng kỳ năm trước (YoY): {yoy_change:+.2f}%
+- Mức biến động cận kỳ (MoM): {mo_m_change:+.2f}%
+- Đỉnh lịch sử ({label_suffix}): {max_val:,.2f} điểm (Tháng {max_date})
+- Đáy lịch sử ({label_suffix}): {min_val:,.2f} điểm (Tháng {min_date})
 
-                        messages_payload = [{"role": "system", "content": system_prompt}] + [
-                            {"role": m["role"], "content": m["content"]}
-                            for m in st.session_state.messages
-                        ]
+YÊU CẦU QUAN TRỌNG VỀ ĐỊNH DẠNG VÀ NỘI DUNG:
+1. Mở đầu câu trả lời BẮT BUỘC bằng đúng dòng chỉ định hành động sau đây (đã được tối ưu đúng trọng tâm câu hỏi):
+{act_heading}
+
+2. Sau dòng hành động trên, xuống dòng và trình bày câu trả lời trực diện, sắc bén, chia theo các đầu dòng rõ ràng, lập luận bằng con số cụ thể ở trên.
+"""
+
+                        messages_payload = [{"role": "system", "content": system_prompt}]
+                        for m in st.session_state.messages:
+                            if m.get("content"):
+                                messages_payload.append({"role": m["role"], "content": m["content"]})
 
                         response = client.chat.completions.create(
                             model="local-model",
@@ -733,14 +773,27 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
                         )
 
                         for chunk in response:
-                            if chunk.choices[0].delta.content is not None:
+                            if chunk.choices and len(chunk.choices) > 0 and chunk.choices[0].delta.content:
                                 full_response += chunk.choices[0].delta.content
                                 message_placeholder.markdown(full_response + "▌")
-                        message_placeholder.markdown(full_response)
+
+                        status_box.empty() # Xóa dòng trạng thái tạm thời
+                        
+                        if full_response.strip():
+                            # Nếu AI không tự tạo dòng act_heading, tự động bổ sung vào đầu
+                            if not full_response.strip().startswith("🎯"):
+                                full_response = f"{act_heading}\n\n{full_response}"
+                            message_placeholder.markdown(full_response)
+                        else:
+                            full_response = f"{act_heading}\n\n⚠️ *Không nhận được phản hồi từ mô hình AI Local. Vui lòng kiểm tra lại LM Studio đã nạp Model chưa.*"
+                            message_placeholder.warning(full_response)
 
                     except Exception as e:
-                        full_response = f"⚠️ Lỗi kết nối với Máy chủ AI ({NGROK_STATIC_URL}): {str(e)}"
+                        status_box.empty()
+                        full_response = f"{act_heading}\n\n⚠️ **Lỗi kết nối Máy chủ AI Ngrok ({NGROK_STATIC_URL}):**\n\n`{str(e)}`\n\n💡 *Gợi ý:* Hãy kiểm tra máy chủ LM Studio đã bật Local Server và Ngrok đang chạy kết nối."
                         message_placeholder.error(full_response)
 
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            if full_response.strip():
+                st.session_state.messages.append({"role": "assistant", "content": full_response})
+            
             st.rerun()
