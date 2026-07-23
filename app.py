@@ -17,174 +17,172 @@ st.set_page_config(
 
 # CSS ĐỘT PHÁ - PHONG CÁCH SEGMENTED CONTROL & TABLES NÂNG CẤP
 st.markdown("""
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        
-        html, body, [class*="css"] {
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }
-        
-        .main {
-            background: #0B0F19 !important;
-        }
-        
-        /* Glassmorphic Cards */
-        .glass-card {
-            background: rgba(17, 24, 39, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 20px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            margin-bottom: 15px;
-        }
-        
-        /* Metric Cards */
-        [data-testid="stMetric"] {
-            background: rgba(17, 24, 39, 0.8) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            padding: 18px 22px !important;
-            border-radius: 16px !important;
-            backdrop-filter: blur(10px) !important;
-            transition: all 0.3s ease !important;
-        }
-        [data-testid="stMetric"]:hover {
-            border-color: rgba(16, 185, 129, 0.4) !important;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.15) !important;
-            transform: translateY(-2px) !important;
-        }
-        div[data-testid="stMetricValue"] {
-            font-size: 26px !important;
-            font-weight: 800 !important;
-            color: #10B981 !important;
-        }
-        div[data-testid="stMetricLabel"] {
-            font-size: 11px !important;
-            color: #94A3B8 !important;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600 !important;
-        }
-        
-        /* =========================================================
-           THIẾT KẾ TAB MỚI: SEGMENTED CONTROL CỰC ĐẸP
-           ========================================================= */
-        div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
-        div[data-testid="stTabs"] [data-baseweb="tab-border-bar"],
-        div[data-testid="stTabs"] [role="tablist"]::after {
-            display: none !important;
-            height: 0px !important;
-            background-color: transparent !important;
-            border: none !important;
-        }
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+    
+    .main {
+        background: #0B0F19 !important;
+    }
+    
+    /* Glassmorphic Cards */
+    .glass-card {
+        background: rgba(17, 24, 39, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        margin-bottom: 15px;
+    }
+    
+    /* Metric Cards */
+    [data-testid="stMetric"] {
+        background: rgba(17, 24, 39, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 18px 22px !important;
+        border-radius: 16px !important;
+        backdrop-filter: blur(10px) !important;
+        transition: all 0.3s ease !important;
+    }
+    [data-testid="stMetric"]:hover {
+        border-color: rgba(16, 185, 129, 0.4) !important;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.15) !important;
+        transform: translateY(-2px) !important;
+    }
+    div[data-testid="stMetricValue"] {
+        font-size: 26px !important;
+        font-weight: 800 !important;
+        color: #10B981 !important;
+    }
+    div[data-testid="stMetricLabel"] {
+        font-size: 11px !important;
+        color: #94A3B8 !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600 !important;
+    }
+    
+    /* SEGMENTED CONTROL TABS */
+    div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
+    div[data-testid="stTabs"] [data-baseweb="tab-border-bar"],
+    div[data-testid="stTabs"] [role="tablist"]::after {
+        display: none !important;
+        height: 0px !important;
+        background-color: transparent !important;
+        border: none !important;
+    }
 
-        div[data-testid="stTabs"] [role="tablist"],
-        div[data-testid="stTabs"] [data-baseweb="tab-list"] {
-            display: flex !important;
-            width: 100% !important;
-            background: #111827 !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            border-radius: 14px !important;
-            padding: 6px !important;
-            gap: 6px !important;
-            margin-bottom: 24px !important;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
-        }
+    div[data-testid="stTabs"] [role="tablist"],
+    div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+        display: flex !important;
+        width: 100% !important;
+        background: #111827 !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 14px !important;
+        padding: 6px !important;
+        gap: 6px !important;
+        margin-bottom: 24px !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    }
 
-        div[data-testid="stTabs"] button[role="tab"],
-        div[data-testid="stTabs"] [data-baseweb="tab"] {
-            flex: 1 1 0% !important;
-            width: 100% !important;
-            height: 44px !important;
-            border-radius: 10px !important;
-            border: none !important;
-            background: transparent !important;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            cursor: pointer !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 0 12px !important;
-            border-bottom: none !important;
-        }
+    div[data-testid="stTabs"] button[role="tab"],
+    div[data-testid="stTabs"] [data-baseweb="tab"] {
+        flex: 1 1 0% !important;
+        width: 100% !important;
+        height: 44px !important;
+        border-radius: 10px !important;
+        border: none !important;
+        background: transparent !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 12px !important;
+        border-bottom: none !important;
+    }
 
-        div[data-testid="stTabs"] button[role="tab"] p,
-        div[data-testid="stTabs"] button[role="tab"] span {
-            color: #94A3B8 !important;
-            font-weight: 600 !important;
-            font-size: 13.5px !important;
-            margin: 0 !important;
-            transition: color 0.2s ease !important;
-            white-space: nowrap !important;
-        }
+    div[data-testid="stTabs"] button[role="tab"] p,
+    div[data-testid="stTabs"] button[role="tab"] span {
+        color: #94A3B8 !important;
+        font-weight: 600 !important;
+        font-size: 13.5px !important;
+        margin: 0 !important;
+        transition: color 0.2s ease !important;
+        white-space: nowrap !important;
+    }
 
-        div[data-testid="stTabs"] button[role="tab"]:hover {
-            background: rgba(255, 255, 255, 0.04) !important;
-        }
-        div[data-testid="stTabs"] button[role="tab"]:hover p {
-            color: #F8FAFC !important;
-        }
+    div[data-testid="stTabs"] button[role="tab"]:hover {
+        background: rgba(255, 255, 255, 0.04) !important;
+    }
+    div[data-testid="stTabs"] button[role="tab"]:hover p {
+        color: #F8FAFC !important;
+    }
 
-        div[data-testid="stTabs"] button[role="tab"][aria-selected="true"],
-        div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] {
-            background: linear-gradient(135deg, #0D9488 0%, #0284C7 100%) !important;
-            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35) !important;
-            border-bottom: none !important;
-        }
+    div[data-testid="stTabs"] button[role="tab"][aria-selected="true"],
+    div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, #0D9488 0%, #0284C7 100%) !important;
+        box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35) !important;
+        border-bottom: none !important;
+    }
 
-        div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
-        div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] span {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-        }
-        
-        div[data-testid="stPills"] button {
-            background-color: rgba(255, 255, 255, 0.03) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            color: #94A3B8 !important;
-            border-radius: 20px !important;
-            font-size: 12px !important;
-        }
-        div[data-testid="stPills"] button[aria-selected="true"] {
-            background-color: rgba(16, 185, 129, 0.15) !important;
-            border-color: #10B981 !important;
-            color: #10B981 !important;
-        }
+    div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] p,
+    div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] span {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+    
+    div[data-testid="stPills"] button {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #94A3B8 !important;
+        border-radius: 20px !important;
+        font-size: 12px !important;
+    }
+    div[data-testid="stPills"] button[aria-selected="true"] {
+        background-color: rgba(16, 185, 129, 0.15) !important;
+        border-color: #10B981 !important;
+        color: #10B981 !important;
+    }
 
-        .ai-welcome {
-            border: 1px dashed rgba(16, 185, 129, 0.3);
-            background: rgba(16, 185, 129, 0.02);
-            border-radius: 14px;
-            padding: 20px;
-            text-align: center;
-            margin-top: 10px;
-        }
-        
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
-    </style>
+    .ai-welcome {
+        border: 1px dashed rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.02);
+        border-radius: 14px;
+        padding: 20px;
+        text-align: center;
+        margin-top: 10px;
+    }
+    
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+</style>
 """, unsafe_allow_html=True)
 
 # Header chính
 h_col1, h_col2 = st.columns([3, 1])
 with h_col1:
     st.markdown("""
-        <div style="margin-bottom: 12px;">
-            <h2 style="font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.5px;">
-                📈 Hệ Thống Dữ Liệu Vĩ Mô & Trợ Lý AI
-            </h2>
-            <p style="color: #64748B; font-size: 14px; margin: 4px 0 0 0;">
-                Nền tảng phân tích chu kỳ kinh tế, lạm phát & mô phỏng kịch bản vĩ mô thời gian thực.
-            </p>
-        </div>
+    <div style="margin-bottom: 12px;">
+        <h2 style="font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.5px;">
+            📈 Hệ Thống Dữ Liệu Vĩ Mô & Trợ Lý AI
+        </h2>
+        <p style="color: #64748B; font-size: 14px; margin: 4px 0 0 0;">
+            Nền tảng phân tích chu kỳ kinh tế, lạm phát & mô phỏng kịch bản vĩ mô thời gian thực.
+        </p>
+    </div>
     """, unsafe_allow_html=True)
 with h_col2:
     st.markdown("""
-        <div style="text-align: right; padding-top: 5px;">
-            <span style="background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                🟢 Live Data System
-            </span>
-        </div>
+    <div style="text-align: right; padding-top: 5px;">
+        <span style="background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+            🟢 Live Data System
+        </span>
+    </div>
     """, unsafe_allow_html=True)
 
 # BỘ LỌC THỜI GIAN
@@ -421,7 +419,7 @@ if df is not None:
             
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # TAB 3: BẢNG NIÊN ĐỘ (TỐI ƯU CÂN ĐỐI & MÀU SẮC DỄ NHÌN)
+        # TAB 3: BẢNG NIÊN ĐỘ (ĐÃ SỬA LỖI HIỂN THỊ HTML THÔ)
         with tab_table:
             st.markdown("##### 📊 Số liệu CPI trung bình từng năm")
             
@@ -435,80 +433,76 @@ if df is not None:
                 val = row[f'Chỉ số {data_column} Trung Bình']
                 pct = 25 + ((val - min_cpi) / cpi_range) * 75
                 
-                rows_html += f"""
-                <tr>
-                    <td style="text-align: center; font-weight: 700; color: #F8FAFC;">
-                        <span style="background: rgba(16, 185, 129, 0.12); color: #34D399; padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(52, 211, 153, 0.25); font-size: 13px; display: inline-block;">
-                            {year}
-                        </span>
-                    </td>
-                    <td style="text-align: right; font-weight: 800; color: #10B981; font-size: 15px; padding-right: 20px;">
-                        {val:,.2f}
-                    </td>
-                    <td style="vertical-align: middle; padding-left: 15px; padding-right: 15px;">
-                        <div style="background: rgba(255, 255, 255, 0.06); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05);">
-                            <div style="width: {pct:.1f}%; height: 100%; background: linear-gradient(90deg, #059669 0%, #10B981 50%, #34D399 100%); border-radius: 10px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);"></div>
-                        </div>
-                    </td>
-                </tr>
-                """
+                rows_html += f"""<tr>
+<td style="text-align: center; font-weight: 700; color: #F8FAFC;">
+<span style="background: rgba(16, 185, 129, 0.12); color: #34D399; padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(52, 211, 153, 0.25); font-size: 13px; display: inline-block;">
+{year}
+</span>
+</td>
+<td style="text-align: right; font-weight: 800; color: #10B981; font-size: 15px; padding-right: 20px;">
+{val:,.2f}
+</td>
+<td style="vertical-align: middle; padding-left: 15px; padding-right: 15px;">
+<div style="background: rgba(255, 255, 255, 0.06); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05);">
+<div style="width: {pct:.1f}%; height: 100%; background: linear-gradient(90deg, #059669 0%, #10B981 50%, #34D399 100%); border-radius: 10px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);"></div>
+</div>
+</td>
+</tr>"""
 
-            table_html = f"""
-            <style>
-                .custom-cpi-table-container {{
-                    border-radius: 14px;
-                    overflow: hidden;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-                    margin-bottom: 20px;
-                    background: #111827;
-                }}
-                .custom-cpi-table {{
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-size: 13px;
-                    color: #F1F5F9;
-                }}
-                .custom-cpi-table th {{
-                    background: #1E293B;
-                    color: #34D399;
-                    padding: 14px 16px;
-                    font-weight: 700;
-                    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-                    text-transform: uppercase;
-                    letter-spacing: 0.8px;
-                    font-size: 11px;
-                }}
-                .custom-cpi-table tr {{
-                    transition: background 0.2s ease;
-                }}
-                .custom-cpi-table tr:nth-child(even) {{
-                    background: rgba(255, 255, 255, 0.02);
-                }}
-                .custom-cpi-table tr:hover {{
-                    background: rgba(16, 185, 129, 0.08) !important;
-                }}
-                .custom-cpi-table td {{
-                    padding: 13px 16px;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                    vertical-align: middle;
-                }}
-            </style>
-            <div class="custom-cpi-table-container">
-                <table class="custom-cpi-table">
-                    <thead>
-                        <tr>
-                            <th style="text-align: center; width: 22%;">Năm</th>
-                            <th style="text-align: right; width: 38%; padding-right: 20px;">CPI Trung Bình</th>
-                            <th style="text-align: left; width: 40%; padding-left: 15px;">Mức độ Tương quan Chu kỳ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows_html}
-                    </tbody>
-                </table>
-            </div>
-            """
+            table_html = f"""<style>
+.custom-cpi-table-container {{
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    margin-bottom: 20px;
+    background: #111827;
+}}
+.custom-cpi-table {{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    color: #F1F5F9;
+}}
+.custom-cpi-table th {{
+    background: #1E293B;
+    color: #34D399;
+    padding: 14px 16px;
+    font-weight: 700;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-size: 11px;
+}}
+.custom-cpi-table tr {{
+    transition: background 0.2s ease;
+}}
+.custom-cpi-table tr:nth-child(even) {{
+    background: rgba(255, 255, 255, 0.02);
+}}
+.custom-cpi-table tr:hover {{
+    background: rgba(16, 185, 129, 0.08) !important;
+}}
+.custom-cpi-table td {{
+    padding: 13px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}}
+</style>
+<div class="custom-cpi-table-container">
+<table class="custom-cpi-table">
+<thead>
+<tr>
+<th style="text-align: center; width: 22%;">Năm</th>
+<th style="text-align: right; width: 38%; padding-right: 20px;">CPI Trung Bình</th>
+<th style="text-align: left; width: 40%; padding-left: 15px;">Mức độ Tương quan Chu kỳ</th>
+</tr>
+</thead>
+<tbody>
+{rows_html}
+</tbody>
+</table>
+</div>"""
             st.markdown(table_html, unsafe_allow_html=True)
             
             csv_data = df_active.to_csv(index=False).encode('utf-8')
@@ -520,7 +514,7 @@ if df is not None:
                 use_container_width=True
             )
 
-        # TAB 4: MÔ PHỎNG KỊCH BẢN (CẬP NHẬT BẢNG MÀU TƯƠNG PHẢN CAO)
+        # TAB 4: MÔ PHỎNG KỊCH BẢN (ĐÃ SỬA LỖI HIỂN THỊ HTML THÔ)
         with tab_sim:
             st.markdown("##### 🧪 Stress-Test Áp lực Lạm phát")
             st.caption("Điều chỉnh tham số giả định để mô phỏng tác động:")
@@ -537,13 +531,13 @@ if df is not None:
             projected_cpi = current_val * (1 + sim_impact/100)
             
             st.markdown(f"""
-                <div class="glass-card" style="margin-top:10px; margin-bottom:15px; border-left: 4px solid {'#F43F5E' if sim_impact > 0 else '#10B981'};">
-                    <div style="font-size:12px; color:#94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
-                    <div style="font-size:26px; font-weight:800; color:{'#FB7185' if sim_impact > 0 else '#34D399'}; margin: 4px 0;">
-                        {sim_impact:+.2f}% &rarr; ~{projected_cpi:,.2f} điểm
-                    </div>
-                    <small style="color:#64748B;">Mô hình ước lượng dựa trên trọng số biến động năng lượng & hàng hóa nhập khẩu.</small>
+            <div class="glass-card" style="margin-top:10px; margin-bottom:15px; border-left: 4px solid {'#F43F5E' if sim_impact > 0 else '#10B981'};">
+                <div style="font-size:12px; color:#94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
+                <div style="font-size:26px; font-weight:800; color:{'#FB7185' if sim_impact > 0 else '#34D399'}; margin: 4px 0;">
+                    {sim_impact:+.2f}% &rarr; ~{projected_cpi:,.2f} điểm
                 </div>
+                <small style="color:#64748B;">Mô hình ước lượng dựa trên trọng số biến động năng lượng & hàng hóa nhập khẩu.</small>
+            </div>
             """, unsafe_allow_html=True)
 
             st.markdown("##### 📋 Phân tích Cơ chế Tác động Chi tiết")
@@ -557,100 +551,98 @@ if df is not None:
             total_color = "#FB7185" if sim_impact > 0 else ("#34D399" if sim_impact < 0 else "#94A3B8")
             total_bg = "rgba(244, 63, 94, 0.18)" if sim_impact > 0 else ("rgba(16, 185, 129, 0.18)" if sim_impact < 0 else "rgba(148, 163, 184, 0.1)")
 
-            table_html = f"""
-            <style>
-                .explain-table-container {{
-                    border-radius: 14px;
-                    overflow: hidden;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-                    margin-top: 10px;
-                    background: #111827;
-                }}
-                .explain-table {{
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-size: 13px;
-                    color: #F1F5F9;
-                }}
-                .explain-table th {{
-                    background: #1E293B;
-                    color: #34D399;
-                    padding: 12px 14px;
-                    text-align: left;
-                    font-weight: 700;
-                    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-                    text-transform: uppercase;
-                    letter-spacing: 0.6px;
-                    font-size: 11px;
-                }}
-                .explain-table td {{
-                    padding: 13px 14px;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                    vertical-align: middle;
-                    line-height: 1.5;
-                }}
-                .explain-table tr:hover {{
-                    background: rgba(255, 255, 255, 0.03);
-                }}
-                .badge-value {{
-                    display: inline-block;
-                    padding: 4px 10px;
-                    border-radius: 6px;
-                    font-weight: 700;
-                    font-size: 12px;
-                }}
-            </style>
-            <div class="explain-table-container">
-                <table class="explain-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 20%;">Biến số Vĩ mô</th>
-                            <th style="width: 15%; text-align: center;">Điều chỉnh</th>
-                            <th style="width: 12%; text-align: center;">Trọng số</th>
-                            <th style="width: 16%; text-align: center;">Đóng góp CPI</th>
-                            <th style="width: 37%;">Cơ chế truyền dẫn & Tác động thực tế</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><b style="color: #F8FAFC;">🛢️ Giá Dầu WTI</b></td>
-                            <td style="text-align: center;">
-                                <span class="badge-value" style="background: {oil_bg}; color: {oil_color}; border: 1px solid {oil_color}40;">{oil_sim:+d}%</span>
-                            </td>
-                            <td style="text-align: center; color: #94A3B8; font-weight: 600;">0.04</td>
-                            <td style="text-align: center;">
-                                <span class="badge-value" style="background: {oil_bg}; color: {oil_color}; font-size: 13px;">{oil_impact:+.2f}%</span>
-                            </td>
-                            <td style="color: #CBD5E1; font-size: 12.5px;">Tác động trực tiếp lên nhóm Giao thông (xăng dầu), lan tỏa sang chi phí vận tải, logistics và giá thành sản xuất hàng hóa.</td>
-                        </tr>
-                        <tr>
-                            <td><b style="color: #F8FAFC;">💵 Tỷ giá USD/VND</b></td>
-                            <td style="text-align: center;">
-                                <span class="badge-value" style="background: {fx_bg}; color: {fx_color}; border: 1px solid {fx_color}40;">{fx_sim:+d}%</span>
-                            </td>
-                            <td style="text-align: center; color: #94A3B8; font-weight: 600;">0.11</td>
-                            <td style="text-align: center;">
-                                <span class="badge-value" style="background: {fx_bg}; color: {fx_color}; font-size: 13px;">{fx_impact:+.2f}%</span>
-                            </td>
-                            <td style="color: #CBD5E1; font-size: 12.5px;">Tạo áp lực "Nhập khẩu lạm phát" (Imported Inflation), làm tăng chi phí nguyên vật liệu, máy móc & hàng hóa đầu vào.</td>
-                        </tr>
-                        <tr style="background: rgba(16, 185, 129, 0.05); border-top: 1px solid rgba(16, 185, 129, 0.2);">
-                            <td><b style="color: #34D399; font-size: 13.5px;">📊 Tổng hợp Stress-Test</b></td>
-                            <td style="text-align: center; color: #64748B;">—</td>
-                            <td style="text-align: center; color: #64748B;">—</td>
-                            <td style="text-align: center;">
-                                <span class="badge-value" style="background: {total_bg}; color: {total_color}; font-size: 14px; border: 1px solid {total_color}50;">{sim_impact:+.2f}%</span>
-                            </td>
-                            <td style="color: #F8FAFC; font-weight: 500; font-size: 12.5px;">
-                                Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">{'tăng' if sim_impact > 0 else 'giảm'} {abs(sim_impact):.2f}%</b>, ước đạt mức <b>~{projected_cpi:,.2f} điểm</b>.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            """
-            st.markdown(table_html, unsafe_allow_html=True)
+            table_html_sim = f"""<style>
+.explain-table-container {{
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    margin-top: 10px;
+    background: #111827;
+}}
+.explain-table {{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    color: #F1F5F9;
+}}
+.explain-table th {{
+    background: #1E293B;
+    color: #34D399;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 700;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-size: 11px;
+}}
+.explain-table td {{
+    padding: 13px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+    line-height: 1.5;
+}}
+.explain-table tr:hover {{
+    background: rgba(255, 255, 255, 0.03);
+}}
+.badge-value {{
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+}}
+</style>
+<div class="explain-table-container">
+<table class="explain-table">
+<thead>
+<tr>
+<th style="width: 20%;">Biến số Vĩ mô</th>
+<th style="width: 15%; text-align: center;">Điều chỉnh</th>
+<th style="width: 12%; text-align: center;">Trọng số</th>
+<th style="width: 16%; text-align: center;">Đóng góp CPI</th>
+<th style="width: 37%;">Cơ chế truyền dẫn & Tác động thực tế</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><b style="color: #F8FAFC;">🛢️ Giá Dầu WTI</b></td>
+<td style="text-align: center;">
+<span class="badge-value" style="background: {oil_bg}; color: {oil_color}; border: 1px solid {oil_color}40;">{oil_sim:+d}%</span>
+</td>
+<td style="text-align: center; color: #94A3B8; font-weight: 600;">0.04</td>
+<td style="text-align: center;">
+<span class="badge-value" style="background: {oil_bg}; color: {oil_color}; font-size: 13px;">{oil_impact:+.2f}%</span>
+</td>
+<td style="color: #CBD5E1; font-size: 12.5px;">Tác động trực tiếp lên nhóm Giao thông (xăng dầu), lan tỏa sang chi phí vận tải, logistics và giá thành sản xuất hàng hóa.</td>
+</tr>
+<tr>
+<td><b style="color: #F8FAFC;">💵 Tỷ giá USD/VND</b></td>
+<td style="text-align: center;">
+<span class="badge-value" style="background: {fx_bg}; color: {fx_color}; border: 1px solid {fx_color}40;">{fx_sim:+d}%</span>
+</td>
+<td style="text-align: center; color: #94A3B8; font-weight: 600;">0.11</td>
+<td style="text-align: center;">
+<span class="badge-value" style="background: {fx_bg}; color: {fx_color}; font-size: 13px;">{fx_impact:+.2f}%</span>
+</td>
+<td style="color: #CBD5E1; font-size: 12.5px;">Tạo áp lực "Nhập khẩu lạm phát" (Imported Inflation), làm tăng chi phí nguyên vật liệu, máy móc & hàng hóa đầu vào.</td>
+</tr>
+<tr style="background: rgba(16, 185, 129, 0.05); border-top: 1px solid rgba(16, 185, 129, 0.2);">
+<td><b style="color: #34D399; font-size: 13.5px;">📊 Tổng hợp Stress-Test</b></td>
+<td style="text-align: center; color: #64748B;">—</td>
+<td style="text-align: center; color: #64748B;">—</td>
+<td style="text-align: center;">
+<span class="badge-value" style="background: {total_bg}; color: {total_color}; font-size: 14px; border: 1px solid {total_color}50;">{sim_impact:+.2f}%</span>
+</td>
+<td style="color: #F8FAFC; font-weight: 500; font-size: 12.5px;">
+Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">{'tăng' if sim_impact > 0 else 'giảm'} {abs(sim_impact):.2f}%</b>, ước đạt mức <b>~{projected_cpi:,.2f} điểm</b>.
+</td>
+</tr>
+</tbody>
+</table>
+</div>"""
+            st.markdown(table_html_sim, unsafe_allow_html=True)
 
         # TAB 5: HIGHLIGHT VĨ MÔ
         with tab_insights:
@@ -685,13 +677,13 @@ if df is not None:
         with chat_container:
             if len(st.session_state.messages) == 0:
                 st.markdown("""
-                    <div class="ai-welcome">
-                        <div style="font-size: 32px; margin-bottom: 5px;">🎈</div>
-                        <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Trợ lý AI Phân tích & Dự báo Lạm phát</div>
-                        <p style="color: #64748B; font-size: 12px; margin-top: 5px;">
-                            Đặt câu hỏi phân tích kinh tế vĩ mô hoặc chọn một trong các gợi ý phía trên để bắt đầu.
-                        </p>
-                    </div>
+                <div class="ai-welcome">
+                    <div style="font-size: 32px; margin-bottom: 5px;">🎈</div>
+                    <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Trợ lý AI Phân tích & Dự báo Lạm phát</div>
+                    <p style="color: #64748B; font-size: 12px; margin-top: 5px;">
+                        Đặt câu hỏi phân tích kinh tế vĩ mô hoặc chọn một trong các gợi ý phía trên để bắt đầu.
+                    </p>
+                </div>
                 """, unsafe_allow_html=True)
 
             for msg in st.session_state.messages:
