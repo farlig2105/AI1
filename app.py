@@ -311,7 +311,7 @@ if df is not None:
             <div class="glass-card" style="border-left: 4px solid #10B981;">
                 <p style="font-size: 13px; color: #E2E8F0; margin: 0; line-height: 1.6;">
                     💡 <b>Ví dụ trực quan:</b> Giả sử năm ngoái bạn mang <b>100.000 VNĐ</b> đi chợ mua được <b>2 bát phở</b>. Năm nay, vẫn cầm 100.000 VNĐ đó bạn chỉ mua được <b>1 bát phở và 1 ly trà đá</b>.
-                    <br>&rarr; Đồng tiền của bạn đã bị giảm sức mua. Sự suy giảm sức mua đó chính là <b>Lạm phát</b>, và công cụ để tính toán chính xác mức độ tăng giá phở/trà đá đó là <b>Chỉ số CPI</b>.
+                    <br>→ Đồng tiền của bạn đã bị giảm sức mua. Sự suy giảm sức mua đó chính là <b>Lạm phát</b>, và công cụ để tính toán chính xác mức độ tăng giá phở/trà đá đó là <b>Chỉ số CPI</b>.
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -350,7 +350,7 @@ if df is not None:
               CPI đóng vai trò như thước đo độ cao. Tỷ lệ Lạm phát chính là tốc độ mà độ cao đó gia tăng (YoY - Year on Year):
             """)
             
-            st.latex(r"\\text{Tỷ lệ Lạm phát (YoY)} = \\frac{\\text{CPI}_{\\text{Kỳ này}} - \\text{CPI}_{\\text{Cùng kỳ năm ngoái}}}{\\text{CPI}_{\\text{Cùng kỳ năm ngoái}}} \\times 100\\%")
+            st.latex(r"\text{Tỷ lệ Lạm phát (YoY)} = \frac{\text{CPI}_{\text{Kỳ này}} - \text{CPI}_{\text{Cùng kỳ năm ngoái}}}{\text{CPI}_{\text{Cùng kỳ năm ngoái}}} \times 100\%")
 
             st.markdown("""
             <div class="glass-card" style="margin-top: 12px; padding: 16px;">
@@ -530,11 +530,12 @@ if df is not None:
             sim_impact = oil_impact + fx_impact
             projected_cpi = current_val * (1 + sim_impact/100)
             
+            # ĐÃ SỬA LỖI &rr; THÀNH KÝ TỰ MŨI TÊN CHUẨN →
             st.markdown(f"""
             <div class="glass-card" style="margin-top:10px; margin-bottom:15px; border-left: 4px solid {'#F43F5E' if sim_impact > 0 else '#10B981'};">
                 <div style="font-size:12px; color:#94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
                 <div style="font-size:26px; font-weight:800; color:{'#FB7185' if sim_impact > 0 else '#34D399'}; margin: 4px 0;">
-                    {sim_impact:+.2f}% &rr; ~{projected_cpi:,.2f} điểm
+                    {sim_impact:+.2f}% → ~{projected_cpi:,.2f} điểm
                 </div>
                 <small style="color:#64748B;">Mô hình ước lượng dựa trên trọng số biến động năng lượng & hàng hóa nhập khẩu.</small>
             </div>
