@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS nâng cấp hiệu ứng Glow, Glassmorphism, Tab UI Fintech x1000 và layout cân đối
+# CSS ĐỘT PHÁ - THIẾT KẾ TAB ĐỐI XỨNG & NEON CAPSULE GLOW
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -25,7 +25,7 @@ st.markdown("""
         }
         
         .main {
-            background: radial-gradient(circle at 50% 0%, #1a2035 0%, #0a0c10 100%) !important;
+            background: radial-gradient(circle at 50% 0%, #111827 0%, #030712 100%) !important;
         }
         
         .glass-card {
@@ -64,51 +64,88 @@ st.markdown("""
             font-weight: 600 !important;
         }
         
-        /* ==========================================
-           NÂNG CẤP TAB HEADER (GLASSMORPHISM & NEON GLOW)
-           ========================================== */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 10px !important;
-            background: rgba(15, 23, 42, 0.65) !important;
-            padding: 8px 10px !important;
-            border-radius: 16px !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            backdrop-filter: blur(16px) !important;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-            margin-bottom: 20px !important;
-        }
+        /* =========================================================
+           THIẾT KẾ TAB MỚI: ĐỐI XỨNG $100\%$, ĐẸP GẤP X1000 LẦN
+           ========================================================= */
         
-        .stTabs [data-baseweb="tab"] {
-            height: 44px !important;
+        /* Xóa sạch vạch gạch chân màu đỏ & xám mặc định của Streamlit */
+        div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
+        div[data-testid="stTabs"] [data-baseweb="tab-border-bar"] {
+            display: none !important;
+            height: 0px !important;
+            visibility: hidden !important;
+        }
+
+        /* 1. Thanh bao quanh danh sách Tab - Định hình Khung Glassmorphism */
+        div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 8px !important;
+            background: rgba(15, 23, 42, 0.8) !important;
+            padding: 6px !important;
+            border-radius: 18px !important;
+            border: 1px solid rgba(0, 255, 204, 0.25) !important;
+            backdrop-filter: blur(20px) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 255, 204, 0.05) !important;
+            margin-bottom: 25px !important;
+            width: 100% !important;
+        }
+
+        /* 2. Thẻ Tab mặc định - Chia đều 100% không gian đối xứng */
+        div[data-testid="stTabs"] [data-baseweb="tab"],
+        div[data-testid="stTabs"] button[data-baseweb="tab"] {
+            flex: 1 1 0% !important; /* Bắt buộc chia đều đối xứng */
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            height: 48px !important;
             border-radius: 12px !important;
-            color: #94A3B8 !important;
+            border: 1px solid transparent !important;
+            background-color: transparent !important;
+            padding: 0 10px !important;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer !important;
+            outline: none !important;
+        }
+
+        /* Chữ trong Tab mặc định */
+        div[data-testid="stTabs"] [data-baseweb="tab"] p,
+        div[data-testid="stTabs"] [data-baseweb="tab"] span,
+        div[data-testid="stTabs"] button[data-baseweb="tab"] p {
             font-weight: 600 !important;
             font-size: 13.5px !important;
-            border: 1px solid transparent !important;
-            padding: 0 18px !important;
-            background-color: transparent !important;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            color: #94A3B8 !important;
+            transition: all 0.3s ease !important;
+            white-space: nowrap !important;
         }
 
-        .stTabs [data-baseweb="tab"]:hover {
-            color: #F8FAFC !important;
-            background-color: rgba(255, 255, 255, 0.05) !important;
-            border-color: rgba(255, 255, 255, 0.12) !important;
-            transform: translateY(-2px) !important;
-        }
-
-        .stTabs [aria-selected="true"] {
-            background: linear-gradient(135deg, rgba(0, 255, 204, 0.18) 0%, rgba(0, 180, 216, 0.12) 100%) !important;
-            color: #00FFCC !important;
-            border: 1px solid rgba(0, 255, 204, 0.45) !important;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.22), inset 0 0 10px rgba(0, 255, 204, 0.1) !important;
-            font-weight: 700 !important;
+        /* 3. Hiệu ứng Rê chuột (Hover) */
+        div[data-testid="stTabs"] [data-baseweb="tab"]:hover {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
             transform: translateY(-1px) !important;
         }
+        div[data-testid="stTabs"] [data-baseweb="tab"]:hover p,
+        div[data-testid="stTabs"] [data-baseweb="tab"]:hover span {
+            color: #FFFFFF !important;
+        }
 
-        .stTabs [data-baseweb="tab-highlight"],
-        .stTabs [data-baseweb="tab-border-bar"] {
-            display: none !important;
+        /* 4. TAB ĐƯỢC CHỌN (Active Tab) - Rực rỡ Cyberpunk Neon */
+        div[data-testid="stTabs"] [aria-selected="true"],
+        div[data-testid="stTabs"] button[aria-selected="true"] {
+            background: linear-gradient(135deg, #00FFCC 0%, #00B4D8 100%) !important;
+            border: 1px solid #00FFCC !important;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+            transform: scale(1.02) !important;
+        }
+
+        /* Chữ của Active Tab - Màu tối đậm tương phản cực kì nét */
+        div[data-testid="stTabs"] [aria-selected="true"] p,
+        div[data-testid="stTabs"] [aria-selected="true"] span,
+        div[data-testid="stTabs"] button[aria-selected="true"] p {
+            color: #0A0E17 !important;
+            font-weight: 800 !important;
         }
         
         div[data-testid="stPills"] button {
@@ -523,7 +560,7 @@ if df is not None:
             * **Xu hướng trung hạn:** Đường SMA 12 tháng đang {'đi lên' if df_active['SMA12'].iloc[-1] > df_active['SMA12'].iloc[-6] else 'đi ngang/giảm'}, phản ánh áp lực chu kỳ tích lũy.
             """)
 
-    # --- CỘT PHẢI: AI ASSISTANT (ĐI THẲNG VÀO TRỌNG TÂM - ƯU TIÊN DỰ BÁO LẠM PHÁT) ---
+    # --- CỘT PHẢI: AI ASSISTANT ---
     with col2:
         st.markdown("### 🤖 Trợ lý AI Phân tích & Dự báo Lạm phát")
         
@@ -571,22 +608,21 @@ if df is not None:
             recent_monthly_summary = df_active.tail(12).to_string(index=False)
             annual_summary = df_annual_grouped.to_string(index=False)
 
-            # PROMPT SYSTEM CHẶT CHẼ: TRẢ LỜI CHÍNH XÁC TRỌNG TÂM + TRỌNG TÂM LẠM PHÁT
             system_instruction = f"""
             Bạn là một Chuyên gia Phân tích & Dự báo Lạm phát Vĩ mô cấp cao (nghiên cứu sinh/giảng viên chuyên ngành Kinh tế chính trị - Tài chính tại Học viện Tài chính).
 
             🎯 QUY TẮC PHẢN HỒI BẮT BỘC:
             1. **TRẢ LỜI CHÍNH XÁC TRỌNG TÂM:** 
-               - Đi thẳng vào bản chất câu hỏi của người dùng. Tuyệt đối KHÔNG viết lời chào mừng, KHÔNG mở bài xã giao (không dùng "Chào bạn", "Dưới đây là...", "Cảm ơn bạn...").
+               - Đi thẳng vào bản chất câu hỏi của người dùng. Tuyệt đối KHÔNG viết lời chào mừng, KHÔNG mở bài xã giao.
                - Không đưa ra các thông tin ngoài phạm vi câu hỏi. Câu trả lời phải súc tích, đắt giá, luận điểm rõ ràng.
 
             2. **TRỌNG TÂM CỐT LÕI - LẠM PHÁT & CPI:**
-               - Trọng tâm công việc chính của bạn là phân tích, đánh giá và DỰ BÁO LẠM PHÁT / CPI (ngắn, trung và dài hạn).
-               - Với các câu hỏi vĩ mô liên quan (như Tỷ giá, Lãi suất, Giá dầu, Chính sách tiền tệ...), hãy trả lời chính xác vấn đề được hỏi và chốt lại tác động/liên hệ cốt lõi tới áp lực lạm phát của Việt Nam một cách súc tích.
+               - Trọng tâm công việc chính của bạn là phân tích, đánh giá và DỰ BÁO LẠM PHÁT / CPI.
+               - Với các câu hỏi vĩ mô liên quan (Tỷ giá, Lãi suất, Giá dầu...), hãy trả lời chính xác và chốt lại tác động tới áp lực lạm phát của Việt Nam.
 
             3. **CẤU TRÚC PHẢN HỒI:**
                - Bắt đầu ngay bằng KẾT LUẬN hoặc CÂU TRẢ LỜI TRỰC TIẾP ở ngay câu đầu tiên.
-               - Sau đó trình bày các luận điểm minh chứng hoặc kịch bản dự báo (dựa vào số liệu thực tế) bằng các gạch đầu dòng ngắn gọn.
+               - Trình bày các luận điểm minh chứng bằng các gạch đầu dòng ngắn gọn.
 
             📊 DỮ LIỆU VĨ MÔ THỰC TẾ CUNG CẤP:
             
