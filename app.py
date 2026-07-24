@@ -1,3 +1,4 @@
+import requests
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -195,14 +196,77 @@ timeframe = st.pills(
 st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
 # ==========================================
-# 2. CONFIG NGROK CỐ ĐỊNH
+# 2. CONFIG NGROK & UPTIMEROBOT MONITOR
 # ==========================================
 NGROK_STATIC_URL = "https://decode-thigh-dinginess.ngrok-free.dev"
 
+# API Key UptimeRobot đã tích hợp trực tiếp
+UPTIMEROBOT_READONLY_KEY = st.secrets.get("UPTIMEROBOT_KEY", "m803581790-b5c59d78d9cdd9caff8dd30d")
+
+@st.cache_data(ttl=300)
+def get_uptimerobot_status(api_key: str):
+    """Lấy dữ liệu giám sát trực tiếp từ API UptimeRobot (Cache 5 phút)"""
+    url = "https://api.uptimerobot.com/v2/getMonitors"
+    payload = f"api_key={api_key}&format=json&custom_uptime_ratios=30"
+    headers = {'content-type': "application/x-www-form-urlencoded"}
+    
+    try:
+        response = requests.post(url, data=payload, headers=headers, timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("stat") == "ok" and data.get("monitors"):
+                monitor = data["monitors"][0]
+                status_code = monitor.get("status")
+                
+                # 2 = Online, 8/9 = Offline
+                if status_code == 2:
+                    status_str = "🟢 Online"
+                elif status_code in [8, 9]:
+                    status_str = "🔴 Offline"
+                else:
+                    status_str = "🟡 Đang kiểm tra"
+                    
+                uptime_ratio = monitor.get("custom_uptime_ratio", "100")
+                friendly_name = monitor.get("friendly_name", "Server")
+                
+                return {
+                    "name": friendly_name,
+                    "status": status_str,
+                    "uptime": f"{float(uptime_ratio):.1f}%"
+                }
+    except Exception:
+        pass
+    
+    return {
+        "name": "Server",
+        "status": "⚪ Không rõ",
+        "uptime": "N/A"
+    }
+
 st.sidebar.markdown("### 🖥️ HỆ THỐNG MÁY CHỦ")
+
+# Widget Hiển thị Trạng thái UptimeRobot trên Sidebar
+if UPTIMEROBOT_READONLY_KEY:
+    uptime_info = get_uptimerobot_status(UPTIMEROBOT_READONLY_KEY)
+    st.sidebar.markdown(
+        f"""
+        <div style="background: rgba(16, 185, 129, 0.03); border: 1px solid rgba(16, 185, 129, 0.15); padding: 12px 14px; border-radius: 12px; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #34D399; font-weight: 700; font-size: 12px;">🌐 WEB UPTIME MONITOR</span>
+                <span style="font-size: 12px; font-weight: 700;">{uptime_info['status']}</span>
+            </div>
+            <div style="margin-top: 6px; font-size: 11px; color: #94A3B8;">
+                • Tên Monitor: <b style="color: #E2E8F0;">{uptime_info['name']}</b><br>
+                • Uptime (30 ngày): <b style="color: #10B981;">{uptime_info['uptime']}</b>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 st.sidebar.markdown(
     f"""
-    <div style="background: rgba(16, 185, 129, 0.03); border: 1px solid rgba(16, 185, 129, 0.15); padding: 15px; border-radius: 12px;">
+    <div style="background: rgba(16, 185, 129, 0.03); border: 1px solid rgba(16, 185, 129, 0.15); padding: 14px; border-radius: 12px;">
         <span style="color: #10B981; font-weight: 700; font-size: 13px;">● AI ENGINE ONLINE</span><br>
         <small style="color: #64748B; display: block; margin-top: 4px;">Ngrok Static Endpoint:</small>
         <code style="color: #E2E8F0; font-size: 10px; word-break: break-all; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 4px; display: block; margin-top: 4px;">{NGROK_STATIC_URL}</code>
@@ -530,7 +594,6 @@ if df is not None:
             sim_impact = oil_impact + fx_impact
             projected_cpi = current_val * (1 + sim_impact/100)
             
-            # ĐÃ SỬA LỖI &rr; THÀNH KÝ TỰ MŨI TÊN CHUẨN →
             st.markdown(f"""
             <div class="glass-card" style="margin-top:10px; margin-bottom:15px; border-left: 4px solid {'#F43F5E' if sim_impact > 0 else '#10B981'};">
                 <div style="font-size:12px; color:#94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">DỰ BÁO ĐIỀU CHỈNH CPI CẬN KỲ</div>
