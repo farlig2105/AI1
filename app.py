@@ -280,7 +280,7 @@ if st.sidebar.button("🧹 Xóa lịch sử hội thoại AI", use_container_wid
     st.rerun()
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Phát triển bởi Nhóm nghiên cứu Học viện Tài chính.")
+st.sidebar.caption("Phát triển bởi The Pioneers-Học viện Tài chính.")
 
 # ==========================================
 # 3. ĐỌC & XỬ LÝ DỮ LIỆU
