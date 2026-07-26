@@ -41,6 +41,7 @@ st.markdown("""
     }
     div[data-testid="stExpander"] details {
         border: none !important;
+        padding: 0 !important;
     }
     div[data-testid="stExpander"] summary {
         background: linear-gradient(90deg, rgba(13, 148, 136, 0.15) 0%, rgba(17, 24, 39, 0.4) 100%) !important;
@@ -57,9 +58,15 @@ st.markdown("""
         font-size: 14.5px !important;
         letter-spacing: -0.2px !important;
     }
+    
+    /* KHOẢNG CÁCH GIỮA Ô NGOÀI VÀ Ô TRONG ĐỒNG NHẤT 100% CẢ 4 CẠNH (16px) */
     div[data-testid="stExpander"] div[role="region"] {
-        padding: 12px 16px 16px 16px !important;
+        padding: 16px !important;
         background: rgba(11, 15, 25, 0.5) !important;
+    }
+    div[data-testid="stExpander"] div[role="region"] > div {
+        padding: 0 !important;
+        margin: 0 !important;
     }
     
     /* Glassmorphic Cards */
@@ -224,11 +231,11 @@ with h_col2:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ CÂN BẰNG TỶ LỆ)
+# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ CÂN BẰNG TỶ LỆ CẢ 4 CẠNH)
 # ==========================================
 with st.expander("🚀 **Lần đầu truy cập? Bắt đầu nhanh tại đây (3 bước đơn giản)**", expanded=True):
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 14px; padding: 18px 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); box-sizing: border-box; width: 100%;">
+    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 14px; padding: 16px 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); box-sizing: border-box; width: 100%; margin: 0;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px;">
             <span style="font-size: 13.5px; color: #E2E8F0; font-weight: 500;">
                 ✨ <b>Chào mừng bạn đến với Hệ thống Dữ liệu Vĩ mô & Trợ lý AI!</b> Khám phá nhanh theo 3 bước:
