@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS ĐỘT PHÁ - PHONG CÁCH SEGMENTED CONTROL & EXPANDER / BANNER NÂNG CẤP
+# CSS ĐỘT PHÁ - CÂN BẰNG KHUNG TẠO SỰ CÂN ĐỐI TUYỆT ĐỐI
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -183,13 +183,17 @@ st.markdown("""
         color: #10B981 !important;
     }
 
+    /* Ô CHÀO MỪNG AI - THIẾT KẾ CÂN ĐỐI TỰ NHIÊN 4 CẠNH */
     .ai-welcome {
-        border: 1px dashed rgba(16, 185, 129, 0.3);
-        background: rgba(16, 185, 129, 0.02);
-        border-radius: 14px;
-        padding: 20px;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.6) 100%);
+        border-radius: 16px;
+        padding: 24px 20px;
         text-align: center;
-        margin-top: 10px;
+        margin: 8px auto;
+        box-sizing: border-box;
+        width: calc(100% - 4px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     }
     
     ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -220,11 +224,11 @@ with h_col2:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ THIẾT KẾ LẠI CỰC ĐẸP)
+# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ CÂN BẰNG TỶ LỆ)
 # ==========================================
 with st.expander("🚀 **Lần đầu truy cập? Bắt đầu nhanh tại đây (3 bước đơn giản)**", expanded=True):
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 14px; padding: 18px 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);">
+    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 14px; padding: 18px 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); box-sizing: border-box; width: 100%;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px;">
             <span style="font-size: 13.5px; color: #E2E8F0; font-weight: 500;">
                 ✨ <b>Chào mừng bạn đến với Hệ thống Dữ liệu Vĩ mô & Trợ lý AI!</b> Khám phá nhanh theo 3 bước:
@@ -790,7 +794,6 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
     # 6. CỘT PHẢI: AI ASSISTANT & PHẠM VI PHÂN TÍCH
     # ==========================================
     with col2:
-        # BỘ LỌC THỜI GIAN ĐÃ ĐƯỢC CHUYỂN SANG TRÊN CHATBOT
         selected_timeframe = st.pills(
             "📍 Phạm vi phân tích dữ liệu cho AI & Hệ thống:",
             options=["1 năm qua", "5 năm qua", "Tất cả 10 năm"],
@@ -839,9 +842,9 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
             if len(st.session_state.messages) == 0:
                 st.markdown(f"""
                 <div class="ai-welcome">
-                    <div style="font-size: 32px; margin-bottom: 5px;">🤖</div>
-                    <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Tôi có thể giúp gì cho bạn?</div>
-                    <p style="color: #94A3B8; font-size: 12px; margin-top: 5px; line-height: 1.5;">
+                    <div style="font-size: 30px; margin-bottom: 6px;">🤖</div>
+                    <div style="color: #ffffff; font-weight: 700; font-size: 15px; margin-bottom: 4px;">Tôi có thể giúp gì cho bạn?</div>
+                    <p style="color: #94A3B8; font-size: 12px; margin: 0; line-height: 1.5;">
                         Phạm vi phân tích hiện tại: <b style="color: #10B981;">{label_suffix}</b>.<br>
                         Nhập câu hỏi bất kỳ hoặc chọn nút gợi ý phía trên để bắt đầu hội thoại!
                     </p>
