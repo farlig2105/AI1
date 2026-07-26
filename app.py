@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS ĐỘT PHÁ - PHONG CÁCH SEGMENTED CONTROL & TABLES NÂNG CẤP
+# CSS ĐỘT PHÁ - PHONG CÁCH SEGMENTED CONTROL & EXPANDER / BANNER NÂNG CẤP
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -27,6 +27,39 @@ st.markdown("""
     
     .main {
         background: #0B0F19 !important;
+    }
+    
+    /* Custom Streamlit Expander (Thanh Hướng Dẫn) */
+    div[data-testid="stExpander"] {
+        background: rgba(17, 24, 39, 0.7) !important;
+        border: 1px solid rgba(16, 185, 129, 0.25) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+        overflow: hidden !important;
+        margin-bottom: 20px !important;
+        backdrop-filter: blur(12px) !important;
+    }
+    div[data-testid="stExpander"] details {
+        border: none !important;
+    }
+    div[data-testid="stExpander"] summary {
+        background: linear-gradient(90deg, rgba(13, 148, 136, 0.15) 0%, rgba(17, 24, 39, 0.4) 100%) !important;
+        padding: 12px 20px !important;
+        border-radius: 16px !important;
+        transition: all 0.3s ease !important;
+    }
+    div[data-testid="stExpander"] summary:hover {
+        background: linear-gradient(90deg, rgba(13, 148, 136, 0.25) 0%, rgba(17, 24, 39, 0.6) 100%) !important;
+    }
+    div[data-testid="stExpander"] summary p {
+        font-weight: 700 !important;
+        color: #34D399 !important;
+        font-size: 14.5px !important;
+        letter-spacing: -0.2px !important;
+    }
+    div[data-testid="stExpander"] div[role="region"] {
+        padding: 12px 16px 16px 16px !important;
+        background: rgba(11, 15, 25, 0.5) !important;
     }
     
     /* Glassmorphic Cards */
@@ -187,21 +220,46 @@ with h_col2:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI
+# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ THIẾT KẾ LẠI CỰC ĐẸP)
 # ==========================================
-with st.expander("👋 **Lần đầu truy cập? Bắt đầu nhanh tại đây (3 bước đơn giản)**", expanded=True):
+with st.expander("🚀 **Lần đầu truy cập? Bắt đầu nhanh tại đây (3 bước đơn giản)**", expanded=True):
     st.markdown("""
-    <div style="background: rgba(13, 148, 136, 0.08); border-left: 4px solid #10B981; padding: 12px 16px; border-radius: 8px; font-size: 13.5px; line-height: 1.6; color: #E2E8F0;">
-        Chào mừng bạn đến với hệ thống theo dõi Vĩ mô & AI! Để không bị ngợp, hãy khám phá theo 3 bước:
-        <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
-            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
-                <b>1️⃣ Quan sát chỉ số:</b> Xem 4 ô KPI bên dưới để biết giá trị CPI & Lạm phát mới nhất.
+    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 14px; padding: 18px 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px;">
+            <span style="font-size: 13.5px; color: #E2E8F0; font-weight: 500;">
+                ✨ <b>Chào mừng bạn đến với Hệ thống Dữ liệu Vĩ mô & Trợ lý AI!</b> Khám phá nhanh theo 3 bước:
+            </span>
+            <span style="background: rgba(16, 185, 129, 0.2); color: #34D399; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.3); letter-spacing: 0.5px;">
+                QUICK START
+            </span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px;">
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 14px; transition: transform 0.2s ease;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <span style="background: linear-gradient(135deg, #10B981, #059669); color: #FFF; font-weight: 800; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);">1</span>
+                    <b style="color: #F8FAFC; font-size: 13px;">Quan sát KPI Vĩ mô</b>
+                </div>
+                <p style="color: #94A3B8; font-size: 12px; margin: 0; line-height: 1.5;">
+                    Xem 4 ô chỉ số phía dưới để nắm nhanh giá trị CPI, Lạm phát YoY và đỉnh/đáy lịch sử.
+                </p>
             </div>
-            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
-                <b>2️⃣ Khám phá Tab:</b> Xem biểu đồ đồ thị, thử nghiệm kéo slider Mô phỏng kịch bản.
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 14px; transition: transform 0.2s ease;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <span style="background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFF; font-weight: 800; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);">2</span>
+                    <b style="color: #F8FAFC; font-size: 13px;">Thử nghiệm Mô phỏng</b>
+                </div>
+                <p style="color: #94A3B8; font-size: 12px; margin: 0; line-height: 1.5;">
+                    Chuyển sang các tab Biểu đồ, kéo thanh trượt Giá dầu & Tỷ giá để Stress-Test kịch bản CPI.
+                </p>
             </div>
-            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
-                <b>3️⃣ Trợ lý AI:</b> Đặt câu hỏi ở cột bên phải để AI giải thích diễn biến thị trường.
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 14px; transition: transform 0.2s ease;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <span style="background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: #FFF; font-weight: 800; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);">3</span>
+                    <b style="color: #F8FAFC; font-size: 13px;">Hỏi đáp cùng AI Assistant</b>
+                </div>
+                <p style="color: #94A3B8; font-size: 12px; margin: 0; line-height: 1.5;">
+                    Đặt câu hỏi ở khung trò chuyện bên phải hoặc nhấp câu gợi ý để AI phân tích chuyên sâu.
+                </p>
             </div>
         </div>
     </div>
