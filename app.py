@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS ĐỘT PHÁ - XỬ LÝ DỨT ĐIỂM LỖI DÍNH VIỀN DƯỚI
+# CSS ĐỘT PHÁ - XỬ LÝ DỨT ĐIỂM LỖI DÍNH VIỀN DƯỚI TRÊN MỌI PHIÊN BẢN STREAMLIT
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -61,22 +61,24 @@ st.markdown("""
         letter-spacing: -0.2px !important;
     }
     
-    /* 2. ÉP KHU VỰC NỘI DUNG (REGION) CÓ PADDING 16PX ĐỀU 4 CẠNH */
+    /* 2. KHẮC PHỤC DỨT ĐIỂM: ÉP PADDING CHO TOÀN BỘ CÁC THẺ CONTAINER CỦA EXPANDER */
+    div[data-testid="stExpander"] [data-testid="stExpanderDetails"],
+    div[data-testid="stExpander"] details > div,
     div[data-testid="stExpander"] div[role="region"] {
-        padding: 16px !important;
+        padding: 16px 16px 18px 16px !important;
         background: rgba(11, 15, 25, 0.5) !important;
         box-sizing: border-box !important;
     }
     
-    /* 3. TRIỆT TIỆU TRIỆT ĐỂ MARGIN THỪA CỦA STREAMLIT GÂY DÍNH VIỀN DƯỚI */
-    div[data-testid="stExpander"] div[role="region"] [data-testid="stVerticalBlock"] {
+    /* 3. TRIỆT TIỆU TÁC ĐỘNG XẤU TỪ MARGIN MẶC ĐỊNH */
+    div[data-testid="stExpander"] [data-testid="stVerticalBlock"] {
         gap: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
     }
-    div[data-testid="stExpander"] div[role="region"] [data-testid="stMarkdownContainer"],
-    div[data-testid="stExpander"] div[role="region"] [data-testid="stMarkdownContainer"] > div,
-    div[data-testid="stExpander"] div[role="region"] p {
+    div[data-testid="stExpander"] [data-testid="stMarkdownContainer"],
+    div[data-testid="stExpander"] [data-testid="stMarkdownContainer"] > div,
+    div[data-testid="stExpander"] p {
         padding: 0 !important;
         margin: 0 !important;
     }
@@ -243,11 +245,11 @@ with h_col2:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ CÂN BẰNG TỶ LỆ KHOẢNG CÁCH THỰC TẾ)
+# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ FIX MARGIN DƯỚI AN TOÀN)
 # ==========================================
 with st.expander("🚀 **Lần đầu truy cập? Bắt đầu nhanh tại đây (3 bước đơn giản)**", expanded=True):
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); box-sizing: border-box; width: 100%; margin: 0; display: block;">
+    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); box-sizing: border-box; width: 100%; margin: 0 0 4px 0; display: block;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px;">
             <span style="font-size: 13.5px; color: #E2E8F0; font-weight: 500;">
                 ✨ <b>Chào mừng bạn đến với Hệ thống Dữ liệu Vĩ mô & Trợ lý AI!</b> Khám phá nhanh theo 3 bước:
