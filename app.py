@@ -837,12 +837,15 @@ DỮ LIỆU VĨ MÔ THỜI GIAN THỰC TRONG PHẠM VI DỮ LIỆU ĐANG LỌC (
 - Đỉnh đạt được trong phạm vi {label_suffix}: {max_val:,.2f} điểm (Tháng {max_date})
 - Đáy đạt được trong phạm vi {label_suffix}: {min_val:,.2f} điểm (Tháng {min_date})
 
-YÊU CẦU QUAN TRỌNG BẮT BUỘC TUÂN THỦ:
+YÊU CẦU QUAN TRỌNG BẮT BUỘC TUÂN THỦ KHI TRẢ LỜI:
 1. GIỚI HẠN PHẠM VI THỜI GIAN: Toàn bộ phân tích, nhận định, suy luận và lập luận BẮT BUỘC PHẢI GIỚI HẠN TUYỆT ĐỐI trong khung thời gian **{label_suffix} ({selected_timeframe})**. Không lấy số liệu ngoài khung thời gian này trừ khi người dùng yêu cầu đối chiếu đặc biệt.
 2. Mở đầu câu trả lời BẮT BUỘC bằng đúng dòng chỉ định hành động sau đây:
 {act_heading}
 
-3. Trình bày câu trả lời trực diện, sắc bén, chia theo các đầu dòng rõ ràng, lập luận bằng con số cụ thể đã được trích xuất ở trên.
+3. PHONG CÁCH TRẢ LỜI & TƯ DUY PHÂN TÍCH:
+   - SÚC TÍCH VÀ NGẮN GỌN: Đi thẳng, đi chính xác vào trọng tâm câu hỏi của người dùng, không dài dòng lan man, bỏ qua lời chào hay dẫn dắt thừa thãi.
+   - PHÂN TÍCH NHƯ CHUYÊN GIA THỰC THẾ: Đưa ra nhận định sắc bén, tự nhiên, đa chiều và có góc nhìn chuyên môn thực chiến.
+   - LẬP LUẬN LOGIC VÀ ĐẦY ĐỦ THÔNG TIN: Đảm bảo tính mạch lạc, chặt chẽ trong suy luận logic; sử dụng số liệu thực tế đã được cung cấp ở trên để làm bằng chứng định lượng rõ ràng.
 """
 
                         messages_payload = [{"role": "system", "content": system_prompt}]
