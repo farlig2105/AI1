@@ -186,9 +186,30 @@ with h_col2:
     </div>
     """, unsafe_allow_html=True)
 
+# ==========================================
+# CẢI TIẾN UX 1: BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI
+# ==========================================
+with st.expander("👋 **Lần đầu truy cập? Bắt đầu nhanh tại đây (3 bước đơn giản)**", expanded=True):
+    st.markdown("""
+    <div style="background: rgba(13, 148, 136, 0.08); border-left: 4px solid #10B981; padding: 12px 16px; border-radius: 8px; font-size: 13.5px; line-height: 1.6; color: #E2E8F0;">
+        Chào mừng bạn đến với hệ thống theo dõi Vĩ mô & AI! Để không bị ngợp, hãy khám phá theo 3 bước:
+        <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
+                <b>1️⃣ Quan sát chỉ số:</b> Xem 4 ô KPI bên dưới để biết giá trị CPI & Lạm phát mới nhất.
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
+                <b>2️⃣ Khám phá Tab:</b> Xem biểu đồ đồ thị, thử nghiệm kéo slider Mô phỏng kịch bản.
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
+                <b>3️⃣ Trợ lý AI:</b> Đặt câu hỏi ở cột bên phải để AI giải thích diễn biến thị trường.
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 # BỘ LỌC THỜI GIAN
 timeframe = st.pills(
-    "Phạm vi phân tích:",
+    "Phạm vi phân tích dữ liệu:",
     options=["1 năm qua", "5 năm qua", "Tất cả 10 năm"],
     default="Tất cả 10 năm",
     key="global_timeframe"
@@ -199,13 +220,10 @@ st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 # 2. CONFIG NGROK & UPTIMEROBOT MONITOR
 # ==========================================
 NGROK_STATIC_URL = "https://decode-thigh-dinginess.ngrok-free.dev"
-
-# API Key UptimeRobot đã tích hợp trực tiếp
 UPTIMEROBOT_READONLY_KEY = st.secrets.get("UPTIMEROBOT_KEY", "m803581790-b5c59d78d9cdd9caff8dd30d")
 
 @st.cache_data(ttl=300)
 def get_uptimerobot_status(api_key: str):
-    """Lấy dữ liệu giám sát trực tiếp từ API UptimeRobot (Cache 5 phút)"""
     url = "https://api.uptimerobot.com/v2/getMonitors"
     payload = f"api_key={api_key}&format=json&custom_uptime_ratios=30"
     headers = {'content-type': "application/x-www-form-urlencoded"}
@@ -218,7 +236,6 @@ def get_uptimerobot_status(api_key: str):
                 monitor = data["monitors"][0]
                 status_code = monitor.get("status")
                 
-                # 2 = Online, 8/9 = Offline
                 if status_code == 2:
                     status_str = "🟢 Online"
                 elif status_code in [8, 9]:
@@ -245,7 +262,6 @@ def get_uptimerobot_status(api_key: str):
 
 st.sidebar.markdown("### 🖥️ HỆ THỐNG MÁY CHỦ")
 
-# Widget Hiển thị Trạng thái UptimeRobot trên Sidebar
 if UPTIMEROBOT_READONLY_KEY:
     uptime_info = get_uptimerobot_status(UPTIMEROBOT_READONLY_KEY)
     st.sidebar.markdown(
@@ -338,123 +354,59 @@ if df is not None:
     min_date = df_active[df_active[data_column] == min_val]['Ngay'].dt.strftime('%m/%Y').values[0]
 
     # ==========================================
-    # 4. KPI CARDS
+    # 4. KPI CARDS (Bổ sung tooltip thân thiện)
     # ==========================================
     kpi1, kpi2, kpi3, kpi4 = st.columns(4, gap="small")
     with kpi1:
-        st.metric(label=f"Chỉ số {data_column}", value=f"{current_val:,.2f}", delta=f"{mo_m_change:+.2f}% (Cận Kỳ)")
+        st.metric(
+            label=f"Chỉ số {data_column}", 
+            value=f"{current_val:,.2f}", 
+            delta=f"{mo_m_change:+.2f}% (So với tháng trước)",
+            help="Chỉ số CPI đo lường mức giá trung bình của giỏ hàng hóa & dịch vụ tiêu dùng mới nhất."
+        )
     with kpi2:
-        st.metric(label="Tăng Trưởng YoY", value=f"{yoy_change:+.2f}%", delta="So với cùng kỳ")
+        st.metric(
+            label="Tăng Trưởng Lạm Phát (YoY)", 
+            value=f"{yoy_change:+.2f}%", 
+            delta="So với cùng kỳ năm trước",
+            help="Tỷ lệ phần trăm thay đổi mức giá so với đúng thời điểm này năm ngoái."
+        )
     with kpi3:
-        st.metric(label=f"Đỉnh {label_suffix}", value=f"{max_val:,.2f}", delta=f"Tháng {max_date}", delta_color="off")
+        st.metric(
+            label=f"Mức Cao Nhất ({label_suffix})", 
+            value=f"{max_val:,.2f}", 
+            delta=f"Tháng {max_date}", 
+            delta_color="off",
+            help="Chỉ số CPI đạt đỉnh trong mốc thời gian đang lọc."
+        )
     with kpi4:
-        st.metric(label=f"Đáy {label_suffix}", value=f"{min_val:,.2f}", delta=f"Tháng {min_date}", delta_color="off")
+        st.metric(
+            label=f"Mức Thấp Nhất ({label_suffix})", 
+            value=f"{min_val:,.2f}", 
+            delta=f"Tháng {min_date}", 
+            delta_color="off",
+            help="Chỉ số CPI chạm đáy trong mốc thời gian đang lọc."
+        )
 
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ==========================================
-    # 5. BỐ TRÍ LAYOUT TAB
+    # 5. BỐ TRÍ LAYOUT TAB (SẮP XẾP LẠI THỨ TỰ ƯU TIÊN)
     # ==========================================
     col1, col2 = st.columns([1.3, 1], gap="large")
 
     with col1:
-        tab_theory, tab_chart, tab_table, tab_sim, tab_insights = st.tabs([
-            "💡 Lý thuyết",
+        # CẢI TIẾN UX 2: Đưa Biểu đồ & Mô phỏng lên trước, đẩy Lý thuyết về cuối
+        tab_chart, tab_sim, tab_table, tab_theory = st.tabs([
             "📈 Biểu đồ Chu kỳ", 
-            "📊 Bảng Niên độ", 
             "🛠️ Mô phỏng Kịch bản",
-            "📌 Highlight Vĩ mô"
+            "📊 Bảng Số liệu Niên độ",
+            "💡 Thư viện Kiến thức"
         ])
 
-        # TAB 1: LÝ THUYẾT CHI TIẾT
-        with tab_theory:
-            st.markdown("##### 🛒 1. Nhập môn Kinh tế Vĩ mô: CPI & Lạm phát là gì?")
-            st.caption("Ví dụ trực quan về biến động sức mua thực tế:")
-            
-            st.markdown("""
-            <div class="glass-card" style="border-left: 4px solid #10B981;">
-                <p style="font-size: 13px; color: #E2E8F0; margin: 0; line-height: 1.6;">
-                    💡 <b>Ví dụ trực quan:</b> Giả sử năm ngoái bạn mang <b>100.000 VNĐ</b> đi chợ mua được <b>2 bát phở</b>. Năm nay, vẫn cầm 100.000 VNĐ đó bạn chỉ mua được <b>1 bát phở và 1 ly trà đá</b>.
-                    <br>→ Đồng tiền của bạn đã bị giảm sức mua. Sự suy giảm sức mua đó chính là <b>Lạm phát</b>, và công cụ để tính toán chính xác mức độ tăng giá phở/trà đá đó là <b>Chỉ số CPI</b>.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            c_th1, c_th2 = st.columns(2)
-            with c_th1:
-                st.markdown("""
-                <div class="glass-card" style="height: 100%;">
-                    <h6 style="color: #10B981; margin-top:0; font-size: 14px;">🧺 CPI (Consumer Price Index)</h6>
-                    <span style="background: rgba(16,185,129,0.1); color: #10B981; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">THƯỚC ĐO TĨNH</span>
-                    <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
-                        • <b>Tên gọi:</b> Chỉ số Giá tiêu dùng.<br>
-                        • <b>Bản chất:</b> Tưởng tượng Tổng cục Thống kê (GSO) gom khoảng 752 mặt hàng thiết yếu vào một <b>"Chiếc Giỏ Hàng Chuẩn"</b>.<br>
-                        • <b>Cách hoạt động:</b> Định kỳ hàng tháng, GSO đi cộng tổng số tiền cần thiết để mua "Giỏ Hàng" này. Sự chênh lệch tổng số tiền so với gốc gọi là CPI.
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-            with c_th2:
-                st.markdown("""
-                <div class="glass-card" style="height: 100%;">
-                    <h6 style="color: #F43F5E; margin-top:0; font-size: 14px;">🎈 Lạm phát (Inflation)</h6>
-                    <span style="background: rgba(244,63,94,0.1); color: #F43F5E; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">TỐC ĐỘ TĂNG TRƯỜNG</span>
-                    <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
-                        • <b>Bản chất:</b> Là <b>tốc độ biến động (%)</b> của mặt bằng giá chung theo thời gian.<br>
-                        • <b>Mối đe dọa:</b> Lạm phát nhẹ (2-3%/năm) kích thích sản xuất. Nhưng lạm phát quá cao làm giảm giá trị tiền lương, gây mất giá đồng tiền.<br>
-                        • <b>Nguyên nhân chính:</b> Do chi phí đầu vào tăng (Dầu khí, tỷ giá) hoặc do lượng cung tiền lớn.
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("##### 🔗 2. Mối quan hệ tương tác & Công thức liên kết")
-            
-            st.markdown("""
-            * **CPI là biến đầu vào → Lạm phát là kết quả đầu ra:** 
-              CPI đóng vai trò như thước đo độ cao. Tỷ lệ Lạm phát chính là tốc độ mà độ cao đó gia tăng (YoY - Year on Year):
-            """)
-            
-            st.latex(r"\text{Tỷ lệ Lạm phát (YoY)} = \frac{\text{CPI}_{\text{Kỳ này}} - \text{CPI}_{\text{Cùng kỳ năm ngoái}}}{\text{CPI}_{\text{Cùng kỳ năm ngoái}}} \times 100\%")
-
-            st.markdown("""
-            <div class="glass-card" style="margin-top: 12px; padding: 16px;">
-                <b style="color: #10B981; font-size: 13px;">📖 Giải thích chi tiết ký hiệu công thức:</b>
-                <ul style="font-size: 12px; color: #CBD5E1; margin-top: 10px; margin-bottom: 0; padding-left: 20px; line-height: 1.8;">
-                    <li><b>Tỷ lệ Lạm phát (YoY):</b> Mức độ gia tăng giá cả so với cùng kỳ năm trước, tính bằng %.</li>
-                    <li><b>CPI<sub>Kỳ này</sub>:</b> Chỉ số CPI thu thập tại thời điểm hiện tại.</li>
-                    <li><b>CPI<sub>Cùng kỳ năm ngoái</sub>:</b> Chỉ số CPI thu thập đúng vào tháng này của 1 năm trước.</li>
-                    <li><b>Thao tác trừ:</b> Đo lường mức độ biến động tuyệt đối về điểm số.</li>
-                    <li><b>Thao tác chia & nhân 100%:</b> Quy đổi về tỷ lệ phần trăm (%) chuẩn hóa.</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown("""
-            * **Cơ chế tác động 2 chiều:**
-              1. **Chiều thuận:** Giá các mặt hàng chiến lược (Dầu, Tỷ giá USD/VND) tăng → Chi phí sản xuất & vận chuyển tăng → **CPI tăng** → **Lạm phát tăng**.
-              2. **Chiều ngược:** Người dân kỳ vọng lạm phát cao → Ồ ạt mua tài sản tích trữ (BĐS, Vàng) → Lực cầu tăng đột biến → **Tiếp tục đẩy CPI tăng**.
-            """)
-
-            st.markdown("---")
-            st.markdown("##### 🚀 3. Tại sao cần 'Dự báo Đa nguồn Thời gian thực'?")
-            st.markdown("""
-            <div class="glass-card" style="background: rgba(16, 185, 129, 0.02); border: 1px solid rgba(16, 185, 129, 0.15);">
-                <b style="color: #F43F5E; font-size: 13px;">⚠️ Hạn chế của Phương pháp Thống kê Truyền thống:</b>
-                <p style="font-size: 12px; color: #94A3B8; margin-top: 4px; line-height: 1.5;">
-                    Báo cáo CPI chính thức thường chỉ công bố <b>mỗi tháng 1 lần (với độ trễ 20-30 ngày)</b>. Khi có cú sốc giá dầu thế giới, chính sách cần thông tin ngay lập tức chứ không thể chờ đến cuối tháng.
-                </p>
-                <b style="color: #10B981; font-size: 13px;">💡 Giải pháp Nowcasting Đa nguồn (Real-Time AI):</b>
-                <p style="font-size: 12px; color: #CBD5E1; margin-top: 4px; line-height: 1.6;">
-                    Ứng dụng kết hợp <b>3 tầng dữ liệu</b> liên tục:
-                    <br>1. <b>Nguồn Tần suất cao (Cập nhật hàng ngày):</b> Giá Dầu WTI/Brent, Tỷ giá USD/VND, Giá Vàng.
-                    <br>2. <b>Nguồn Dữ liệu Lịch sử:</b> Chuỗi CPI chính thống của GSO để làm mốc nền tảng.
-                    <br>3. <b>Trí tuệ Nhân tạo (RAG + LLM):</b> Truy xuất văn bản điều hành vĩ mô để tính toán <b>Dự báo CPI tức thời</b>, loại bỏ hoàn toàn độ trễ báo cáo.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # TAB 2: BIỂU ĐỒ CHU KỲ
+        # TAB 1: BIỂU ĐỒ CHU KỲ & TÓM TẮT TÌNH HÌNH
         with tab_chart:
+            st.markdown("##### 📈 Diễn biến Chu kỳ CPI & Xu hướng")
             show_sma = st.checkbox("Hiển thị Đường trung bình động SMA (12 tháng)", value=True)
             
             fig = go.Figure()
@@ -475,7 +427,7 @@ if df is not None:
                 paper_bgcolor='rgba(0,0,0,0)',
                 plot_bgcolor='rgba(0,0,0,0)',
                 margin=dict(l=10, r=10, t=10, b=10),
-                height=380,
+                height=350,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
             fig.update_xaxes(gridcolor="rgba(255, 255, 255, 0.05)")
@@ -483,105 +435,25 @@ if df is not None:
             
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # TAB 3: BẢNG NIÊN ĐỘ
-        with tab_table:
-            st.markdown("##### 📊 Số liệu CPI trung bình từng năm")
-            
-            min_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].min()
-            max_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].max()
-            cpi_range = max_cpi - min_cpi if max_cpi != min_cpi else 1
-            
-            rows_html = ""
-            for idx, row in df_annual_grouped.iterrows():
-                year = int(row['Năm'])
-                val = row[f'Chỉ số {data_column} Trung Bình']
-                pct = 25 + ((val - min_cpi) / cpi_range) * 75
-                
-                rows_html += f"""<tr>
-<td style="text-align: center; font-weight: 700; color: #F8FAFC;">
-<span style="background: rgba(16, 185, 129, 0.12); color: #34D399; padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(52, 211, 153, 0.25); font-size: 13px; display: inline-block;">
-{year}
-</span>
-</td>
-<td style="text-align: right; font-weight: 800; color: #10B981; font-size: 15px; padding-right: 20px;">
-{val:,.2f}
-</td>
-<td style="vertical-align: middle; padding-left: 15px; padding-right: 15px;">
-<div style="background: rgba(255, 255, 255, 0.06); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05);">
-<div style="width: {pct:.1f}%; height: 100%; background: linear-gradient(90deg, #059669 0%, #10B981 50%, #34D399 100%); border-radius: 10px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);"></div>
-</div>
-</td>
-</tr>"""
+            # Tóm tắt điểm nóng vĩ mô lồng trực tiếp bên dưới đồ thị
+            st.markdown("""
+            <div class="glass-card" style="margin-top: 10px; padding: 14px 18px;">
+                <b style="color: #34D399; font-size: 13px;">📌 Tóm tắt Điểm nóng Vĩ mô Nhanh:</b>
+                <ul style="font-size: 12.5px; color: #CBD5E1; margin-top: 6px; margin-bottom: 0; padding-left: 20px; line-height: 1.7;">
+                    <li><b>Biến động đỉnh điểm:</b> Chỉ số chạm đỉnh cao nhất tại <b>{}</b> (Tháng {}).</li>
+                    <li><b>Tốc độ tăng trưởng:</b> Mức tăng lạm phát so với cùng kỳ (YoY) đạt <b>{:+.2f}%</b>.</li>
+                    <li><b>Đánh giá xu hướng:</b> Đường trung bình động SMA 12 tháng đang <b>{}</b>, phản ánh áp lực tích lũy lạm phát trong trung hạn.</li>
+                </ul>
+            </div>
+            """.format(
+                f"{max_val:,.2f}", max_date, yoy_change,
+                'đi lên' if df_active['SMA12'].iloc[-1] > df_active['SMA12'].iloc[-6] else 'đi ngang/giảm'
+            ), unsafe_allow_html=True)
 
-            table_html = f"""<style>
-.custom-cpi-table-container {{
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-    margin-bottom: 20px;
-    background: #111827;
-}}
-.custom-cpi-table {{
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    color: #F1F5F9;
-}}
-.custom-cpi-table th {{
-    background: #1E293B;
-    color: #34D399;
-    padding: 14px 16px;
-    font-weight: 700;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-size: 11px;
-}}
-.custom-cpi-table tr {{
-    transition: background 0.2s ease;
-}}
-.custom-cpi-table tr:nth-child(even) {{
-    background: rgba(255, 255, 255, 0.02);
-}}
-.custom-cpi-table tr:hover {{
-    background: rgba(16, 185, 129, 0.08) !important;
-}}
-.custom-cpi-table td {{
-    padding: 13px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    vertical-align: middle;
-}}
-</style>
-<div class="custom-cpi-table-container">
-<table class="custom-cpi-table">
-<thead>
-<tr>
-<th style="text-align: center; width: 22%;">Năm</th>
-<th style="text-align: right; width: 38%; padding-right: 20px;">CPI Trung Bình</th>
-<th style="text-align: left; width: 40%; padding-left: 15px;">Mức độ Tương quan Chu kỳ</th>
-</tr>
-</thead>
-<tbody>
-{rows_html}
-</tbody>
-</table>
-</div>"""
-            st.markdown(table_html, unsafe_allow_html=True)
-            
-            csv_data = df_active.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 Tải xuống dữ liệu CSV chi tiết",
-                data=csv_data,
-                file_name="du_lieu_vi_mo_cpi.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-
-        # TAB 4: MÔ PHỎNG KỊCH BẢN
+        # TAB 2: MÔ PHỎNG KỊCH BẢN
         with tab_sim:
             st.markdown("##### 🧪 Stress-Test Áp lực Lạm phát")
-            st.caption("Điều chỉnh tham số giả định để mô phỏng tác động:")
+            st.caption("Hãy thử kéo các thanh trượt bên dưới để xem Giá dầu & Tỷ giá tác động thế nào đến CPI:")
             
             sc1, sc2 = st.columns(2)
             with sc1:
@@ -708,14 +580,161 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
 </div>"""
             st.markdown(table_html_sim, unsafe_allow_html=True)
 
-        # TAB 5: HIGHLIGHT VĨ MÔ
-        with tab_insights:
-            st.markdown("##### 📌 Tóm tắt Điểm nóng Vĩ mô")
-            st.markdown(f"""
-            * **Biến động đỉnh điểm:** Chỉ số đạt đỉnh **{max_val:,.2f}** vào tháng **{max_date}**.
-            * **Tốc độ tăng trưởng:** Mức tăng YoY hiện tại đạt **{yoy_change:+.2f}%**.
-            * **Xu hướng trung hạn:** Đường SMA 12 tháng đang {'đi lên' if df_active['SMA12'].iloc[-1] > df_active['SMA12'].iloc[-6] else 'đi ngang/giảm'}, phản ánh áp lực chu kỳ tích lũy.
+        # TAB 3: BẢNG NIÊN ĐỘ
+        with tab_table:
+            st.markdown("##### 📊 Số liệu CPI trung bình từng năm")
+            
+            min_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].min()
+            max_cpi = df_annual_grouped[f'Chỉ số {data_column} Trung Bình'].max()
+            cpi_range = max_cpi - min_cpi if max_cpi != min_cpi else 1
+            
+            rows_html = ""
+            for idx, row in df_annual_grouped.iterrows():
+                year = int(row['Năm'])
+                val = row[f'Chỉ số {data_column} Trung Bình']
+                pct = 25 + ((val - min_cpi) / cpi_range) * 75
+                
+                rows_html += f"""<tr>
+<td style="text-align: center; font-weight: 700; color: #F8FAFC;">
+<span style="background: rgba(16, 185, 129, 0.12); color: #34D399; padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(52, 211, 153, 0.25); font-size: 13px; display: inline-block;">
+{year}
+</span>
+</td>
+<td style="text-align: right; font-weight: 800; color: #10B981; font-size: 15px; padding-right: 20px;">
+{val:,.2f}
+</td>
+<td style="vertical-align: middle; padding-left: 15px; padding-right: 15px;">
+<div style="background: rgba(255, 255, 255, 0.06); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05);">
+<div style="width: {pct:.1f}%; height: 100%; background: linear-gradient(90deg, #059669 0%, #10B981 50%, #34D399 100%); border-radius: 10px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);"></div>
+</div>
+</td>
+</tr>"""
+
+            table_html = f"""<style>
+.custom-cpi-table-container {{
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    margin-bottom: 20px;
+    background: #111827;
+}}
+.custom-cpi-table {{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    color: #F1F5F9;
+}}
+.custom-cpi-table th {{
+    background: #1E293B;
+    color: #34D399;
+    padding: 14px 16px;
+    font-weight: 700;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-size: 11px;
+}}
+.custom-cpi-table tr {{
+    transition: background 0.2s ease;
+}}
+.custom-cpi-table tr:nth-child(even) {{
+    background: rgba(255, 255, 255, 0.02);
+}}
+.custom-cpi-table tr:hover {{
+    background: rgba(16, 185, 129, 0.08) !important;
+}}
+.custom-cpi-table td {{
+    padding: 13px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}}
+</style>
+<div class="custom-cpi-table-container">
+<table class="custom-cpi-table">
+<thead>
+<tr>
+<th style="text-align: center; width: 22%;">Năm</th>
+<th style="text-align: right; width: 38%; padding-right: 20px;">CPI Trung Bình</th>
+<th style="text-align: left; width: 40%; padding-left: 15px;">Mức độ Tương quan Chu kỳ</th>
+</tr>
+</thead>
+<tbody>
+{rows_html}
+</tbody>
+</table>
+</div>"""
+            st.markdown(table_html, unsafe_allow_html=True)
+            
+            csv_data = df_active.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Tải xuống toàn bộ dữ liệu CSV chi tiết",
+                data=csv_data,
+                file_name="du_lieu_vi_mo_cpi.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+
+        # TAB 4: THƯ VIỆN KIẾN THỨC
+        with tab_theory:
+            st.markdown("##### 🛒 1. Nhập môn Kinh tế Vĩ mô: CPI & Lạm phát là gì?")
+            st.caption("Ví dụ trực quan về biến động sức mua thực tế:")
+            
+            st.markdown("""
+            <div class="glass-card" style="border-left: 4px solid #10B981;">
+                <p style="font-size: 13px; color: #E2E8F0; margin: 0; line-height: 1.6;">
+                    💡 <b>Ví dụ trực quan:</b> Giả sử năm ngoái bạn mang <b>100.000 VNĐ</b> đi chợ mua được <b>2 bát phở</b>. Năm nay, vẫn cầm 100.000 VNĐ đó bạn chỉ mua được <b>1 bát phở và 1 ly trà đá</b>.
+                    <br>→ Đồng tiền của bạn đã bị giảm sức mua. Sự suy giảm sức mua đó chính là <b>Lạm phát</b>, và công cụ để tính toán chính xác mức độ tăng giá phở/trà đá đó là <b>Chỉ số CPI</b>.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            c_th1, c_th2 = st.columns(2)
+            with c_th1:
+                st.markdown("""
+                <div class="glass-card" style="height: 100%;">
+                    <h6 style="color: #10B981; margin-top:0; font-size: 14px;">🧺 CPI (Consumer Price Index)</h6>
+                    <span style="background: rgba(16,185,129,0.1); color: #10B981; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">THƯỚC ĐO TĨNH</span>
+                    <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
+                        • <b>Tên gọi:</b> Chỉ số Giá tiêu dùng.<br>
+                        • <b>Bản chất:</b> Tưởng tượng Tổng cục Thống kê (GSO) gom khoảng 752 mặt hàng thiết yếu vào một <b>"Chiếc Giỏ Hàng Chuẩn"</b>.<br>
+                        • <b>Cách hoạt động:</b> Định kỳ hàng tháng, GSO đi cộng tổng số tiền cần thiết để mua "Giỏ Hàng" này. Sự chênh lệch tổng số tiền so với gốc gọi là CPI.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            with c_th2:
+                st.markdown("""
+                <div class="glass-card" style="height: 100%;">
+                    <h6 style="color: #F43F5E; margin-top:0; font-size: 14px;">🎈 Lạm phát (Inflation)</h6>
+                    <span style="background: rgba(244,63,94,0.1); color: #F43F5E; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">TỐC ĐỘ TĂNG TRƯỜNG</span>
+                    <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
+                        • <b>Bản chất:</b> Là <b>tốc độ biến động (%)</b> của mặt bằng giá chung theo thời gian.<br>
+                        • <b>Mối đe dọa:</b> Lạm phát nhẹ (2-3%/năm) kích thích sản xuất. Nhưng lạm phát quá cao làm giảm giá trị tiền lương, gây mất giá đồng tiền.<br>
+                        • <b>Nguyên nhân chính:</b> Do chi phí đầu vào tăng (Dầu khí, tỷ giá) hoặc do lượng cung tiền lớn.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("##### 🔗 2. Mối quan hệ tương tác & Công thức liên kết")
+            
+            st.markdown("""
+            * **CPI là biến đầu vào → Lạm phát là kết quả đầu ra:** 
+              CPI đóng vai trò như thước đo độ cao. Tỷ lệ Lạm phát chính là tốc độ mà độ cao đó gia tăng (YoY - Year on Year):
             """)
+            
+            st.latex(r"\text{Tỷ lệ Lạm phát (YoY)} = \frac{\text{CPI}_{\text{Kỳ này}} - \text{CPI}_{\text{Cùng kỳ năm ngoái}}}{\text{CPI}_{\text{Cùng kỳ năm ngoái}}} \times 100\%")
+
+            st.markdown("""
+            <div class="glass-card" style="margin-top: 12px; padding: 16px;">
+                <b style="color: #10B981; font-size: 13px;">📖 Giải thích chi tiết ký hiệu công thức:</b>
+                <ul style="font-size: 12px; color: #CBD5E1; margin-top: 10px; margin-bottom: 0; padding-left: 20px; line-height: 1.8;">
+                    <li><b>Tỷ lệ Lạm phát (YoY):</b> Mức độ gia tăng giá cả so với cùng kỳ năm trước, tính bằng %.</li>
+                    <li><b>CPI<sub>Kỳ này</sub>:</b> Chỉ số CPI thu thập tại thời điểm hiện tại.</li>
+                    <li><b>CPI<sub>Cùng kỳ năm ngoái</sub>:</b> Chỉ số CPI thu thập đúng vào tháng này của 1 năm trước.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
 
     # ==========================================
     # 6. CỘT PHẢI: AI ASSISTANT VỚI ACTION INDICATOR
@@ -726,7 +745,7 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        st.caption("💡 Gợi ý câu hỏi trọng tâm:")
+        st.caption("💡 Nhấp vào câu hỏi gợi ý bên dưới để AI trả lời ngay:")
         q1, q2, q3 = st.columns(3)
         clicked_prompt = None
         if q1.button("📉 Dự báo CPI quý tới", use_container_width=True):
@@ -736,9 +755,9 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
         if q3.button("🏦 Chính sách tiền tệ", use_container_width=True):
             clicked_prompt = "Áp lực lạm phát hiện nay ảnh hưởng trực tiếp thế nào đến quyết định điều hành lãi suất của Ngân hàng Nhà nước?"
 
-        chat_container = st.container(height=400)
+        chat_container = st.container(height=410)
 
-        # Hàm xác định câu chỉ ra hành động phù hợp với trọng tâm câu hỏi
+        # Hàm xác định câu chỉ ra hành động phù hợp
         def get_action_description(prompt_text: str) -> tuple[str, str]:
             p_lower = prompt_text.lower()
             if any(k in p_lower for k in ["dự báo", "cpi", "tháng tới", "quý tới", "xu hướng"]):
@@ -761,10 +780,10 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
             if len(st.session_state.messages) == 0:
                 st.markdown("""
                 <div class="ai-welcome">
-                    <div style="font-size: 32px; margin-bottom: 5px;">🎈</div>
-                    <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Trợ lý AI Phân tích & Dự báo Lạm phát</div>
-                    <p style="color: #64748B; font-size: 12px; margin-top: 5px;">
-                        Đặt câu hỏi phân tích kinh tế vĩ mô hoặc chọn một trong các gợi ý phía trên để bắt đầu.
+                    <div style="font-size: 32px; margin-bottom: 5px;">🤖</div>
+                    <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Tôi có thể giúp gì cho bạn?</div>
+                    <p style="color: #94A3B8; font-size: 12px; margin-top: 5px; line-height: 1.5;">
+                        Nhập câu hỏi bất kỳ về Kinh tế Vĩ mô, Lạm phát hoặc chọn một trong các nút gợi ý phía trên để bắt đầu hội thoại!
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -778,7 +797,6 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
         prompt_to_send = clicked_prompt if clicked_prompt else user_input
 
         if prompt_to_send:
-            # 1. Thêm câu hỏi người dùng vào history
             st.session_state.messages.append({"role": "user", "content": prompt_to_send})
             
             with chat_container:
@@ -788,7 +806,6 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
                 with st.chat_message("assistant"):
                     act_status, act_heading = get_action_description(prompt_to_send)
                     
-                    # Trạng thái tĩnh/động hiển thị khi AI đang suy nghĩ
                     status_box = st.empty()
                     status_box.markdown(f"""
                     <div style="background: rgba(13, 148, 136, 0.12); border: 1px solid rgba(13, 148, 136, 0.35); padding: 10px 14px; border-radius: 10px; font-size: 12.5px; color: #2DD4BF; margin-bottom: 12px;">
@@ -800,7 +817,6 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
                     full_response = ""
 
                     try:
-                        # Khởi tạo OpenAI client kèm header tránh bị ngrok chặn
                         client = OpenAI(
                             base_url=f"{NGROK_STATIC_URL}/v1",
                             api_key="lm-studio",
@@ -819,7 +835,7 @@ DỮ LIỆU VĨ MÔ THỜI GIAN THỰC ĐANG CÓ TRONG HỆ THỐNG:
 - Đáy lịch sử ({label_suffix}): {min_val:,.2f} điểm (Tháng {min_date})
 
 YÊU CẦU QUAN TRỌNG VỀ ĐỊNH DẠNG VÀ NỘI DUNG:
-1. Mở đầu câu trả lời BẮT BUỘC bằng đúng dòng chỉ định hành động sau đây (đã được tối ưu đúng trọng tâm câu hỏi):
+1. Mở đầu câu trả lời BẮT BUỘC bằng đúng dòng chỉ định hành động sau đây:
 {act_heading}
 
 2. Sau dòng hành động trên, xuống dòng và trình bày câu trả lời trực diện, sắc bén, chia theo các đầu dòng rõ ràng, lập luận bằng con số cụ thể ở trên.
@@ -841,10 +857,9 @@ YÊU CẦU QUAN TRỌNG VỀ ĐỊNH DẠNG VÀ NỘI DUNG:
                                 full_response += chunk.choices[0].delta.content
                                 message_placeholder.markdown(full_response + "▌")
 
-                        status_box.empty() # Xóa dòng trạng thái tạm thời
+                        status_box.empty()
                         
                         if full_response.strip():
-                            # Nếu AI không tự tạo dòng act_heading, tự động bổ sung vào đầu
                             if not full_response.strip().startswith("🎯"):
                                 full_response = f"{act_heading}\n\n{full_response}"
                             message_placeholder.markdown(full_response)
