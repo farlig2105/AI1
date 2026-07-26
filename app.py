@@ -187,7 +187,7 @@ with h_col2:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# CẢI TIẾN UX 1: BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI
+# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI
 # ==========================================
 with st.expander("👋 **Lần đầu truy cập? Bắt đầu nhanh tại đây (3 bước đơn giản)**", expanded=True):
     st.markdown("""
@@ -207,14 +207,8 @@ with st.expander("👋 **Lần đầu truy cập? Bắt đầu nhanh tại đây
     </div>
     """, unsafe_allow_html=True)
 
-# BỘ LỌC THỜI GIAN
-timeframe = st.pills(
-    "Phạm vi phân tích dữ liệu:",
-    options=["1 năm qua", "5 năm qua", "Tất cả 10 năm"],
-    default="Tất cả 10 năm",
-    key="global_timeframe"
-)
-st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+# Lấy phạm vi phân tích thời gian hiện tại từ Session State
+timeframe = st.session_state.get("global_timeframe", "Tất cả 10 năm")
 
 # ==========================================
 # 2. CONFIG NGROK & UPTIMEROBOT MONITOR
@@ -354,7 +348,7 @@ if df is not None:
     min_date = df_active[df_active[data_column] == min_val]['Ngay'].dt.strftime('%m/%Y').values[0]
 
     # ==========================================
-    # 4. KPI CARDS (Bổ sung tooltip thân thiện)
+    # 4. KPI CARDS
     # ==========================================
     kpi1, kpi2, kpi3, kpi4 = st.columns(4, gap="small")
     with kpi1:
@@ -391,12 +385,11 @@ if df is not None:
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ==========================================
-    # 5. BỐ TRÍ LAYOUT TAB (SẮP XẾP LẠI THỨ TỰ ƯU TIÊN)
+    # 5. BỐ TRÍ LAYOUT TAB
     # ==========================================
     col1, col2 = st.columns([1.3, 1], gap="large")
 
     with col1:
-        # CẢI TIẾN UX 2: Đưa Biểu đồ & Mô phỏng lên trước, đẩy Lý thuyết về cuối
         tab_chart, tab_sim, tab_table, tab_theory = st.tabs([
             "📈 Biểu đồ Chu kỳ", 
             "🛠️ Mô phỏng Kịch bản",
@@ -435,10 +428,9 @@ if df is not None:
             
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-            # Tóm tắt điểm nóng vĩ mô lồng trực tiếp bên dưới đồ thị
             st.markdown("""
             <div class="glass-card" style="margin-top: 10px; padding: 14px 18px;">
-                <b style="color: #34D399; font-size: 13px;">📌 Tóm tắt Điểm nóng Vĩ mô Nhanh:</b>
+                <b style="color: #34D399; font-size: 13px;">📌 Tóm tắt Điểm nóng Vĩ mô Nhanh ({}) :</b>
                 <ul style="font-size: 12.5px; color: #CBD5E1; margin-top: 6px; margin-bottom: 0; padding-left: 20px; line-height: 1.7;">
                     <li><b>Biến động đỉnh điểm:</b> Chỉ số chạm đỉnh cao nhất tại <b>{}</b> (Tháng {}).</li>
                     <li><b>Tốc độ tăng trưởng:</b> Mức tăng lạm phát so với cùng kỳ (YoY) đạt <b>{:+.2f}%</b>.</li>
@@ -446,7 +438,7 @@ if df is not None:
                 </ul>
             </div>
             """.format(
-                f"{max_val:,.2f}", max_date, yoy_change,
+                label_suffix, f"{max_val:,.2f}", max_date, yoy_change,
                 'đi lên' if df_active['SMA12'].iloc[-1] > df_active['SMA12'].iloc[-6] else 'đi ngang/giảm'
             ), unsafe_allow_html=True)
 
@@ -737,9 +729,18 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
             """, unsafe_allow_html=True)
 
     # ==========================================
-    # 6. CỘT PHẢI: AI ASSISTANT VỚI ACTION INDICATOR
+    # 6. CỘT PHẢI: AI ASSISTANT & PHẠM VI PHÂN TÍCH
     # ==========================================
     with col2:
+        # BỘ LỌC THỜI GIAN ĐÃ ĐƯỢC CHUYỂN SANG TRÊN CHATBOT
+        selected_timeframe = st.pills(
+            "📍 Phạm vi phân tích dữ liệu cho AI & Hệ thống:",
+            options=["1 năm qua", "5 năm qua", "Tất cả 10 năm"],
+            default=timeframe,
+            key="global_timeframe"
+        )
+        st.markdown("<div style='margin-bottom: 8px;'></div>", unsafe_allow_html=True)
+
         st.markdown("### 🤖 Trợ lý AI Phân tích & Dự báo Lạm phát")
         
         if "messages" not in st.session_state:
@@ -755,35 +756,36 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
         if q3.button("🏦 Chính sách tiền tệ", use_container_width=True):
             clicked_prompt = "Áp lực lạm phát hiện nay ảnh hưởng trực tiếp thế nào đến quyết định điều hành lãi suất của Ngân hàng Nhà nước?"
 
-        chat_container = st.container(height=410)
+        chat_container = st.container(height=380)
 
         # Hàm xác định câu chỉ ra hành động phù hợp
         def get_action_description(prompt_text: str) -> tuple[str, str]:
             p_lower = prompt_text.lower()
             if any(k in p_lower for k in ["dự báo", "cpi", "tháng tới", "quý tới", "xu hướng"]):
-                act_status = "⚡ Đang trích xuất chuỗi lịch sử CPI, tính toán đường SMA12 và mô phỏng xu hướng lạm phát cận kỳ..."
-                act_heading = "🎯 **Hành động phân tích:** Đang tổng hợp chuỗi thời gian CPI cận kỳ, phân tích độ lệch so với đỉnh/đáy lịch sử và tính toán kịch bản dự báo lạm phát..."
+                act_status = f"⚡ Đang trích xuất chuỗi lịch sử CPI trong phạm vi {label_suffix}, tính toán đường SMA12 và mô phỏng xu hướng lạm phát cận kỳ..."
+                act_heading = f"🎯 **Hành động phân tích:** Đang tổng hợp chuỗi thời gian CPI trong phạm vi **{label_suffix}**, phân tích độ lệch so với đỉnh/đáy lịch sử và tính toán kịch bản dự báo lạm phát..."
             elif any(k in p_lower for k in ["dầu", "giá dầu", "tỷ giá", "usd", "wti", "vàng"]):
-                act_status = "⚡ Đang tính toán hệ số truyền dẫn từ biến động Giá Dầu WTI và Tỷ giá USD/VND vào CPI..."
-                act_heading = "🎯 **Hành động phân tích:** Đang đo lường mức độ ảnh hưởng của chi phí năng lượng nhập khẩu và áp lực tỷ giá đến mặt bằng giá tiêu dùng..."
+                act_status = f"⚡ Đang tính toán hệ số truyền dẫn từ biến động Giá Dầu WTI và Tỷ giá USD/VND vào CPI ({label_suffix})..."
+                act_heading = f"🎯 **Hành động phân tích:** Đang đo lường mức độ ảnh hưởng của chi phí năng lượng nhập khẩu và áp lực tỷ giá đến mặt bằng giá tiêu dùng trong phạm vi **{label_suffix}**..."
             elif any(k in p_lower for k in ["tiền tệ", "lãi suất", "nhnn", "ngân hàng", "chính sách"]):
-                act_status = "⚡ Đang đối chiếu chỉ tiêu lạm phát mục tiêu và đánh giá dư địa điều hành chính sách tiền tệ..."
-                act_heading = "🎯 **Hành động phân tích:** Đang đánh giá tác động của áp lực lạm phát hiện tại lên không gian điều hành lãi suất và thanh khoản của Ngân hàng Nhà nước..."
+                act_status = f"⚡ Đang đối chiếu chỉ tiêu lạm phát mục tiêu và đánh giá dư địa điều hành chính sách tiền tệ ({label_suffix})..."
+                act_heading = f"🎯 **Hành động phân tích:** Đang đánh giá tác động của áp lực lạm phát trong phạm vi **{label_suffix}** lên không gian điều hành lãi suất và thanh khoản của Ngân hàng Nhà nước..."
             else:
-                act_status = f"⚡ Đang truy vấn cơ sở dữ liệu vĩ mô và tổng hợp luận điểm cho câu hỏi: '{prompt_text[:30]}...' "
-                act_heading = f"🎯 **Hành động phân tích:** Đang truy xuất tập số liệu vĩ mô thời gian thực và phân tích trọng tâm câu hỏi của người dùng..."
+                act_status = f"⚡ Đang truy vấn cơ sở dữ liệu vĩ mô ({label_suffix}) và tổng hợp luận điểm..."
+                act_heading = f"🎯 **Hành động phân tích:** Đang truy xuất tập số liệu vĩ mô giai đoạn **{label_suffix}** và phân tích trọng tâm câu hỏi của người dùng..."
             
             return act_status, act_heading
 
         # Render lịch sử trò chuyện
         with chat_container:
             if len(st.session_state.messages) == 0:
-                st.markdown("""
+                st.markdown(f"""
                 <div class="ai-welcome">
                     <div style="font-size: 32px; margin-bottom: 5px;">🤖</div>
                     <div style="color: #ffffff; font-weight: 700; font-size: 15px;">Tôi có thể giúp gì cho bạn?</div>
                     <p style="color: #94A3B8; font-size: 12px; margin-top: 5px; line-height: 1.5;">
-                        Nhập câu hỏi bất kỳ về Kinh tế Vĩ mô, Lạm phát hoặc chọn một trong các nút gợi ý phía trên để bắt đầu hội thoại!
+                        Phạm vi phân tích hiện tại: <b style="color: #10B981;">{label_suffix}</b>.<br>
+                        Nhập câu hỏi bất kỳ hoặc chọn nút gợi ý phía trên để bắt đầu hội thoại!
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -827,18 +829,20 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
                         system_prompt = f"""
 Bạn là Chuyên gia Phân tích Kinh tế Vĩ mô & Dự báo Lạm phát chuyên sâu tại Việt Nam.
 
-DỮ LIỆU VĨ MÔ THỜI GIAN THỰC ĐANG CÓ TRONG HỆ THỐNG:
+DỮ LIỆU VĨ MÔ THỜI GIAN THỰC TRONG PHẠM VI DỮ LIỆU ĐANG LỌC ({label_suffix.upper()}):
+- Phạm vi thời gian phân tích: {label_suffix} ({selected_timeframe})
 - Chỉ số {data_column} cận kỳ: {current_val:,.2f} điểm
 - Tăng trưởng so với cùng kỳ năm trước (YoY): {yoy_change:+.2f}%
 - Mức biến động cận kỳ (MoM): {mo_m_change:+.2f}%
-- Đỉnh lịch sử ({label_suffix}): {max_val:,.2f} điểm (Tháng {max_date})
-- Đáy lịch sử ({label_suffix}): {min_val:,.2f} điểm (Tháng {min_date})
+- Đỉnh đạt được trong phạm vi {label_suffix}: {max_val:,.2f} điểm (Tháng {max_date})
+- Đáy đạt được trong phạm vi {label_suffix}: {min_val:,.2f} điểm (Tháng {min_date})
 
-YÊU CẦU QUAN TRỌNG VỀ ĐỊNH DẠNG VÀ NỘI DUNG:
-1. Mở đầu câu trả lời BẮT BUỘC bằng đúng dòng chỉ định hành động sau đây:
+YÊU CẦU QUAN TRỌNG BẮT BUỘC TUÂN THỦ:
+1. GIỚI HẠN PHẠM VI THỜI GIAN: Toàn bộ phân tích, nhận định, suy luận và lập luận BẮT BUỘC PHẢI GIỚI HẠN TUYỆT ĐỐI trong khung thời gian **{label_suffix} ({selected_timeframe})**. Không lấy số liệu ngoài khung thời gian này trừ khi người dùng yêu cầu đối chiếu đặc biệt.
+2. Mở đầu câu trả lời BẮT BUỘC bằng đúng dòng chỉ định hành động sau đây:
 {act_heading}
 
-2. Sau dòng hành động trên, xuống dòng và trình bày câu trả lời trực diện, sắc bén, chia theo các đầu dòng rõ ràng, lập luận bằng con số cụ thể ở trên.
+3. Trình bày câu trả lời trực diện, sắc bén, chia theo các đầu dòng rõ ràng, lập luận bằng con số cụ thể đã được trích xuất ở trên.
 """
 
                         messages_payload = [{"role": "system", "content": system_prompt}]
