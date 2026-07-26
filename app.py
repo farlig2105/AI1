@@ -77,7 +77,7 @@ st.markdown("""
         margin: 0 !important;
     }
     div[data-testid="stExpander"] [data-testid="stMarkdownContainer"],
-    div[data-testid="stExpander"] [data-testid="stMarkdownContainer"] > div {
+    div[data-testid="stMarkdownContainer"] > div {
         padding: 0 !important;
         margin: 0 !important;
     }
@@ -244,12 +244,12 @@ with h_col2:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ FIX TẠO KHOẢNG THỞ TRÊN/DƯỚI/TRÁI/PHẢI)
+# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ TĂNG PADDING TRÊN/DƯỚI THOÁNG ĐÃNG)
 # ==========================================
 with st.expander("🚀 **Lần đầu truy cập? Bắt đầu nhanh tại đây (3 bước đơn giản)**", expanded=True):
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); box-sizing: border-box; width: 100%; margin: 6px 0;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 14px;">
+    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 26px 28px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); box-sizing: border-box; width: 100%; margin: 8px 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 16px;">
             <span style="font-size: 14px; color: #E2E8F0; font-weight: 500; line-height: 1.5;">
                 ✨ <b style="color: #FFFFFF;">Chào mừng bạn đến với Hệ thống Dữ liệu Vĩ mô & Trợ lý AI!</b> Khám phá nhanh theo 3 bước:
             </span>
@@ -780,7 +780,7 @@ Tổng hợp biến số khiến CPI dự báo <b style="color: {total_color};">
                 st.markdown("""
                 <div class="glass-card" style="height: 100%;">
                     <h6 style="color: #F43F5E; margin-top:0; font-size: 14px;">🎈 Lạm phát (Inflation)</h6>
-                    <span style="background: rgba(244,63,94,0.1); color: #F43F5E; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">TỐC ĐỘ TĂNG TRƯỜNG</span>
+                    <span style="background: rgba(244,63,94,0.1); color: #F43F5E; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight:700;">TỐC ĐỘ TĂNG TRƯỞNG</span>
                     <p style="font-size: 12px; color: #CBD5E1; line-height: 1.6; margin-top: 10px;">
                         • <b>Bản chất:</b> Là <b>tốc độ biến động (%)</b> của mặt bằng giá chung theo thời gian.<br>
                         • <b>Mối đe dọa:</b> Lạm phát nhẹ (2-3%/năm) kích thích sản xuất. Nhưng lạm phát quá cao làm giảm giá trị tiền lương, gây mất giá đồng tiền.<br>
