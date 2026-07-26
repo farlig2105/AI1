@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS ĐỘT PHÁ - CÂN BẰNG KHUNG TẠO SỰ CÂN ĐỐI TUYỆT ĐỐI
+# CSS ĐỘT PHÁ - XỬ LÝ DỨT ĐIỂM LỖI DÍNH VIỀN DƯỚI
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -29,10 +29,10 @@ st.markdown("""
         background: #0B0F19 !important;
     }
     
-    /* Custom Streamlit Expander (Thanh Hướng Dẫn) */
+    /* 1. KHUNG OUTCONTAINER (ST.EXPANDER) */
     div[data-testid="stExpander"] {
         background: rgba(17, 24, 39, 0.7) !important;
-        border: 1px solid rgba(16, 185, 129, 0.25) !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
         border-radius: 16px !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
         overflow: hidden !important;
@@ -42,11 +42,13 @@ st.markdown("""
     div[data-testid="stExpander"] details {
         border: none !important;
         padding: 0 !important;
+        margin: 0 !important;
     }
     div[data-testid="stExpander"] summary {
         background: linear-gradient(90deg, rgba(13, 148, 136, 0.15) 0%, rgba(17, 24, 39, 0.4) 100%) !important;
-        padding: 12px 20px !important;
-        border-radius: 16px !important;
+        padding: 14px 20px !important;
+        border-radius: 16px 16px 0 0 !important;
+        border-bottom: 1px solid rgba(16, 185, 129, 0.15) !important;
         transition: all 0.3s ease !important;
     }
     div[data-testid="stExpander"] summary:hover {
@@ -59,12 +61,22 @@ st.markdown("""
         letter-spacing: -0.2px !important;
     }
     
-    /* KHOẢNG CÁCH GIỮA Ô NGOÀI VÀ Ô TRONG ĐỒNG NHẤT 100% CẢ 4 CẠNH (16px) */
+    /* 2. ÉP KHU VỰC NỘI DUNG (REGION) CÓ PADDING 16PX ĐỀU 4 CẠNH */
     div[data-testid="stExpander"] div[role="region"] {
         padding: 16px !important;
         background: rgba(11, 15, 25, 0.5) !important;
+        box-sizing: border-box !important;
     }
-    div[data-testid="stExpander"] div[role="region"] > div {
+    
+    /* 3. TRIỆT TIỆU TRIỆT ĐỂ MARGIN THỪA CỦA STREAMLIT GÂY DÍNH VIỀN DƯỚI */
+    div[data-testid="stExpander"] div[role="region"] [data-testid="stVerticalBlock"] {
+        gap: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    div[data-testid="stExpander"] div[role="region"] [data-testid="stMarkdownContainer"],
+    div[data-testid="stExpander"] div[role="region"] [data-testid="stMarkdownContainer"] > div,
+    div[data-testid="stExpander"] div[role="region"] p {
         padding: 0 !important;
         margin: 0 !important;
     }
@@ -190,7 +202,7 @@ st.markdown("""
         color: #10B981 !important;
     }
 
-    /* Ô CHÀO MỪNG AI - THIẾT KẾ CÂN ĐỐI TỰ NHIÊN 4 CẠNH */
+    /* Ô CHÀO MỪNG AI */
     .ai-welcome {
         border: 1px solid rgba(16, 185, 129, 0.35);
         background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.6) 100%);
@@ -231,11 +243,11 @@ with h_col2:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ CÂN BẰNG TỶ LỆ CẢ 4 CẠNH)
+# BANNER HƯỚNG DẪN DÀNH CHO NGƯỜI MỚI (ĐÃ CÂN BẰNG TỶ LỆ KHOẢNG CÁCH THỰC TẾ)
 # ==========================================
 with st.expander("🚀 **Lần đầu truy cập? Bắt đầu nhanh tại đây (3 bước đơn giản)**", expanded=True):
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 14px; padding: 16px 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); box-sizing: border-box; width: 100%; margin: 0;">
+    <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); box-sizing: border-box; width: 100%; margin: 0; display: block;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px;">
             <span style="font-size: 13.5px; color: #E2E8F0; font-weight: 500;">
                 ✨ <b>Chào mừng bạn đến với Hệ thống Dữ liệu Vĩ mô & Trợ lý AI!</b> Khám phá nhanh theo 3 bước:
@@ -245,7 +257,7 @@ with st.expander("🚀 **Lần đầu truy cập? Bắt đầu nhanh tại đây
             </span>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px;">
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 14px; transition: transform 0.2s ease;">
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 14px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                     <span style="background: linear-gradient(135deg, #10B981, #059669); color: #FFF; font-weight: 800; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);">1</span>
                     <b style="color: #F8FAFC; font-size: 13px;">Quan sát KPI Vĩ mô</b>
@@ -254,7 +266,7 @@ with st.expander("🚀 **Lần đầu truy cập? Bắt đầu nhanh tại đây
                     Xem 4 ô chỉ số phía dưới để nắm nhanh giá trị CPI, Lạm phát YoY và đỉnh/đáy lịch sử.
                 </p>
             </div>
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 14px; transition: transform 0.2s ease;">
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 14px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                     <span style="background: linear-gradient(135deg, #0284C7, #0369A1); color: #FFF; font-weight: 800; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);">2</span>
                     <b style="color: #F8FAFC; font-size: 13px;">Thử nghiệm Mô phỏng</b>
@@ -263,7 +275,7 @@ with st.expander("🚀 **Lần đầu truy cập? Bắt đầu nhanh tại đây
                     Chuyển sang các tab Biểu đồ, kéo thanh trượt Giá dầu & Tỷ giá để Stress-Test kịch bản CPI.
                 </p>
             </div>
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 14px; transition: transform 0.2s ease;">
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 14px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                     <span style="background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: #FFF; font-weight: 800; font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);">3</span>
                     <b style="color: #F8FAFC; font-size: 13px;">Hỏi đáp cùng AI Assistant</b>
